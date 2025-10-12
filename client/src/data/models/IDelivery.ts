@@ -6,7 +6,7 @@ export enum DeliveryStatus {
     DELIVERED = "Delivered",
     CANCELED = "Canceled",
 }
-export const DeliveryStatusLabels: { [key in DeliveryStatus]: string } = {
+export const DeliveryStatusLabels: Record<DeliveryStatus, string> = {
     [DeliveryStatus.PENDING]: "Pendente",
     [DeliveryStatus.IN_PROGRESS]: "Em Progresso",
     [DeliveryStatus.DELIVERED]: "Entregue",
@@ -20,7 +20,7 @@ export enum PaymentMethod {
     PIX = "Pix",
 }
 
-export const PaymentMethodLabels: { [key in PaymentMethod]: string } = {
+export const PaymentMethodLabels: Record<PaymentMethod, string> = {
     [PaymentMethod.CASH]: "Dinheiro",
     [PaymentMethod.CREDIT_CARD]: "Cartão de Crédito",
     [PaymentMethod.DEBIT_CARD]: "Cartão de Débito",

@@ -2,6 +2,7 @@ export interface ITable {
     id: string;
     number: number;
     isAvailable: boolean;
+    establishmentId: string;
     shoppingCart?: ITableShoppingCart;
 }
 

@@ -7,7 +7,7 @@ export enum ProductCategory {
     OTHERS = "Others",
 }
 
-export const ProductCategoryLabels: { [key in ProductCategory]: string } = {
+export const ProductCategoryLabels: Record<ProductCategory, string> = {
     [ProductCategory.COLDDRINKS]: "Bebidas Frias",
     [ProductCategory.HOTDRINKS]: "Bebidas Quentes",
     [ProductCategory.PORTIONS]: "Porções",
