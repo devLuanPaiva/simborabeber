@@ -1,3 +1,5 @@
+import { IEstablishment, IEstablishmentProduct } from "./IEstablishment";
+
 export enum ProductCategory {
     COLDDRINKS = "Cold Drinks",
     HOTDRINKS = "Hot Drinks",
@@ -19,18 +21,30 @@ export const ProductCategoryLabels: Record<ProductCategory, string> = {
 export interface IProduct {
     id: string;
     name: string;
-    description?: string;
+    description?: string | null;
     salePrice: number;
-    purchasePrice?: number;
-    imageUrl?: string;
+    purchasePrice?: number | null;
     category: ProductCategory;
-
-
-    hasStockControl: boolean;
-    quantityInStock?: number;
-    minimumStockQuantity?: number;
-    barCode?: string;
-
+    imageUrl?: string | null;
+    createdAt: Date;
+    barCode?: string | null;
     showInMenu: boolean;
-    isAvailable?: boolean;
+    isActive: boolean;
+
+    // Relations
+    establishmentProducts?: IEstablishmentProduct[];
+    productStocks?: IProductStock[];
+}
+
+
+export interface IProductStock {
+    id: string;
+    establishmentId: string;
+    productId: string;
+    quantity: number;
+    updatedAt: Date;
+
+    // Relations
+    establishment?: IEstablishment;
+    product?: IProduct;
 }

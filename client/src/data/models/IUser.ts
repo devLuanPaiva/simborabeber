@@ -1,3 +1,5 @@
+import { IEstablishment } from "./IEstablishment";
+
 export enum UserRole {
     WAITER = "WAITER",
     MANAGER = "MANAGER",
@@ -8,11 +10,13 @@ export const UserRolesLabels: Record<UserRole, string> = {
     [UserRole.MANAGER]: "Gerente",
     [UserRole.ADMIN]: "Administrador"
 };
-export interface IUser{
+export interface IUser {
     id: string;
     name: string;
     email: string;
     role: UserRole;
+    createdAt: Date;
     isActive: boolean;
-    establishmentId: string;
+    establishmentId?: string;
+    establishment?: IEstablishment | null;
 }
