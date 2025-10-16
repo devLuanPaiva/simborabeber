@@ -1,26 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+import { PrismaService } from 'src/database/prisma.service';
+import { JwtService } from '@nestjs/jwt';
+import { AuthDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly jwtService: JwtService,
+  ) { }
+
+  private async validateUser(email: string, password: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+      select: { id: true, email: true, name: true, role: true, password: true, isActive: true },
+    })
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      throw new UnauthorizedException({ error: "Usuário ou senha inválidos", message: "Credenciais inválidas", code: "INVALID_CREDENTIALS" });
+    }
+    return user
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async signIn({ email, password }: AuthDto): Promise<{ access_token: string }> {
+    const user = await this.validateUser(email, password)
+    if (!user.isActive) throw new UnauthorizedException({ error: "Conta inativa", message: "Conta inativa", code: "ACCOUNT_INACTIVE" })
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    const payload = { id: user.id, email: user.email, role: user.role, name: user.name, isActive: user.isActive }
+    const access_token = await this.jwtService.signAsync(payload)
+    return { access_token }
   }
 }
