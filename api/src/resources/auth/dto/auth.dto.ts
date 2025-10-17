@@ -9,3 +9,9 @@ export class AuthDto {
     @ApiProperty({ example: "senha123" })
     password: string
 }
+
+export class RefreshTokenDto {
+    @IsNotEmpty({ message: "O refresh token é obrigatório" })
+    @ApiProperty({ example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." })
+    refreshToken: string
+}
