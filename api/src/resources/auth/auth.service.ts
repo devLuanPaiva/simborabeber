@@ -9,64 +9,97 @@ export class AuthService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-  ) { }
+  ) {}
 
   private async validateUser(email: string, password: string) {
     const user = await this.prismaService.user.findUnique({
       where: { email },
-      select: { id: true, email: true, name: true, role: true, password: true, isActive: true },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        password: true,
+        isActive: true,
+      },
     });
 
     if (!user || !(await bcrypt.compare(password, user.password))) {
       throw new UnauthorizedException({
-        error: "Usuário ou senha inválidos",
-        message: "Credenciais inválidas",
-        code: "INVALID_CREDENTIALS"
+        error: 'Usuário ou senha inválidos',
+        message: 'Credenciais inválidas',
+        code: 'INVALID_CREDENTIALS',
       });
     }
     return user;
   }
 
-  private async generateTokens(payload: Record<string, any>): Promise<{ access_token: string, refresh_token: string }> {
-    const access_token = await this.jwtService.signAsync({ ...payload, type: 'access' });
-    const refresh_token = await this.jwtService.signAsync({ ...payload, type: 'refresh' }, { expiresIn: '2h' });
+  private async generateTokens(
+    payload: Record<string, any>,
+  ): Promise<{ access_token: string; refresh_token: string }> {
+    const access_token = await this.jwtService.signAsync({
+      ...payload,
+      type: 'access',
+    });
+    const refresh_token = await this.jwtService.signAsync(
+      { ...payload, type: 'refresh' },
+      { expiresIn: '2h' },
+    );
     return { access_token, refresh_token };
   }
 
-  async signIn({ email, password }: AuthDto): Promise<{ access_token: string, refresh_token: string }> {
+  async signIn({
+    email,
+    password,
+  }: AuthDto): Promise<{ access_token: string; refresh_token: string }> {
     const user = await this.validateUser(email, password);
-    if (!user.isActive) throw new UnauthorizedException({
-      error: "Conta inativa",
-      message: "Conta inativa",
-      code: "ACCOUNT_INACTIVE"
-    });
+    if (!user.isActive)
+      throw new UnauthorizedException({
+        error: 'Conta inativa',
+        message: 'Conta inativa',
+        code: 'ACCOUNT_INACTIVE',
+      });
 
-    const payload = { id: user.id, email: user.email, role: user.role, name: user.name, isActive: user.isActive };
+    const payload = {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.name,
+      isActive: user.isActive,
+    };
     return this.generateTokens(payload);
   }
 
-  async refreshToken(refreshToken: string): Promise<{ access_token: string, refresh_token: string }> {
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<{ access_token: string; refresh_token: string }> {
     try {
       const decoded = this.jwtService.verify(refreshToken);
 
       if (decoded.type !== 'refresh') {
         throw new UnauthorizedException({
-          error: "Token inválido",
-          message: "Token inválido",
-          code: "INVALID_TOKEN"
+          error: 'Token inválido',
+          message: 'Token inválido',
+          code: 'INVALID_TOKEN',
         });
       }
 
       const user = await this.prismaService.user.findUnique({
         where: { id: decoded.id },
-        select: { id: true, email: true, name: true, role: true, isActive: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          isActive: true,
+        },
       });
 
       if (!user) {
         throw new UnauthorizedException({
-          error: "Token inválido",
-          message: "Token inválido",
-          code: "INVALID_TOKEN"
+          error: 'Token inválido',
+          message: 'Token inválido',
+          code: 'INVALID_TOKEN',
         });
       }
 
@@ -76,9 +109,9 @@ export class AuthService {
       return this.generateTokens(payload);
     } catch (error) {
       throw new UnauthorizedException({
-        error: "Token inválido",
+        error: 'Token inválido',
         message: error,
-        code: "INVALID_TOKEN"
+        code: 'INVALID_TOKEN',
       });
     }
   }

@@ -1,36 +1,36 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common"
-import { ConfigService } from "@nestjs/config"
-import { JwtService } from "@nestjs/jwt"
-import { Request } from "express"
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-    const secret = this.configService.get<string>("JWT_SECRET")
-    const token = this.extractTokenFromHeader(request)
+    const request = context.switchToHttp().getRequest();
+    const secret = this.configService.get<string>('JWT_SECRET');
+    const token = this.extractTokenFromHeader(request);
     if (!token) {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
     try {
-      const payload = await this.jwtService.verifyAsync(token, { secret })
-      if (!payload) throw new UnauthorizedException("Token inválido")
+      const payload = await this.jwtService.verifyAsync(token, { secret });
+      if (!payload) throw new UnauthorizedException('Token inválido');
       if (payload.type !== 'access') {
-        throw new UnauthorizedException("Tipo de token inválido");
+        throw new UnauthorizedException('Tipo de token inválido');
       }
-      request.user = payload
+      request.user = payload;
     } catch {
-      throw new UnauthorizedException()
+      throw new UnauthorizedException();
     }
-    return true
+    return true;
   }
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(" ") ?? []
-    return type === "Bearer" ? token : undefined
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }
