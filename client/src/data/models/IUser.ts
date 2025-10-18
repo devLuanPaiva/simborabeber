@@ -20,3 +20,9 @@ export interface IUser {
     establishmentId?: string;
     establishment?: IEstablishment | null;
 }
+
+export interface ITokenPayload extends Partial<IUser> {
+    exp: number;
+    iat: number;
+    type: "access" | "refresh";
+}
