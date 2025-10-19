@@ -1,4 +1,5 @@
 import { AuthForce } from "@/components/auth/AuthForce";
+import { AdminLayout } from "@/components/layout/AdminLayout";
 
 export default function RootLayout({
     children,
@@ -6,6 +7,6 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <AuthForce>{children}</AuthForce>
+        <AuthForce><AdminLayout>{children}</AdminLayout></AuthForce>
     );
 }
