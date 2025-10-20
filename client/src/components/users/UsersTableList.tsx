@@ -5,6 +5,7 @@ import { Badge } from "../ui/badge";
 import { Switch } from "../ui/switch";
 import { Button } from "../ui/button";
 import { Pencil } from "lucide-react";
+import { formatDate } from "@/data/functions";
 
 interface UsersTableListProps {
     users: IUser[]
@@ -38,7 +39,7 @@ export function UsersTableList({ users, handleToggleStatus, handleOpenDialog }: 
                                     </Badge>
                                 </TableCell>
                                 <TableCell>
-                                    {user.createdAt.toLocaleDateString("pt-BR")}
+                                    {formatDate(user.createdAt)}
                                 </TableCell>
                                 <TableCell>
                                     <div className="flex items-center gap-2">
