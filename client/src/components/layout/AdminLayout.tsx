@@ -42,7 +42,7 @@ export function AdminLayout({
                 </div>
 
                 <main className="flex-1 relative overflow-y-auto focus:outline-none">
-                    <div className="py-6 bg-green-300">{children}</div>
+                    <div className="py-6 ">{children}</div>
                 </main>
             </div>
         </div>
