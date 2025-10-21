@@ -53,84 +53,131 @@ export function Sidebar({
     };
 
     return (
-        <aside
-            className={cn(
-                "fixed top-0 left-0 h-full bg-card border-r transition-all duration-300 z-50",
-                sidebarOpen ? "w-64" : "w-0 md:w-20"
-            )}
-        >
-            <div className="flex flex-col h-full">
-
-                <div className="p-4 border-b flex items-center justify-between">
-                    {sidebarOpen && (
-                        <div className="flex items-center gap-2">
-                            <Flame className={cn("h-6 w-6", themeColor)} />
-                            <span className="font-bebas tracking-wide">Fogo & Brasa</span>
+        <aside>
+            <div className="hidden md:flex md:flex-shrink-0 h-screen">
+                <div className="flex flex-col w-64">
+                    <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto  border-r">
+                        <div className="p-4 border-b flex items-center justify-between">
+                            {sidebarOpen && (
+                                <div className="flex items-center gap-2">
+                                    <Flame className={cn("h-6 w-6", themeColor)} />
+                                    <span className="font-bebas tracking-wide">Fogo & Brasa</span>
+                                </div>
+                            )}
                         </div>
-                    )}
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setSidebarOpen(!sidebarOpen)}
-                        className="md:hidden"
-                    >
-                        {sidebarOpen ? <X className="h-5 w-5" /> : <MenuIcon className="h-5 w-5" />}
-                    </Button>
-                </div>
-
-                <div className="p-4 border-b">
-                    {sidebarOpen ? (
-                        <div>
-                            <p className="truncate">{currentUser?.name}</p>
-                            <p className="text-xs text-muted-foreground capitalize">
-                                {UserRolesLabels[currentUser?.role || UserRole.WAITER]}
-                            </p>
+                        <div className="mt-8 flex-grow flex flex-col">
+                            <nav className="flex-1 px-2 space-y-1">
+                                {menuItems.map((item) => {
+                                    const Icon = item.icon;
+                                    const active = isActive(item.href);
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            href={item.href}
+                                            onClick={() => {
+                                                setSidebarOpen(false);
+                                            }}
+                                            aria-current={active ? "page" : undefined}
+                                            className={`${active
+                                                ? `bg-accent/50 font-medium ${themeColor}`
+                                                : "text-gray-700 hover:bg-gray-50"
+                                                } group flex items-center px-2 py-2 text-sm rounded-md w-full text-left`}
+                                        >
+                                            <Icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                                            {item.label}
+                                        </Link>
+                                    );
+                                })}
+                            </nav>
                         </div>
-                    ) : (
-                        <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <span className="text-xs">{currentUser?.name.charAt(0)}</span>
-                        </div>
-                    )}
-                </div>
+                    </div>
 
-                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-                    {menuItems.map((item) => {
-                        const Icon = item.icon;
-                        const active = isActive(item.href);
-                        return (
-                            <Link
-                                key={item.id}
-                                href={item.href}
-                                onClick={() => {
-                                    setSidebarOpen(false);
-                                }}
-                                aria-current={active ? "page" : undefined}
-                                className={`${active
-                                        ? `bg-accent/50 font-medium ${themeColor}`
-                                        : "text-gray-700 hover:bg-gray-50"
-                                    } group flex items-center px-2 py-2 text-sm rounded-md w-full text-left`}
-                            >
-                                <Icon className="mr-3 h-5 w-5" aria-hidden="true" />
-                                {item.label}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="p-4 border-t">
-                    <Button
-                        variant="ghost"
-                        className={cn(
-                            "w-full justify-start gap-3 text-destructive hover:text-destructive",
-                            !sidebarOpen && "justify-center px-2"
-                        )}
-                        onClick={onLogout}
-                    >
-                        <LogOut className="h-5 w-5 flex-shrink-0" />
-                        {sidebarOpen && <span>Sair</span>}
-                    </Button>
+                    <div className="p-4 border-t">
+                        <Button
+                            variant="ghost"
+                            className={cn(
+                                "w-full justify-start gap-3 text-destructive hover:text-destructive",
+                                !sidebarOpen && "justify-center px-2"
+                            )}
+                            onClick={onLogout}
+                        >
+                            <LogOut className="h-5 w-5 flex-shrink-0" />
+                            {sidebarOpen && <span>Sair</span>}
+                        </Button>
+                    </div>
                 </div>
             </div>
+            {sidebarOpen && (
+                <div className="fixed inset-0 flex z-40 md:hidden" aria-modal="true">
+                    <div
+                        className="fixed inset-0 bg-gray-600 bg-opacity-75"
+                        onClick={() => setSidebarOpen(false)}
+                        aria-label="Fechar menu lateral clicando fora"
+                        tabIndex={0}
+                    />
+                    <div className={cn("relative flex-1 flex flex-col max-w-xs w-full", themeColor)}>
+                        <div className="absolute top-0 right-0 -mr-12 pt-2">
+                            <button
+                                onClick={() => setSidebarOpen(false)}
+                                aria-label="Fechar menu lateral clicando no botão"
+                                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                            >
+                                <X className="h-6 w-6 text-white" aria-hidden="true" />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto  border-r">
+                            <div className="p-4 border-b flex items-center justify-between">
+                                {sidebarOpen && (
+                                    <div className="flex items-center gap-2">
+                                        <Flame className={cn("h-6 w-6", themeColor)} />
+                                        <span className="font-bebas tracking-wide">Fogo & Brasa</span>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mt-8 flex-grow flex flex-col">
+                                <nav className="flex-1 px-2 space-y-1">
+                                    {menuItems.map((item) => {
+                                        const Icon = item.icon;
+                                        const active = isActive(item.href);
+                                        return (
+                                            <Link
+                                                key={item.id}
+                                                href={item.href}
+                                                onClick={() => {
+                                                    setSidebarOpen(false);
+                                                }}
+                                                aria-current={active ? "page" : undefined}
+                                                className={`${active
+                                                    ? `bg-accent/50 font-medium ${themeColor}`
+                                                    : "text-gray-700 hover:bg-gray-50"
+                                                    } group flex items-center px-2 py-2 text-sm rounded-md w-full text-left`}
+                                            >
+                                                <Icon className="mr-3 h-5 w-5" aria-hidden="true" />
+                                                {item.label}
+                                            </Link>
+                                        );
+                                    })}
+                                </nav>
+                            </div>
+                        </div>
+
+                        <div className="p-4 border-t">
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "w-full justify-start gap-3 text-destructive hover:text-destructive",
+                                    !sidebarOpen && "justify-center px-2"
+                                )}
+                                onClick={onLogout}
+                            >
+                                <LogOut className="h-5 w-5 flex-shrink-0" />
+                                {sidebarOpen && <span>Sair</span>}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </aside>
     )
 }
