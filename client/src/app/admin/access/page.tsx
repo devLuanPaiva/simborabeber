@@ -32,8 +32,13 @@ export default function AccessPage() {
             }
             const loggedInUser = decodeTokenToUser(response?.data[0]?.access_token);
 
-            checkRoleAccessAndRedirect(loggedInUser?.role!);
-        } catch (error) {
+            const role = loggedInUser?.role;
+            if (role === undefined) {
+                setErrorMessage("Não foi possível determinar o papel do usuário.");
+                return;
+            }
+            checkRoleAccessAndRedirect(role);
+        } catch (error: unknown) {
             setErrorMessage("Ocorreu um erro ao tentar efetuar o login. Por favor, tente novamente.");
 
             console.error("Login error:", error);
