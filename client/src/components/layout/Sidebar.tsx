@@ -5,13 +5,12 @@ import {
   managerMenuItems,
   waiterMenuItems,
 } from "@/data/constants";
-import { IUser, UserRole, UserRolesLabels } from "@/data/models";
+import { IUser, UserRole } from "@/data/models";
 import { cn } from "@/lib/utils";
-import { Flame, LogOut, MenuIcon, X } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { Flame, LogOut, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "../ui/button";
-import Link from "next/link";
 
 interface SidebarProps {
   sidebarOpen: boolean;
@@ -29,7 +28,9 @@ export function Sidebar({
   const [themeColor, setThemeColor] = useState<
     "text-secondary" | "text-primary"
   >("text-secondary");
+
   const pathname = usePathname() || "";
+  const route = useRouter();
 
   const setMenuItemsByUserRole = useCallback(() => {
     switch (currentUser?.role) {
@@ -59,16 +60,20 @@ export function Sidebar({
     return pathname === href || pathname.startsWith(href + "/");
   };
 
+  const onNavigate = (href: string) => {
+    route.push(href);
+  };
+
   return (
     <aside>
-      <div className="hidden md:flex md:flex-shrink-0 h-screen">
+      <div className="hidden md:flex md:flex-shrink-0 h-screen bg-card">
         <div className="flex flex-col w-64">
           <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto  border-r">
             <div className="p-4 border-b flex items-center justify-between">
               {sidebarOpen && (
                 <div className="flex items-center gap-2">
                   <Flame className={cn("h-6 w-6", themeColor)} />
-                  <span className="font-bebas tracking-wide">Fogo & Brasa</span>
+                  <h2 className="font-bebas tracking-wide">Fogo & Brasa</h2>
                 </div>
               )}
             </div>
@@ -78,22 +83,18 @@ export function Sidebar({
                   const Icon = item.icon;
                   const active = isActive(item.href);
                   return (
-                    <Link
+                    <Button
                       key={item.id}
-                      href={item.href}
-                      onClick={() => {
-                        setSidebarOpen(false);
-                      }}
-                      aria-current={active ? "page" : undefined}
-                      className={`${
-                        active
-                          ? `bg-accent/50 font-medium ${themeColor}`
-                          : "text-gray-700 hover:bg-gray-50"
-                      } group flex items-center px-2 py-2 text-sm rounded-md w-full text-left`}
+                      variant={active ? "default" : "ghost"}
+                      className={cn(
+                        "w-full justify-start gap-3 cursor-pointer",
+                        !sidebarOpen && "justify-center px-2"
+                      )}
+                      onClick={() => onNavigate(item.id)}
                     >
-                      <Icon className="mr-3 h-5 w-5" aria-hidden="true" />
-                      {item.label}
-                    </Link>
+                      <Icon className="h-5 w-5 flex-shrink-0" />
+                      {sidebarOpen && <span>{item.label}</span>}
+                    </Button>
                   );
                 })}
               </nav>
@@ -116,7 +117,10 @@ export function Sidebar({
         </div>
       </div>
       {sidebarOpen && (
-        <div className="fixed inset-0 flex z-40 md:hidden" aria-modal="true">
+        <div
+          className="fixed inset-0 flex z-40 md:hidden bg-card"
+          aria-modal="true"
+        >
           <div
             className="fixed inset-0 bg-gray-600 bg-opacity-75"
             onClick={() => setSidebarOpen(false)}
@@ -156,22 +160,18 @@ export function Sidebar({
                     const Icon = item.icon;
                     const active = isActive(item.href);
                     return (
-                      <Link
+                      <Button
                         key={item.id}
-                        href={item.href}
-                        onClick={() => {
-                          setSidebarOpen(false);
-                        }}
-                        aria-current={active ? "page" : undefined}
-                        className={`${
-                          active
-                            ? `bg-accent/50 font-medium ${themeColor}`
-                            : "text-gray-700 hover:bg-gray-50"
-                        } group flex items-center px-2 py-2 text-sm rounded-md w-full text-left`}
+                        variant={active ? "default" : "ghost"}
+                        className={cn(
+                          "w-full justify-start gap-3 cursor-pointer",
+                          !sidebarOpen && "justify-center px-2"
+                        )}
+                        onClick={() => onNavigate(item.id)}
                       >
-                        <Icon className="mr-3 h-5 w-5" aria-hidden="true" />
-                        {item.label}
-                      </Link>
+                        <Icon className="h-5 w-5 flex-shrink-0" />
+                        {sidebarOpen && <span>{item.label}</span>}
+                      </Button>
                     );
                   })}
                 </nav>
