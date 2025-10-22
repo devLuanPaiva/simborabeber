@@ -33,6 +33,11 @@ export function AuthenticationProvider({
   const router = useRouter();
   const [user, setUser] = useState<ITokenPayload | null>(null);
 
+  const logout = useCallback(() => {
+    sessionStorage.clear();
+    setUser(null);
+    router.push("/");
+  }, [router]);
 
   const updateSession = useCallback((accessToken: string, refreshToken: string) => {
     sessionStorage.setItem("access_token", accessToken);
@@ -41,7 +46,7 @@ export function AuthenticationProvider({
     setUser(userData);
   }, []);
 
- 
+
   const refreshAccessToken = useCallback(async (): Promise<boolean> => {
     const refreshToken = sessionStorage.getItem("refresh_token");
     if (!refreshToken) return false;
@@ -69,9 +74,9 @@ export function AuthenticationProvider({
       logout();
       return false;
     }
-  }, [updateSession]);
+  }, [updateSession, logout]);
 
-  
+
   const startTokenWatcher = useCallback(() => {
     const interval = setInterval(async () => {
       const token = sessionStorage.getItem("access_token");
@@ -86,12 +91,12 @@ export function AuthenticationProvider({
       if (expiresIn < 60) {
         await refreshAccessToken();
       }
-    }, 30 * 1000); 
+    }, 30 * 1000);
 
     return () => clearInterval(interval);
   }, [refreshAccessToken]);
 
-  
+
   useEffect(() => {
     const token = sessionStorage.getItem("access_token");
     if (token) {
@@ -103,7 +108,7 @@ export function AuthenticationProvider({
     return stopWatcher;
   }, [startTokenWatcher]);
 
- 
+
   const login = useCallback(
     async (
       email: string,
@@ -155,7 +160,7 @@ export function AuthenticationProvider({
     [updateSession]
   );
 
- 
+
   const decodedToken = useCallback(
     async (token: string): Promise<ITokenPayload | null> => {
       sessionStorage.setItem("access_token", token);
@@ -167,13 +172,9 @@ export function AuthenticationProvider({
   );
 
 
-  const logout = useCallback(() => {
-    sessionStorage.clear();
-    setUser(null);
-    router.push("/");
-  }, [router]);
 
- 
+
+
   const values = useMemo(
     () => ({
       login,
