@@ -154,4 +154,12 @@ describe('UserService', () => {
     expect(result).toEqual(updated);
   });
 
+  it('Should handle exception when trying to update a non-existing user', async () => {
+    (prismaMock.user.update as jest.Mock).mockRejectedValue(new Error('Record not found'));
+
+    await expect(service.updateUser('nope', { name: 'X', isActive: true } as any)).rejects.toThrow('Record not found');
+    expect(handleException).toBeCalled();
+  });
+
+
 });
