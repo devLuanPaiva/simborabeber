@@ -2,13 +2,13 @@ import { PrismaService } from './../../database/prisma.service';
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { handleException } from 'src/functions/handleException';
+import { handleException } from '../../functions/handleException';
 import { Role } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) { }
   async createUser(data: CreateUserDto) {
     try {
       await this.ensureEmailNotExists(data.email);
