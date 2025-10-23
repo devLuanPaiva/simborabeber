@@ -55,5 +55,24 @@ describe('UserService', () => {
     expect(result).toEqual(created);
   });
 
+  it('Should set default role as WAITER when no role is provided', async () => {
+    const dto = { name: 'Jane', email: 'jane@example.com', password: 'pwd' };
+    (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_pwd');
+    const created = { id: '2', name: dto.name, email: dto.email, role: Role.WAITER, password: 'hashed_pwd' };
+    (prismaMock.user.create as jest.Mock).mockResolvedValue(created);
+
+    await service.createUser(dto as any);
+
+    expect(prismaMock.user.create).toBeCalledWith({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        password: 'hashed_pwd',
+        role: Role.WAITER,
+      },
+    });
+  });
+
 
 });
