@@ -181,4 +181,10 @@ describe('UserService', () => {
     expect(result).toEqual(deleted);
   });
 
+  it('Should handle exception when trying to delete a non-existing user', async () => {
+    (prismaMock.user.delete as jest.Mock).mockRejectedValue(new Error('Delete failed'));
+
+    await expect(service.deleteUser('nope')).rejects.toThrow('Delete failed');
+    expect(handleException).toBeCalled();
+  });
 });
