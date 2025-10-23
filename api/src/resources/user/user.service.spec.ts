@@ -74,5 +74,12 @@ describe('UserService', () => {
     });
   });
 
+  it('Should throw UnauthorizedException if email already exists', async () => {
+    const dto = { name: 'Dup', email: 'dup@example.com', password: 'x' };
+    (prismaMock.user.findUnique as jest.Mock).mockResolvedValue({ id: 'existing' });
+
+    await expect(service.createUser(dto as any)).rejects.toThrow(UnauthorizedException);
+    expect(prismaMock.user.create).not.toBeCalled();
+  });
 
 });
