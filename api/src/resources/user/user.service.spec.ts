@@ -123,5 +123,11 @@ describe('UserService', () => {
     expect(result).toEqual(user);
   });
 
+  it('Should throw NotFoundException if user is not found by ID', async () => {
+    (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
+
+    await expect(service.getUserById('missing')).rejects.toThrow(NotFoundException);
+  });
+
 
 });
