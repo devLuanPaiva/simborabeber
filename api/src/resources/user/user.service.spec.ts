@@ -161,5 +161,24 @@ describe('UserService', () => {
     expect(handleException).toBeCalled();
   });
 
+  it('Should delete a user successfully and return deleted data', async () => {
+    const deleted = { id: 'd1', name: 'Del', email: 'd@d', role: Role.WAITER, isActive: true, createdAt: new Date() };
+    (prismaMock.user.delete as jest.Mock).mockResolvedValue(deleted);
+
+    const result = await service.deleteUser('d1');
+
+    expect(prismaMock.user.delete).toBeCalledWith({
+      where: { id: 'd1' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    expect(result).toEqual(deleted);
+  });
 
 });
