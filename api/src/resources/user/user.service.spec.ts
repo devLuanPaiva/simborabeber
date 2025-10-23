@@ -82,4 +82,26 @@ describe('UserService', () => {
     expect(prismaMock.user.create).not.toBeCalled();
   });
 
+  it(' Should list all users (without returning the password field)', async () => {
+    const users = [
+      { id: '1', name: 'A', email: 'a@a', role: Role.WAITER, isActive: true, createdAt: new Date() },
+    ];
+    (prismaMock.user.findMany as jest.Mock).mockResolvedValue(users);
+
+    const result = await service.getAllUsers();
+
+    expect(prismaMock.user.findMany).toBeCalledWith({
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    expect(result).toEqual(users);
+  });
+
+
 });
