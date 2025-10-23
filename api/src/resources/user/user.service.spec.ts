@@ -129,5 +129,29 @@ describe('UserService', () => {
     await expect(service.getUserById('missing')).rejects.toThrow(NotFoundException);
   });
 
+  it('Should update user name and isActive successfully', async () => {
+    const dto = { name: 'Updated', isActive: false };
+    const updated = { id: 'u1', name: dto.name, email: 'e', role: Role.WAITER, isActive: dto.isActive, createdAt: new Date() };
+    (prismaMock.user.update as jest.Mock).mockResolvedValue(updated);
+
+    const result = await service.updateUser('u1', dto as any);
+
+    expect(prismaMock.user.update).toBeCalledWith({
+      where: { id: 'u1' },
+      data: {
+        name: dto.name,
+        isActive: dto.isActive,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    expect(result).toEqual(updated);
+  });
 
 });
