@@ -103,5 +103,25 @@ describe('UserService', () => {
     expect(result).toEqual(users);
   });
 
+  it('Should return a user by ID when found', async () => {
+    const user = { id: '1', name: 'A', email: 'a@a', role: Role.WAITER, isActive: true, createdAt: new Date() };
+    (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(user);
+
+    const result = await service.getUserById('1');
+
+    expect(prismaMock.user.findUnique).toBeCalledWith({
+      where: { id: '1' },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
+    expect(result).toEqual(user);
+  });
+
 
 });
