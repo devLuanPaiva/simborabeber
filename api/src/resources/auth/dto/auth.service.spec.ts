@@ -97,5 +97,30 @@ describe('AuthService', () => {
         expect(jwtMock.signAsync).toHaveBeenNthCalledWith(2, expect.objectContaining({ id: user.id, email: user.email, role: user.role, name: user.name, isActive: user.isActive, type: 'refresh' }), { expiresIn: '2h' });
     });
 
+    it('Should verify that refreshToken() returns new tokens when given a valid refresh token', async () => {
+        const refreshToken = 'rt';
+        const decoded = { id: 'u1', type: 'refresh' };
+        jwtMock.verify.mockReturnValue(decoded);
+        const user = { id: 'u1', email: 'e', name: 'n', role: 'r', isActive: true };
+        prismaMock.user.findUnique.mockResolvedValue(user);
+        jwtMock.signAsync.mockResolvedValueOnce('newA').mockResolvedValueOnce('newR');
+
+        const tokens = await service.refreshToken(refreshToken);
+
+        expect(jwtMock.verify).toBeCalledWith(refreshToken);
+        expect(prismaMock.user.findUnique).toBeCalledWith({
+            where: { id: decoded.id },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                isActive: true,
+            },
+        });
+        expect(jwtMock.signAsync).toHaveBeenCalledTimes(2);
+        expect(tokens).toEqual({ access_token: 'newA', refresh_token: 'newR' });
+    });
+
 
 });
