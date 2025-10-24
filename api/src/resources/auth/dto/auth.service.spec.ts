@@ -84,5 +84,18 @@ describe('AuthService', () => {
         expect(bcrypt.compare).toBeCalledWith('ok', 'hashed');
     });
 
+    it('Should generate both access and refresh tokens using JwtService.signAsync()', async () => {
+        const dto = { email: 'a@a', password: 'p' };
+        const user = { id: '1', email: dto.email, name: 'N', role: 'R', password: 'h', isActive: true };
+        prismaMock.user.findUnique.mockResolvedValue(user);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        jwtMock.signAsync.mockResolvedValueOnce('A').mockResolvedValueOnce('R');
+
+        await service.signIn(dto as any);
+
+        expect(jwtMock.signAsync).toHaveBeenNthCalledWith(1, expect.objectContaining({ id: user.id, email: user.email, role: user.role, name: user.name, isActive: user.isActive, type: 'access' }));
+        expect(jwtMock.signAsync).toHaveBeenNthCalledWith(2, expect.objectContaining({ id: user.id, email: user.email, role: user.role, name: user.name, isActive: user.isActive, type: 'refresh' }), { expiresIn: '2h' });
+    });
+
 
 });
