@@ -156,5 +156,15 @@ describe('AuthService', () => {
         expect(prismaMock.user.findUnique).not.toBeCalled();
     });
 
+    it('Should call bcrypt.compare() correctly during validateUser()', async () => {
+        const dto = { email: 'x@y', password: 'pw' };
+        const user = { id: '1', email: dto.email, name: 'N', role: 'R', password: 'hashed_pw', isActive: true };
+        prismaMock.user.findUnique.mockResolvedValue(user);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        jwtMock.signAsync.mockResolvedValueOnce('a').mockResolvedValueOnce('r');
 
+        await service.signIn(dto as any);
+
+        expect(bcrypt.compare).toBeCalledWith(dto.password, user.password);
+    });
 });
