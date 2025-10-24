@@ -65,5 +65,15 @@ describe('AuthService', () => {
         expect(jwtMock.signAsync).not.toBeCalled();
     });
 
+    it('Should throw UnauthorizedException when password is incorrect', async () => {
+        const user = { id: '1', email: 'e', name: 'n', role: 'USER', password: 'hashed', isActive: true };
+        prismaMock.user.findUnique.mockResolvedValue(user);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+        await expect(service.signIn({ email: 'e', password: 'wrong' } as any)).rejects.toThrow(UnauthorizedException);
+        expect(bcrypt.compare).toBeCalledWith('wrong', 'hashed');
+        expect(jwtMock.signAsync).not.toBeCalled();
+    });
+
 
 });
