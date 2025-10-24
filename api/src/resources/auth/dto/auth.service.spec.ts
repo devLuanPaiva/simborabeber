@@ -57,5 +57,13 @@ describe('AuthService', () => {
         expect(tokens).toEqual({ access_token: 'access_token', refresh_token: 'refresh_token' });
     });
 
+    it('Should throw UnauthorizedException when email does not exist', async () => {
+        prismaMock.user.findUnique.mockResolvedValue(null);
+
+        await expect(service.signIn({ email: 'no@no', password: 'x' } as any)).rejects.toThrow(UnauthorizedException);
+        expect(bcrypt.compare).not.toBeCalled();
+        expect(jwtMock.signAsync).not.toBeCalled();
+    });
+
 
 });
