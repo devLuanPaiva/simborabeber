@@ -75,5 +75,14 @@ describe('AuthService', () => {
         expect(jwtMock.signAsync).not.toBeCalled();
     });
 
+    it('Should throw UnauthorizedException when the user account is inactive', async () => {
+        const user = { id: '1', email: 'e', name: 'n', role: 'USER', password: 'hashed', isActive: false };
+        prismaMock.user.findUnique.mockResolvedValue(user);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+        await expect(service.signIn({ email: 'e', password: 'ok' } as any)).rejects.toThrow(UnauthorizedException);
+        expect(bcrypt.compare).toBeCalledWith('ok', 'hashed');
+    });
+
 
 });
