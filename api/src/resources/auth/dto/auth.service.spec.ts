@@ -130,5 +130,22 @@ describe('AuthService', () => {
         expect(jwtMock.signAsync).not.toBeCalled();
     });
 
+    it('Should throw UnauthorizedException when the refresh token belongs to a non-existing user', async () => {
+        jwtMock.verify.mockReturnValue({ id: 'missing', type: 'refresh' });
+        prismaMock.user.findUnique.mockResolvedValue(null);
+
+        await expect(service.refreshToken('rt')).rejects.toThrow(UnauthorizedException);
+        expect(prismaMock.user.findUnique).toBeCalledWith({
+            where: { id: 'missing' },
+            select: {
+                id: true,
+                email: true,
+                name: true,
+                role: true,
+                isActive: true,
+            },
+        });
+    });
+
 
 });
