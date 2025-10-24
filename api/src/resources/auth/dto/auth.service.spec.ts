@@ -122,5 +122,13 @@ describe('AuthService', () => {
         expect(tokens).toEqual({ access_token: 'newA', refresh_token: 'newR' });
     });
 
+    it('Should throw UnauthorizedException when the refresh token has an invalid type (not "refresh")', async () => {
+        jwtMock.verify.mockReturnValue({ id: 'u1', type: 'access' });
+
+        await expect(service.refreshToken('bad')).rejects.toThrow(UnauthorizedException);
+        expect(prismaMock.user.findUnique).not.toBeCalled();
+        expect(jwtMock.signAsync).not.toBeCalled();
+    });
+
 
 });
