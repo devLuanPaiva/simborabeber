@@ -147,5 +147,14 @@ describe('AuthService', () => {
         });
     });
 
+    it('Should throw UnauthorizedException when the refresh token verification fails (jwtService.verify throws)', async () => {
+        jwtMock.verify.mockImplementation(() => {
+            throw new Error('invalid token');
+        });
+
+        await expect(service.refreshToken('rt')).rejects.toThrow(UnauthorizedException);
+        expect(prismaMock.user.findUnique).not.toBeCalled();
+    });
+
 
 });
