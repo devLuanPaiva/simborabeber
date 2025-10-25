@@ -103,5 +103,28 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
-  
+  it('HttpException missing message field falls back gracefully', () => {
+    const res = createMockResponse();
+    const host = createMockArgumentsHost(res);
+    const payloadWithoutMessage = {
+      error: 'Validation failed',
+      code: 'VAL_ERR',
+    };
+    const exception = new HttpException(payloadWithoutMessage, HttpStatus.UNPROCESSABLE_ENTITY);
+    const expectedMessage = (exception as any).message;
+
+    filter.catch(exception, host);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.UNPROCESSABLE_ENTITY);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'error',
+      message: expectedMessage,
+      data: null,
+      errors: {
+        code: 'VAL_ERR',
+        field: '',
+        detail: 'Validation failed',
+      },
+    });
+  });
 });
