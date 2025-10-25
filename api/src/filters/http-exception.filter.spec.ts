@@ -70,5 +70,22 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
+  it('HttpException returning a string response', () => {
+    const res = createMockResponse();
+    const host = createMockArgumentsHost(res);
+    const exception = new HttpException('Teapot says no', 418);
+    jest.spyOn(exception, 'getResponse').mockReturnValue('Teapot says no');
+
+    filter.catch(exception, host);
+
+    expect(res.status).toHaveBeenCalledWith(418);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'error',
+      message: 'Teapot says no',
+      data: null,
+      errors: { code: '', field: '', detail: '' },
+    });
+  });
+
  
 });
