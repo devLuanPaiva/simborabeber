@@ -44,5 +44,31 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
+  it('HttpException with detailed response object', () => {
+    const res = createMockResponse();
+    const host = createMockArgumentsHost(res);
+    const detailedResponse = {
+      message: 'Invalid payload',
+      error: 'Bad Request',
+      code: 'VALIDATION_ERROR',
+      field: 'email',
+    };
+    const exception = new HttpException(detailedResponse, HttpStatus.BAD_REQUEST);
+
+    filter.catch(exception, host);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'error',
+      message: 'Invalid payload',
+      data: null,
+      errors: {
+        code: 'VALIDATION_ERROR',
+        field: 'email',
+        detail: 'Bad Request',
+      },
+    });
+  });
+
  
 });
