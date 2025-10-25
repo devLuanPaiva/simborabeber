@@ -20,11 +20,11 @@ describe('ResponseInterceptor', () => {
   };
 
   const buildExecutionContext = (req: Request): ExecutionContext =>
-    ({
-      switchToHttp: () => ({
-        getRequest: () => req,
-      }),
-    } as any as ExecutionContext);
+  ({
+    switchToHttp: () => ({
+      getRequest: () => req,
+    }),
+  } as any as ExecutionContext);
 
   const buildCallHandler = (data: any): CallHandler => ({
     handle: () => of(data),
@@ -44,8 +44,8 @@ describe('ResponseInterceptor', () => {
     expect(result.status).toBe('success');
     expect(result.count).toBe(7);
     expect(result.currentPage).toBe(1);
-    expect(result.totalPages).toBe(1); 
-    expect(result.results).toEqual(items); 
+    expect(result.totalPages).toBe(1);
+    expect(result.results).toEqual(items);
     expect(result.next).toBeNull();
     expect(result.previous).toBeNull();
   });
@@ -101,7 +101,7 @@ describe('ResponseInterceptor', () => {
 
     expect(result.currentPage).toBe(2);
     expect(result.totalPages).toBe(3);
-    expect(result.results).toEqual(items.slice(2, 4)); 
+    expect(result.results).toEqual(items.slice(2, 4));
 
     const nextUrl = String(result.next);
     const prevUrl = String(result.previous);
@@ -134,5 +134,24 @@ describe('ResponseInterceptor', () => {
     expect(result).not.toHaveProperty('previous');
   });
 
-  
+  test('Edge case: offset greater than count -> empty results and correct page numbers', async () => {
+
+    const query = { offset: '1000', limit: '10' };
+    const req = buildMockRequest(query);
+    const ctx = buildExecutionContext(req);
+
+    const data = { count: 5, results: [1, 2, 3, 4, 5] };
+    const next = buildCallHandler(data);
+
+    const result = await lastValueFrom(interceptor.intercept(ctx, next));
+
+    expect(result.count).toBe(5);
+    expect(result.results).toEqual([]);
+    expect(result.currentPage).toBe(Math.floor(1000 / 10) + 1);
+    expect(result.totalPages).toBe(Math.ceil(5 / 10));
+    expect(result.next).toBeNull();
+    expect(result.previous).toBeTruthy();
+    expect(String(result.previous)).toContain('offset=990');
+    expect(String(result.previous)).toContain('limit=10');
+  });
 });
