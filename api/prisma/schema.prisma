@@ -1,0 +1,225 @@
+generator client {
+    provider        = "prisma-client-js"
+    previewFeatures = ["relationJoins"]
+    engineType      = "binary"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+enum Role {
+    ADMIN
+    MANAGER
+    WAITER
+}
+
+model User {
+    id              String         @id @default(uuid())
+    email           String         @unique
+    password        String
+    name            String
+    role            Role           @default(WAITER)
+    createdAt       DateTime       @default(now())
+    isActive        Boolean        @default(true)
+    Establishment   Establishment? @relation("EstablishmentUsers", fields: [establishmentId], references: [id])
+    establishmentId String?
+
+    @@map("users")
+}
+
+enum EstablishmentType {
+    SNACK_BARS
+    RESTAURANTS
+    STEAKHOUSES
+    BARS
+    ICE_CREAM_PARLORS
+    PIZZARIAS
+}
+
+model Establishment {
+    id                    String                 @id @default(uuid())
+    email                 String                 @unique
+    name                  String
+    type                  EstablishmentType
+    address               String
+    phone                 String
+    slug                  String                 @unique
+    createdAt             DateTime               @default(now())
+    isActive              Boolean                @default(true)
+    users                 User[]                 @relation("EstablishmentUsers")
+    establishmentProducts EstablishmentProduct[]
+    tables                Table[]
+    stockMovements        StockMovement[]
+    sales                 Sale[]
+    productStocks         ProductStock[]
+    shoppingCarts         ShoppingCart[]
+
+    @@map("establishments")
+}
+
+enum Category {
+    COLD_DRINKS
+    HOT_DRINKS
+    DESSERTS
+    SNACKS
+    COMBOS
+
+    ACAI
+    SANDWICHES
+    BURGERS
+
+    MEALS
+    PASTA
+    SIDE_DISHES
+
+    MEATS
+    SKEWERS
+    BARBECUE
+
+    ALCOHOLIC_DRINKS
+    COCKTAILS
+    CRAFT_BEERS
+
+    ICE_CREAM
+    TOPPINGS
+
+    SAVORY_PIZZAS
+    SWEET_PIZZAS
+}
+
+model Product {
+    id            String   @id @default(uuid())
+    name          String
+    description   String?
+    salePrice     Float
+    purchasePrice Float?
+    category      Category
+    imageUrl      String?
+    createdAt     DateTime @default(now())
+
+    barCode String? @unique
+
+    showInMenu Boolean @default(true)
+    isActive   Boolean @default(true)
+
+    establishmentProducts EstablishmentProduct[]
+    productStocks         ProductStock[]
+
+    @@map("products")
+}
+
+model Table {
+    id              String         @id @default(uuid())
+    number          Int
+    isAvailable     Boolean        @default(true)
+    createdAt       DateTime       @default(now())
+    establishment   Establishment  @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+    shoppingCarts   ShoppingCart[]
+
+    @@map("tables")
+}
+
+model ShoppingCart {
+    id              String             @id @default(uuid())
+    createdAt       DateTime           @default(now())
+    items           ShoppingCartItem[]
+    isActive        Boolean            @default(true)
+    openedAt        DateTime?
+    closedAt        DateTime?
+    totalAmount     Float?             @default(0)
+    establishment   Establishment      @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+    table           Table?             @relation(fields: [tableId], references: [id])
+    tableId         String?
+
+    @@map("shopping_carts")
+}
+
+model ShoppingCartItem {
+    id                     String               @id @default(uuid())
+    establishmentProduct   EstablishmentProduct @relation(fields: [establishmentProductId], references: [id])
+    establishmentProductId String
+    unitPrice              Float
+    totalPrice             Float
+    productName            String
+    quantity               Int
+
+    cart   ShoppingCart @relation(fields: [cartId], references: [id])
+    cartId String
+
+    @@map("shopping_cart_items")
+}
+
+model EstablishmentProduct {
+    id              String        @id @default(uuid())
+    establishment   Establishment @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+    product         Product       @relation(fields: [productId], references: [id])
+    productId       String
+    localCode       String?
+    price           Float
+    trackInventory  Boolean       @default(false)
+    available       Boolean       @default(true)
+    createdAt       DateTime      @default(now())
+
+    ShoppingCartItem ShoppingCartItem[]
+    SaleItem         SaleItem[]
+}
+
+model ProductStock {
+    id              String        @id @default(uuid())
+    establishment   Establishment @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+    product         Product       @relation(fields: [productId], references: [id])
+    productId       String
+    quantity        Float         @default(0)
+    updatedAt       DateTime      @updatedAt
+
+    @@unique([establishmentId, productId])
+}
+
+model SaleItem {
+    id         String @id @default(uuid())
+    name       String
+    quantity   Int
+    unitPrice  Float
+    totalPrice Float
+    saleId     String
+    Sale       Sale   @relation(fields: [saleId], references: [id])
+
+    // referenciando produto do estabelecimento para auditoria
+    establishmentProductId String?
+    establishmentProduct   EstablishmentProduct? @relation(fields: [establishmentProductId], references: [id])
+
+    @@map("items_sale")
+}
+
+model Sale {
+    id              String        @id @default(uuid())
+    createdAt       DateTime      @default(now())
+    totalAmount     Float
+    paymentMethod   String
+    items           SaleItem[]
+    tableId         String?
+    establishment   Establishment @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+    waiterId        String?
+    closedAt        DateTime?
+
+    @@map("sales")
+}
+
+model StockMovement {
+    id              String        @id @default(uuid())
+    productId       String
+    change          Int
+    reason          String
+    createdAt       DateTime      @default(now())
+    establishment   Establishment @relation(fields: [establishmentId], references: [id])
+    establishmentId String
+
+    @@map("stock_movements")
+}
