@@ -87,5 +87,21 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
- 
+  it('Non-HttpException (generic Error)', () => {
+    const res = createMockResponse();
+    const host = createMockArgumentsHost(res);
+    const exception = new Error('Unexpected failure');
+
+    filter.catch(exception, host);
+
+    expect(res.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(res.json).toHaveBeenCalledWith({
+      status: 'error',
+      message: 'Internal server error',
+      data: null,
+      errors: { code: '', field: '', detail: '' },
+    });
+  });
+
+  
 });
