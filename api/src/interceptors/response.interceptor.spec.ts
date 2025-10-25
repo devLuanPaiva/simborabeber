@@ -89,5 +89,31 @@ describe('ResponseInterceptor', () => {
     expect(prevUrl).toContain('filter=alpha');
   });
 
- 
+  test('Preserve other query params when building next/previous URLs', async () => {
+    const query = { search: 'term', offset: '2', limit: '2' };
+    const req = buildMockRequest(query);
+    const ctx = buildExecutionContext(req);
+
+    const items = Array.from({ length: 6 }, (_, i) => i + 1);
+    const next = buildCallHandler(items);
+
+    const result = await lastValueFrom(interceptor.intercept(ctx, next));
+
+    expect(result.currentPage).toBe(2);
+    expect(result.totalPages).toBe(3);
+    expect(result.results).toEqual(items.slice(2, 4)); 
+
+    const nextUrl = String(result.next);
+    const prevUrl = String(result.previous);
+
+    expect(nextUrl).toContain('search=term');
+    expect(nextUrl).toContain('offset=4');
+    expect(nextUrl).toContain('limit=2');
+
+    expect(prevUrl).toContain('search=term');
+    expect(prevUrl).toContain('offset=0');
+    expect(prevUrl).toContain('limit=2');
+  });
+
+  
 });
