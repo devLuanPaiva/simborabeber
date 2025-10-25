@@ -115,5 +115,24 @@ describe('ResponseInterceptor', () => {
     expect(prevUrl).toContain('limit=2');
   });
 
+  test('Non-array single object (no pagination)', async () => {
+    const req = buildMockRequest({});
+    const ctx = buildExecutionContext(req);
+
+    const payload = { id: 1, name: 'x' };
+    const next = buildCallHandler(payload);
+
+    const result = await lastValueFrom(interceptor.intercept(ctx, next));
+
+    expect(result).toEqual({
+      status: 'success',
+      result: payload,
+    });
+    expect(result).not.toHaveProperty('results');
+    expect(result).not.toHaveProperty('count');
+    expect(result).not.toHaveProperty('next');
+    expect(result).not.toHaveProperty('previous');
+  });
+
   
 });
