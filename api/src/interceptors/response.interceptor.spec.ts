@@ -50,5 +50,44 @@ describe('ResponseInterceptor', () => {
     expect(result.previous).toBeNull();
   });
 
-  
+  test('Paginated object with explicit offset & limit (string query values)', async () => {
+
+    const query = { offset: '10', limit: '5', sort: 'asc', filter: 'alpha' };
+    const req = buildMockRequest(query);
+    const ctx = buildExecutionContext(req);
+
+    const rawResults = Array.from({ length: 30 }, (_, i) => ({ id: i }));
+    const data = { count: 23, results: rawResults };
+    const next = buildCallHandler(data);
+
+    const result = await lastValueFrom(interceptor.intercept(ctx, next));
+
+    expect(result.status).toBe('success');
+    expect(result.count).toBe(23);
+    expect(result.currentPage).toBe(3);
+    expect(result.totalPages).toBe(Math.ceil(23 / 5));
+
+    expect(result.results).toEqual(rawResults.slice(10, 15));
+
+    expect(result.next).toBeTruthy();
+    expect(result.previous).toBeTruthy();
+
+    const nextUrl = String(result.next);
+    const prevUrl = String(result.previous);
+
+    expect(nextUrl).toContain('http://localhost:3000/items?');
+    expect(prevUrl).toContain('http://localhost:3000/items?');
+
+    expect(nextUrl).toContain('offset=15');
+    expect(nextUrl).toContain('limit=5');
+    expect(nextUrl).toContain('sort=asc');
+    expect(nextUrl).toContain('filter=alpha');
+
+    expect(prevUrl).toContain('offset=5');
+    expect(prevUrl).toContain('limit=5');
+    expect(prevUrl).toContain('sort=asc');
+    expect(prevUrl).toContain('filter=alpha');
+  });
+
+ 
 });
