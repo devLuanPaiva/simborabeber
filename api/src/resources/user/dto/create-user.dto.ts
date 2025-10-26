@@ -1,5 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 import { Role } from '../entities/user.entity';
 export class CreateUserDto {
   @IsNotEmpty({ message: 'O nome é obrigatório' })
@@ -20,4 +28,14 @@ export class CreateUserDto {
   @ApiProperty({ example: 'WAITER' })
   @IsString({ message: 'O papel deve ser uma string' })
   role?: Role;
+}
+
+export class UserDto {
+  @IsUUID('4', { message: 'O ID do usuário deve ser um UUID válido' })
+  @ApiProperty({ example: '8d6f56ac-34c1-4bc9-86c5-1c4d5edc6db9' })
+  id: string;
+
+  @IsEnum(Role, { message: 'O papel informado não é válido' })
+  @ApiProperty({ example: 'MANAGER' })
+  role: Role;
 }
