@@ -27,7 +27,12 @@ export class CreateUserDto {
   @IsEnum(Role)
   @ApiProperty({ example: 'WAITER' })
   @IsString({ message: 'O papel deve ser uma string' })
-  role?: Role;
+  role: Role;
+
+  @IsOptional()
+  @ApiProperty({ example: '8d6f56ac-34c1-4bc9-86c5-1c4d5edc6db9', required: false })
+  @IsUUID('4', { message: 'O ID do estabelecimento deve ser um UUID válido' })
+  establishmentId?: string;
 }
 
 export class UserDto {

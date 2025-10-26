@@ -8,7 +8,7 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) { }
+  constructor(private readonly prismaService: PrismaService) {}
   async createUser(data: CreateUserDto) {
     try {
       await this.ensureEmailNotExists(data.email);
@@ -20,6 +20,7 @@ export class UserService {
           email: data.email,
           password: passwordHash,
           role: data.role ?? Role.WAITER,
+          establishmentId: data.establishmentId,
         },
       });
       return response;
