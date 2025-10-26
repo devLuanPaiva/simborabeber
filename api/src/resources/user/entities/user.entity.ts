@@ -1,3 +1,4 @@
+import { Establishment } from '../../../resources/establishment/entities/establishment.entity';
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
 
 export enum Role {
@@ -33,9 +34,9 @@ export class User {
   @Column({ default: true, name: 'is_active' })
   isActive: boolean;
 
-  //   @ManyToOne(() => Establishment, (establishment) => establishment.users, {
-  //     nullable: true,
-  //     onDelete: 'SET NULL',
-  //   })
-  //   establishment?: Establishment;
+  @ManyToOne(() => Establishment, (establishment) => establishment.users, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  establishment?: Establishment;
 }
