@@ -13,39 +13,70 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async createProductByEstablishment(productData: CreateProductDto, establishmentId: string) {
+  async createProductByEstablishment(createProductDto: CreateProductDto) {
+    const {
+      name,
+      description,
+      purchasePrice,
+      salePrice,
+      category,
+      imageUrl,
+      barCode,
+      showInMenu,
+      establishmentProducts,
+      productStocks,
+    } = createProductDto;
+
     try {
-      const establishment = await this.prisma.establishment.findUnique({
-        where: { id: establishmentId },
-      });
-      if (!establishment) {
-        throw new NotFoundException('Estabelecimento não encontrado.');
+      if (!establishmentProducts?.length) {
+        throw new BadRequestException('É necessário informar ao menos um estabelecimento.');
       }
 
-      if (productData.barCode) {
+      const establishmentIds = establishmentProducts.map((e) => e.establishmentId);
+      const existingEstablishments = await this.prisma.establishment.findMany({
+        where: { id: { in: establishmentIds } },
+        select: { id: true },
+      });
+
+      if (existingEstablishments.length !== establishmentIds.length) {
+        throw new NotFoundException(
+          'Um ou mais estabelecimentos informados não foram encontrados.',
+        );
+      }
+
+      if (barCode) {
         const existingProduct = await this.prisma.product.findUnique({
-          where: { barCode: productData.barCode },
+          where: { barCode },
         });
         if (existingProduct) {
-          throw new ConflictException('Já existe um produto com esse código de barras.');
+          throw new ConflictException('Já existe um produto com este código de barras.');
         }
       }
 
       const product = await this.prisma.product.create({
         data: {
-          ...productData,
+          name,
+          description,
+          purchasePrice,
+          salePrice,
+          category,
+          imageUrl,
+          barCode,
+          showInMenu,
           establishmentProducts: {
-            create: {
-              establishmentId,
-              price: productData.salePrice,
-              trackInventory: true,
-            },
+            create: establishmentProducts.map((ep) => ({
+              establishmentId: ep.establishmentId,
+              localCode: ep.localCode,
+              price: ep.price ?? salePrice,
+              trackInventory: ep.trackInventory ?? false,
+              available: ep.available ?? true,
+            })),
           },
           productStocks: {
-            create: {
-              establishmentId,
-              quantity: 0,
-            },
+            create: productStocks?.map((ps) => ({
+              establishmentId: ps.establishmentId,
+              quantity: ps.quantity ?? 0,
+            })),
           },
         },
         include: {
@@ -56,21 +87,25 @@ export class ProductService {
 
       return product;
     } catch (error) {
-      if (error instanceof BadRequestException || error instanceof ConflictException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException ||
+        error instanceof ConflictException
+      ) {
         throw error;
       }
-      throw new InternalServerErrorException(
-        'Erro ao criar o produto. Tente novamente mais tarde.',
-      );
+
+      throw new InternalServerErrorException('Erro ao criar produto. Tente novamente mais tarde.');
     }
   }
 
   async getProductsByEstablishment(establishmentId: string) {
     try {
-      const establishment = await this.prisma.establishment.findUnique({
+      const establishmentExists = await this.prisma.establishment.findUnique({
         where: { id: establishmentId },
       });
-      if (!establishment) {
+
+      if (!establishmentExists) {
         throw new NotFoundException('Estabelecimento não encontrado.');
       }
 
@@ -88,7 +123,8 @@ export class ProductService {
 
       return products;
     } catch (error) {
-      throw new InternalServerErrorException('Erro ao buscar produtos do estabelecimento.', error);
+      if (error instanceof NotFoundException) throw error;
+      throw new InternalServerErrorException('Erro ao buscar produtos do estabelecimento.');
     }
   }
 
@@ -107,16 +143,28 @@ export class ProductService {
       }
 
       return product;
-    } catch {
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Erro ao buscar produto.');
     }
   }
 
   async updateProductByEstablishment(
     productId: string,
-    updateData: UpdateProductDto,
+    updateProductDto: UpdateProductDto,
     establishmentId: string,
   ) {
+    const {
+      name,
+      description,
+      purchasePrice,
+      salePrice,
+      category,
+      imageUrl,
+      showInMenu,
+      isActive,
+    } = updateProductDto;
+
     try {
       const establishmentProduct = await this.prisma.establishmentProduct.findFirst({
         where: { productId, establishmentId },
@@ -128,16 +176,21 @@ export class ProductService {
         );
       }
 
-      const { productStocks, ...restUpdateData } = updateData;
-
       const updatedProduct = await this.prisma.product.update({
         where: { id: productId },
         data: {
-          ...restUpdateData,
+          name,
+          description,
+          purchasePrice,
+          salePrice,
+          category,
+          imageUrl,
+          showInMenu,
+          isActive,
           establishmentProducts: {
             updateMany: {
               where: { establishmentId },
-              data: { price: updateData.salePrice ?? establishmentProduct.price },
+              data: { price: salePrice ?? establishmentProduct.price },
             },
           },
         },
@@ -189,15 +242,13 @@ export class ProductService {
       return updatedStock;
     } catch (error) {
       if (error instanceof NotFoundException || error instanceof BadRequestException) throw error;
-      throw new InternalServerErrorException('Erro ao atualizar o estoque.');
+      throw new InternalServerErrorException('Erro ao atualizar estoque do produto.');
     }
   }
 
   async removeProductByEstablishment(productId: string, establishmentId: string) {
     try {
-      const product = await this.prisma.product.findUnique({
-        where: { id: productId },
-      });
+      const product = await this.prisma.product.findUnique({ where: { id: productId } });
 
       if (!product) {
         throw new NotFoundException('Produto não encontrado.');
