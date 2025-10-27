@@ -16,15 +16,12 @@ import { UpdateProductDto } from './dto/update-product.dto';
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  @Post('establishment/:establishmentId')
+  @Post('establishment')
   @ApiOperation({ summary: 'Criar um novo produto para um estabelecimento' })
   @ApiBody({ type: CreateProductDto })
   @ApiResponse({ status: 201, description: 'Produto criado com sucesso.' })
-  createProductByEstablishment(
-    @Body() createProductDto: CreateProductDto,
-    @Param('establishmentId') establishmentId: string,
-  ) {
-    return this.productService.createProductByEstablishment(createProductDto, establishmentId);
+  createProductByEstablishment(@Body() createProductDto: CreateProductDto) {
+    return this.productService.createProductByEstablishment(createProductDto);
   }
 
   @Get('establishment/:establishmentId')
