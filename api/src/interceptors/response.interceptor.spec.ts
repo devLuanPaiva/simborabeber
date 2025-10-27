@@ -6,7 +6,7 @@ import { ResponseInterceptor } from './response.interceptor';
 describe('ResponseInterceptor', () => {
   const buildMockRequest = (
     query: Record<string, any> = {},
-    opts?: { protocol?: string; host?: string; path?: string }
+    opts?: { protocol?: string; host?: string; path?: string },
   ): Request => {
     const protocol = opts?.protocol ?? 'http';
     const host = opts?.host ?? 'localhost:3000';
@@ -20,11 +20,11 @@ describe('ResponseInterceptor', () => {
   };
 
   const buildExecutionContext = (req: Request): ExecutionContext =>
-  ({
-    switchToHttp: () => ({
-      getRequest: () => req,
-    }),
-  } as any as ExecutionContext);
+    ({
+      switchToHttp: () => ({
+        getRequest: () => req,
+      }),
+    }) as any as ExecutionContext;
 
   const buildCallHandler = (data: any): CallHandler => ({
     handle: () => of(data),
@@ -51,7 +51,6 @@ describe('ResponseInterceptor', () => {
   });
 
   test('Paginated object with explicit offset & limit (string query values)', async () => {
-
     const query = { offset: '10', limit: '5', sort: 'asc', filter: 'alpha' };
     const req = buildMockRequest(query);
     const ctx = buildExecutionContext(req);
@@ -135,7 +134,6 @@ describe('ResponseInterceptor', () => {
   });
 
   test('Edge case: offset greater than count -> empty results and correct page numbers', async () => {
-
     const query = { offset: '1000', limit: '10' };
     const req = buildMockRequest(query);
     const ctx = buildExecutionContext(req);
