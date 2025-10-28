@@ -41,6 +41,7 @@ export class ProductController {
   @Patch(':id/increase/:establishmentId')
   @ApiOperation({ summary: 'Aumentar a quantidade de um produto em um estabelecimento' })
   @ApiResponse({ status: 200, description: 'Quantidade do produto aumentada com sucesso.' })
+  @ApiBody({ schema: { properties: { quantity: { type: 'number' } }, required: ['quantity'] } })
   increaseQuantityProduct(
     @Param('id') id: string,
     @Param('establishmentId') establishmentId: string,
