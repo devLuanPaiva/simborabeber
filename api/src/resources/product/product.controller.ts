@@ -14,7 +14,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 @Roles(Role.MANAGER, Role.WAITER)
 @Controller('product')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(private readonly productService: ProductService) { }
 
   @Post('establishment')
   @ApiOperation({ summary: 'Criar um novo produto para um estabelecimento' })
@@ -38,6 +38,17 @@ export class ProductController {
     return this.productService.getProductById(id);
   }
 
+  @Patch(':id/increase/:establishmentId')
+  @ApiOperation({ summary: 'Aumentar a quantidade de um produto em um estabelecimento' })
+  @ApiResponse({ status: 200, description: 'Quantidade do produto aumentada com sucesso.' })
+  increaseQuantityProduct(
+    @Param('id') id: string,
+    @Param('establishmentId') establishmentId: string,
+    @Body('quantity') quantity: number,
+  ) {
+    return this.productService.increaseQuantityProduct(id, establishmentId, quantity);
+  }
+
   @Patch(':id/establishment/:establishmentId')
   @ApiOperation({ summary: 'Atualizar um produto pelo ID' })
   @ApiResponse({ status: 200, description: 'Produto atualizado com sucesso.' })
@@ -50,7 +61,7 @@ export class ProductController {
     return this.productService.updateProductByEstablishment(id, updateProductDto, establishmentId);
   }
 
-  @Delete(':id')
+  @Delete(':id/establishment/:establishmentId')
   @ApiOperation({ summary: 'Remover um produto de um estabelecimento' })
   @ApiResponse({ status: 200, description: 'Produto removido com sucesso.' })
   removeProductByEstablishment(
