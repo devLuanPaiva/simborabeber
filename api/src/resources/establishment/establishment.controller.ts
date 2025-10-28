@@ -12,7 +12,7 @@ import { Role } from '../user/entities/user.entity';
 @ApiTags('establishment')
 @Controller('establishment')
 export class EstablishmentController {
-  constructor(private readonly establishmentService: EstablishmentService) {}
+  constructor(private readonly establishmentService: EstablishmentService) { }
 
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
@@ -24,7 +24,7 @@ export class EstablishmentController {
     return this.establishmentService.createEstablishmentDto(createEstablishmentDto, req.user);
   }
 
-  @Get('usuario')
+  @Get('user')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER, Role.WAITER)
   @ApiOperation({ summary: 'Obter estabelecimentos do usuário autenticado' })
