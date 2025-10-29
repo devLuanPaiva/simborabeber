@@ -24,6 +24,7 @@ import {
 } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import { Switch } from "../ui/switch";
+import CurrencyInput from "../shared/CurrencyInput";
 
 interface ProductDialogProps {
   showDialog: boolean;
@@ -98,8 +99,6 @@ export function ProductDialog({
               className="mt-2"
             />
           </div>
-
-          {/* Descrição */}
           <div className="md:col-span-2">
             <Label htmlFor="description">Descrição</Label>
             <Textarea
@@ -136,35 +135,37 @@ export function ProductDialog({
 
           <div>
             <Label htmlFor="purchasePrice">Valor de Compra</Label>
-            <Input
-              id="purchasePrice"
-              type="number"
-              step="0.01"
-              value={formData.purchasePrice ?? ""}
-              onChange={(e) =>
+            <CurrencyInput
+              value={formData.purchasePrice ?? 0}
+              setValue={(v) =>
                 setFormData({
                   ...formData,
-                  purchasePrice: Number.parseFloat(e.target.value),
+                  purchasePrice: typeof v === "object" ? v.target_value : v,
                 })
               }
-              className="mt-2"
+              idInput="purchase-price"
             />
           </div>
 
           <div>
             <Label htmlFor="salePrice">Valor de Venda *</Label>
-            <Input
-              id="salePrice"
-              type="number"
-              step="0.01"
-              value={formData.salePrice ?? ""}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  salePrice: Number.parseFloat(e.target.value),
-                })
-              }
-              className="mt-2"
+            <CurrencyInput
+              value={formData.salePrice ?? 0}
+              setValue={(v) => {
+                const sale = typeof v === "object" ? v.target_value : v;
+                if (formData.establishmentProducts?.[0]) {
+                  setFormData({
+                    ...formData,
+                    salePrice: sale,
+                    establishmentProducts: [
+                      { ...formData.establishmentProducts[0], price: sale },
+                    ],
+                  });
+                } else {
+                  setFormData({ ...formData, salePrice: sale });
+                }
+              }}
+              idInput="sale-price"
             />
           </div>
 
