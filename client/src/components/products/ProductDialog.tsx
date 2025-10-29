@@ -29,7 +29,7 @@ import CurrencyInput from "../shared/CurrencyInput";
 interface ProductDialogProps {
   showDialog: boolean;
   setShowDialog: (show: boolean) => void;
-  editingProduct: boolean;
+  editingProduct: IProduct | null;
   formData: Partial<IProduct>;
   setFormData: (data: Partial<IProduct>) => void;
   handleSave: () => void;
