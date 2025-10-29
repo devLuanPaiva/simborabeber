@@ -1,6 +1,6 @@
 "use client";
+import Loading from "@/components/shared/Loading";
 import { Button } from "@/components/ui/button";
-import { LoaderOne } from "@/components/ui/loader";
 import { Notification } from "@/components/ui/notification";
 import { UserFormDialog } from "@/components/users/UserFormDialog";
 import { UsersStats } from "@/components/users/UsersStats";
@@ -99,16 +99,12 @@ export default function UsersPage() {
 
     if (loading) {
         return (
-            <div className="mx-auto w-11/12 max-w-7xl h-screen flex flex-col items-center justify-center">
-                <LoaderOne />
-            </div>
+            <Loading />
         )
     }
     return (
         <Suspense fallback={
-            <div className="mx-auto w-11/12 max-w-7xl h-screen flex flex-col items-center justify-center">
-                <LoaderOne />
-            </div>
+            <Loading />
         }>
 
             <div className="mx-auto w-11/12 max-w-7xl  space-y-8 ">
