@@ -1,5 +1,6 @@
 "use client";
 import { ProductDialog } from "@/components/products/ProductDialog";
+import { ProductNotFound } from "@/components/products/ProductNotFound";
 import { ProductPageHeader } from "@/components/products/ProductPageHeader";
 import { ProductsTable } from "@/components/products/ProductsTable";
 import Loading from "@/components/shared/Loading";
@@ -63,16 +64,21 @@ export default function ProductPage() {
       product.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  console.log("ProductsPage Render", JSON.stringify(products, null, 2));
   return (
     <Suspense fallback={<Loading />}>
       <div className="mx-auto w-11/12 max-w-7xl  space-y-8">
         <ProductPageHeader handleOpenDialog={handleOpenDialog} />
-        <ProductsTable
-          filteredProducts={filteredProducts || []}
-          handleOpenDialog={handleOpenDialog}
-          setProductToDelete={setProductToDelete}
-          setShowDeleteDialog={setShowDeleteDialog}
-        />
+        {!products || products?.length === 0 ? (
+          <ProductNotFound />
+        ) : (
+          <ProductsTable
+            filteredProducts={filteredProducts || []}
+            handleOpenDialog={handleOpenDialog}
+            setProductToDelete={setProductToDelete}
+            setShowDeleteDialog={setShowDeleteDialog}
+          />
+        )}
         <ProductDialog
           editingProduct={editingProduct}
           formData={formData}
