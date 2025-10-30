@@ -112,7 +112,7 @@ export function ProductDialog({
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="category">Categoria *</Label>
             <Select
               value={formData.category ?? ""}
@@ -120,7 +120,7 @@ export function ProductDialog({
                 setFormData({ ...formData, category: value as ProductCategory })
               }
             >
-              <SelectTrigger className="mt-2">
+              <SelectTrigger className=" w-full">
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
@@ -133,7 +133,7 @@ export function ProductDialog({
             </Select>
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="purchasePrice">Valor de Compra</Label>
             <CurrencyInput
               value={formData.purchasePrice ?? 0}
@@ -147,7 +147,7 @@ export function ProductDialog({
             />
           </div>
 
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="salePrice">Valor de Venda *</Label>
             <CurrencyInput
               value={formData.salePrice ?? 0}
@@ -170,7 +170,7 @@ export function ProductDialog({
           </div>
 
           {formData.establishmentProducts?.[0]?.trackInventory && (
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="stock">Estoque Inicial *</Label>
               <Input
                 id="stock"
