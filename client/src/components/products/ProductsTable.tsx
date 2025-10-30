@@ -32,7 +32,7 @@ export function ProductsTable({
   };
 
   return (
-    <section className="border rounded-lg">
+    <section className="border rounded-lg  max-w-full overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
