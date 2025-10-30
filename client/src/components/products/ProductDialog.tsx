@@ -218,10 +218,16 @@ export function ProductDialog({
         </div>
 
         <div className="flex gap-2 justify-end mt-6">
-          <Button variant="outline" onClick={() => setShowDialog(false)}>
+          <Button
+            variant="outline"
+            className="cursor-pointer"
+            onClick={() => setShowDialog(false)}
+          >
             Cancelar
           </Button>
-          <Button onClick={handleSave}>Salvar Produto</Button>
+          <Button onClick={handleSave} className="cursor-pointer">
+            Salvar Produto
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

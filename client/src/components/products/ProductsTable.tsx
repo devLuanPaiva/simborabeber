@@ -93,13 +93,14 @@ export function ProductsTable({
                       variant="ghost"
                       size="icon"
                       onClick={() => handleOpenDialog(product)}
+                      className="cursor-pointer"
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="text-destructive hover:text-destructive"
+                      className="text-destructive hover:text-destructive cursor-pointer"
                       onClick={() => {
                         setProductToDelete(product.id);
                         setShowDeleteDialog(true);
