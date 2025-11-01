@@ -24,7 +24,10 @@ const alertStyleMap = {
   error: "bg-red-50 text-red-700 border-red-400",
 };
 
-export function Notification({ message, type = "info" }: Readonly<NotificationProps>) {
+export function Notification({
+  message,
+  type = "info",
+}: Readonly<NotificationProps>) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -48,7 +51,7 @@ export function Notification({ message, type = "info" }: Readonly<NotificationPr
         >
           <div data-testid="alert-icon">{iconMap[type]}</div>
           <div className="flex-1 text-sm">{message}</div>
-          <button onClick={() => setVisible(false)}>
+          <button onClick={() => setVisible(false)} className="cursor-pointer">
             <X className="w-4 h-4 text-current" />
           </button>
         </motion.div>

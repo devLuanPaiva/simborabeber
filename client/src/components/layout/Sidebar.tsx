@@ -105,7 +105,7 @@ export function Sidebar({
             <Button
               variant="ghost"
               className={cn(
-                "w-full justify-start gap-3 text-destructive hover:text-destructive",
+                "w-full justify-start gap-3 text-destructive hover:text-destructive cursor-pointer",
                 !sidebarOpen && "justify-center px-2"
               )}
               onClick={onLogout}
@@ -137,7 +137,7 @@ export function Sidebar({
               <button
                 onClick={() => setSidebarOpen(false)}
                 aria-label="Fechar menu lateral clicando no botão"
-                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white cursor-pointer"
               >
                 <X className="h-6 w-6 text-white" aria-hidden="true" />
               </button>
@@ -182,7 +182,7 @@ export function Sidebar({
               <Button
                 variant="ghost"
                 className={cn(
-                  "w-full justify-start gap-3 text-destructive hover:text-destructive",
+                  "w-full justify-start gap-3 text-destructive hover:text-destructive cursor-pointer",
                   !sidebarOpen && "justify-center px-2"
                 )}
                 onClick={onLogout}

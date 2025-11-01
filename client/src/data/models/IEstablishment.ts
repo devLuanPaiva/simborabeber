@@ -1,3 +1,4 @@
+import { ApiResponse } from "../hooks";
 import { IProduct, IProductStock } from "./IProduct";
 import { ISale, ISaleItem } from "./ISale";
 import { IShoppingCart, IShoppingCartItem, ITable } from "./ITable";
@@ -53,4 +54,12 @@ export interface IEstablishmentProduct {
     product?: IProduct;
     shoppingCartItems?: IShoppingCartItem[];
     saleItems?: ISaleItem[];
+}
+
+
+export interface IEstablishmentContextProps {
+    getEstablishmentsByUser: () => Promise<ApiResponse<IEstablishment[]>>;
+    createEstablishment: (establishmentData: Partial<IEstablishment>) => Promise<ApiResponse<IEstablishment>>;
+    updateEstablishment: (id: string, establishmentData: Partial<IEstablishment>) => Promise<ApiResponse<IEstablishment>>;
+    deleteEstablishment: (id: string) => Promise<ApiResponse<null>>;
 }

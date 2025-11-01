@@ -38,7 +38,13 @@ describe('UserService', () => {
     const dto = { name: 'John', email: 'john@example.com', password: 'plain', role: Role.ADMIN };
     (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_pw');
-    const created = { id: '1', name: dto.name, email: dto.email, role: dto.role, password: 'hashed_pw' };
+    const created = {
+      id: '1',
+      name: dto.name,
+      email: dto.email,
+      role: dto.role,
+      password: 'hashed_pw',
+    };
     (prismaMock.user.create as jest.Mock).mockResolvedValue(created);
 
     const result = await service.createUser(dto as any);
@@ -59,7 +65,13 @@ describe('UserService', () => {
     const dto = { name: 'Jane', email: 'jane@example.com', password: 'pwd' };
     (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(null);
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashed_pwd');
-    const created = { id: '2', name: dto.name, email: dto.email, role: Role.WAITER, password: 'hashed_pwd' };
+    const created = {
+      id: '2',
+      name: dto.name,
+      email: dto.email,
+      role: Role.WAITER,
+      password: 'hashed_pwd',
+    };
     (prismaMock.user.create as jest.Mock).mockResolvedValue(created);
 
     await service.createUser(dto as any);
@@ -84,7 +96,14 @@ describe('UserService', () => {
 
   it(' Should list all users (without returning the password field)', async () => {
     const users = [
-      { id: '1', name: 'A', email: 'a@a', role: Role.WAITER, isActive: true, createdAt: new Date() },
+      {
+        id: '1',
+        name: 'A',
+        email: 'a@a',
+        role: Role.WAITER,
+        isActive: true,
+        createdAt: new Date(),
+      },
     ];
     (prismaMock.user.findMany as jest.Mock).mockResolvedValue(users);
 
@@ -104,7 +123,14 @@ describe('UserService', () => {
   });
 
   it('Should return a user by ID when found', async () => {
-    const user = { id: '1', name: 'A', email: 'a@a', role: Role.WAITER, isActive: true, createdAt: new Date() };
+    const user = {
+      id: '1',
+      name: 'A',
+      email: 'a@a',
+      role: Role.WAITER,
+      isActive: true,
+      createdAt: new Date(),
+    };
     (prismaMock.user.findUnique as jest.Mock).mockResolvedValue(user);
 
     const result = await service.getUserById('1');
@@ -131,7 +157,14 @@ describe('UserService', () => {
 
   it('Should update user name and isActive successfully', async () => {
     const dto = { name: 'Updated', isActive: false };
-    const updated = { id: 'u1', name: dto.name, email: 'e', role: Role.WAITER, isActive: dto.isActive, createdAt: new Date() };
+    const updated = {
+      id: 'u1',
+      name: dto.name,
+      email: 'e',
+      role: Role.WAITER,
+      isActive: dto.isActive,
+      createdAt: new Date(),
+    };
     (prismaMock.user.update as jest.Mock).mockResolvedValue(updated);
 
     const result = await service.updateUser('u1', dto as any);
@@ -157,12 +190,21 @@ describe('UserService', () => {
   it('Should handle exception when trying to update a non-existing user', async () => {
     (prismaMock.user.update as jest.Mock).mockRejectedValue(new Error('Record not found'));
 
-    await expect(service.updateUser('nope', { name: 'X', isActive: true } as any)).rejects.toThrow('Record not found');
+    await expect(service.updateUser('nope', { name: 'X', isActive: true } as any)).rejects.toThrow(
+      'Record not found',
+    );
     expect(handleException).toBeCalled();
   });
 
   it('Should delete a user successfully and return deleted data', async () => {
-    const deleted = { id: 'd1', name: 'Del', email: 'd@d', role: Role.WAITER, isActive: true, createdAt: new Date() };
+    const deleted = {
+      id: 'd1',
+      name: 'Del',
+      email: 'd@d',
+      role: Role.WAITER,
+      isActive: true,
+      createdAt: new Date(),
+    };
     (prismaMock.user.delete as jest.Mock).mockResolvedValue(deleted);
 
     const result = await service.deleteUser('d1');
