@@ -24,7 +24,7 @@ export class EstablishmentController {
     return this.establishmentService.createEstablishmentDto(createEstablishmentDto, req.user);
   }
 
-  @Get('usuario')
+  @Get('user')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(Role.MANAGER, Role.WAITER)
   @ApiOperation({ summary: 'Obter estabelecimentos do usuário autenticado' })
@@ -38,7 +38,11 @@ export class EstablishmentController {
   @Roles(Role.MANAGER)
   @ApiOperation({ summary: 'Atualizar um estabelecimento existente' })
   @ApiResponse({ status: 200, description: 'Estabelecimento atualizado com sucesso.' })
-  update(@Param('id') id: string, @Req() req, @Body() updateEstablishmentDto: UpdateEstablishmentDto) {
+  update(
+    @Param('id') id: string,
+    @Req() req,
+    @Body() updateEstablishmentDto: UpdateEstablishmentDto,
+  ) {
     return this.establishmentService.updateEstablishment(id, updateEstablishmentDto, req.user);
   }
 
