@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: cardapio_postgres
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cardapio_network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: cardapio_api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${API_PORT}:3000"
+    depends_on:
+      - postgres
+    networks:
+      - cardapio_network
+
+volumes:
+  postgres_data:
+
+networks:
+  cardapio_network:
+    driver: bridge
