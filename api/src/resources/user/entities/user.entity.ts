@@ -1,42 +1,45 @@
-import { Establishment } from '../../../resources/establishment/entities/establishment.entity';
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+    Entity,
+    PrimaryGeneratedColumn,
+    Column,
+    CreateDateColumn,
+    UpdateDateColumn,
+    
+} from 'typeorm';
 
-export enum Role {
-  ADMIN = 'ADMIN',
-  MANAGER = 'MANAGER',
-  WAITER = 'WAITER',
+export enum UserRole {
+    ADMIN = 'admin',
+    MANAGER = 'manager',
+    WAITER = 'waiter',
 }
 
-@Entity('users')
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+@Entity({ name: 'users', schema: 'public' })
+export class UserEntity {
+    @PrimaryGeneratedColumn('uuid')
+    id: string;
 
-  @Column({ unique: true })
-  email: string;
+    @Column({
+        type: 'varchar',
+        length: 120
+    })
+    name: string;
 
-  @Column()
-  password: string;
+    @Column({ unique: true })
+    email: string;
 
-  @Column()
-  name: string;
+    @Column({
+        type: 'enum',
+        enum: UserRole,
+        default: UserRole.WAITER
+    })
+    role: UserRole;
 
-  @Column({
-    type: 'enum',
-    enum: Role,
-    default: Role.WAITER,
-  })
-  role: Role;
+    @Column()
+    password: string;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt: Date;
+    @CreateDateColumn({ name: 'created_at' })
+    createdAt: Date;
 
-  @Column({ default: true, name: 'is_active' })
-  isActive: boolean;
-
-  @ManyToOne(() => Establishment, (establishment) => establishment.users, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  establishment?: Establishment;
+    @UpdateDateColumn({ name: 'updated_at' })
+    updatedAt: Date;
 }

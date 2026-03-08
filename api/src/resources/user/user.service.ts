@@ -1,130 +1,137 @@
-import { PrismaService } from './../../database/prisma.service';
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { handleException } from '../../functions/handleException';
-import { Role } from './entities/user.entity';
-import * as bcrypt from 'bcrypt';
+import {
+  Injectable,
+  BadRequestException,
+  ConflictException,
+  NotFoundException,
+  HttpException,
+} from '@nestjs/common'
+
+import { CreateUserDto } from './dto/create-user.dto'
+import { UpdateUserDto } from './dto/update-user.dto'
+import { UserEntity } from './entities/user.entity'
+import { hashSync as bcryptHashSync } from 'bcrypt'
+import { UserRepository } from './repository/user.repository'
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
-  async createUser(data: CreateUserDto) {
-    try {
-      await this.ensureEmailNotExists(data.email);
+  constructor(private readonly userRepository: UserRepository) { }
 
-      const passwordHash = await bcrypt.hash(data.password, 10);
-      const response = await this.prismaService.user.create({
-        data: {
-          name: data.name,
-          email: data.email,
-          password: passwordHash,
-          role: data.role ?? Role.WAITER,
-          establishmentId: data.establishmentId,
-        },
-      });
-      return response;
-    } catch (error) {
-      handleException(error, 'Erro ao criar usuário');
-    }
-  }
-
-  async getAllUsers() {
+  async create(createUserDto: CreateUserDto): Promise<Partial<UserEntity>> {
     try {
-      const users = await this.prismaService.user.findMany({
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-        },
-      });
-      return users;
-    } catch (error) {
-      handleException(error, 'Erro ao buscar usuários');
-    }
-  }
+      const existingUser = await this.userRepository.findByEmail(
+        createUserDto.email,
+      )
 
-  async getUserById(id: string) {
-    try {
-      const response = await this.prismaService.user.findUnique({
-        where: { id },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-        },
-      });
-      if (!response) {
-        throw new NotFoundException({
-          error: 'O usuário não foi encontrado',
-          message: 'Usuário não encontrado',
-          code: 'USER_NOT_FOUND',
-        });
+      if (existingUser) {
+        throw new ConflictException({
+          message: 'Email já está em uso',
+          field: 'email',
+          detail: `O email ${createUserDto.email} já está cadastrado`,
+        })
       }
-      return response;
-    } catch (error) {
-      handleException(error, 'Erro ao buscar usuário');
-    }
-  }
 
-  async updateUser(id: string, data: UpdateUserDto) {
-    try {
-      const response = await this.prismaService.user.update({
-        where: { id },
-        data: {
-          name: data.name,
-          isActive: data.isActive,
-        },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-        },
-      });
-      return response;
-    } catch (error) {
-      handleException(error, 'Erro ao atualizar usuário');
-    }
-  }
-  async deleteUser(id: string) {
-    try {
-      const response = await this.prismaService.user.delete({
-        where: { id },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          isActive: true,
-          createdAt: true,
-        },
-      });
-      return response;
-    } catch (error) {
-      handleException(error, 'Erro ao deletar usuário');
-    }
-  }
+      const hashedPassword = bcryptHashSync(createUserDto.password, 10)
 
-  private async ensureEmailNotExists(email: string) {
-    const emailExists = await this.prismaService.user.findUnique({
-      where: { email },
-    });
-    if (emailExists) {
-      throw new UnauthorizedException({
-        error: 'E-mail já cadastrado.',
-        message: 'E-mail já cadastrado.',
-        code: 'EMAIL_EXISTS',
+      const user = await this.userRepository.createUser({
+        ...createUserDto,
+        password: hashedPassword,
+      })
+
+      return this.removePassword(user)
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      }
+
+      throw new BadRequestException({
+        message: 'Erro ao criar usuário',
         field: 'email',
-      });
+        detail: 'Falha ao persistir usuário no banco de dados',
+      })
     }
+  }
+
+  async findAll(): Promise<Partial<UserEntity>[]> {
+    const users = await this.userRepository.findAll()
+
+    if (users.length === 0) {
+      throw new NotFoundException({
+        message: 'Nenhum usuário encontrado',
+        detail: 'Não existem usuários cadastrados no sistema',
+      })
+    }
+
+    return users.map((user) => this.removePassword(user))
+  }
+
+  async findOne(id: string): Promise<Partial<UserEntity>> {
+    const user = await this.userRepository.findById(id)
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Usuário não encontrado',
+        field: 'id',
+        detail: `Usuário com id ${id} não foi encontrado`,
+      })
+    }
+
+    return this.removePassword(user)
+  }
+
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<Partial<UserEntity>> {
+    const user = await this.userRepository.findById(id)
+
+    if (!user) {
+      throw new NotFoundException({
+        message: 'Usuário não encontrado',
+        field: 'id',
+        detail: `Não existe usuário com id ${id} para atualização`,
+      })
+    }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = bcryptHashSync(updateUserDto.password, 10)
+    }
+
+    Object.assign(user, updateUserDto)
+
+    const updatedUser = await this.userRepository.updateUser(user)
+
+    return this.removePassword(updatedUser)
+  }
+
+  async remove(id: string): Promise<{ message: string }> {
+    try {
+      const user = await this.userRepository.findById(id)
+
+      if (!user) {
+        throw new NotFoundException({
+          message: 'Usuário não encontrado',
+          field: 'id',
+          detail: `Não existe usuário com id ${id} para remoção`,
+        })
+      }
+
+      await this.userRepository.deleteUser(user)
+
+      return { message: 'Usuário removido com sucesso' }
+    } catch (error) {
+      if (error instanceof HttpException) {
+        throw error
+      }
+
+      throw new BadRequestException({
+        message: 'Erro ao remover usuário',
+        detail: 'Falha ao remover usuário do banco de dados',
+      })
+    }
+  }
+
+  private removePassword(user: UserEntity): Partial<UserEntity> {
+    const { password, ...userWithoutPassword } = user
+    return userWithoutPassword
   }
 }
