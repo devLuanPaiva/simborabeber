@@ -17,8 +17,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                 database: configService.get<string>('DB_NAME'),
                 schema: 'public',
                 autoLoadEntities: true,
-                entities: [__dirname + '/../**/*.entity.{ts,js}'],
-                migrations: [__dirname + '/migrations/*{.ts,.js}'],
+                entities: [__dirname + '/../**/*.entity.{ts,ts}'],
+                migrations: [__dirname + '/migrations/*{.ts,.ts}'],
                 synchronize: false
             }),
             inject: [ConfigService],
