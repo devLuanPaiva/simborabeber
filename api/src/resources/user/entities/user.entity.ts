@@ -4,7 +4,7 @@ import {
     Column,
     CreateDateColumn,
     UpdateDateColumn,
-    
+
 } from 'typeorm';
 
 export enum UserRole {
@@ -37,9 +37,17 @@ export class UserEntity {
     @Column()
     password: string;
 
+    @Column({
+        name: 'last_login',
+        type: 'timestamp',
+        nullable: true
+    })
+    lastLogin?: Date;
+    
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 }
+
