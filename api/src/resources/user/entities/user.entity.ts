@@ -1,9 +1,12 @@
+import { BarEntity } from '../../bar/entities/bar.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
     Column,
     CreateDateColumn,
     UpdateDateColumn,
+    ManyToOne,
+    JoinColumn,
 
 } from 'typeorm';
 
@@ -43,7 +46,14 @@ export class UserEntity {
         nullable: true
     })
     lastLogin?: Date;
-    
+
+    @ManyToOne(() => BarEntity, bar => bar.users, {
+        nullable: true,
+    })
+
+    @JoinColumn({ name: 'bar_id' })
+    bar: BarEntity;
+
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
 

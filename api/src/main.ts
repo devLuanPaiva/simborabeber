@@ -29,6 +29,14 @@ async function bootstrap() {
 		.setTitle("Cardápio API")
 		.setDescription("API para gerenciamento do cardápio")
 		.setVersion("1.0")
+		.addBearerAuth({
+			type: "http",
+			scheme: "bearer",
+			bearerFormat: "JWT",
+			name: "Authorization",
+			description: "Informe o token JWT",
+			in: "header",
+		})
 		.build()
 
 	const document = SwaggerModule.createDocument(app, config)

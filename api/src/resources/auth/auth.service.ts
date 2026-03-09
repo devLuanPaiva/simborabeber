@@ -5,7 +5,7 @@ import { AuthRepository } from './repository/auth.repository';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 
-interface JwtPayload {
+export interface JwtPayload {
     sub: string;
     email: string;
     name: string;
@@ -14,8 +14,8 @@ interface JwtPayload {
 }
 
 export interface AuthResponse {
-  accessToken: string;
-  refreshToken: string;
+    accessToken: string;
+    refreshToken: string;
 }
 
 
@@ -31,13 +31,13 @@ export class AuthService {
         const user = await this.authRepository.findByEmail(loginDto.email);
 
         if (!user) {
-            throw new UnauthorizedException({message:'Credenciais inválidas', detail: 'Credenciais inválidas'});
+            throw new UnauthorizedException({ message: 'Credenciais inválidas', detail: 'Credenciais inválidas' });
         }
 
         const isPasswordValid = compareSync(loginDto.password, user.password);
 
         if (!isPasswordValid) {
-            throw new UnauthorizedException({message:'Credenciais inválidas', detail: 'Credenciais inválidas'});
+            throw new UnauthorizedException({ message: 'Credenciais inválidas', detail: 'Credenciais inválidas' });
         }
 
         await this.authRepository.updateLastLogin(user.id);
@@ -47,24 +47,24 @@ export class AuthService {
         return {
             ...tokens,
         }
-           
-       
+
+
     }
 
     async refresh(refreshToken: string): Promise<AuthResponse> {
         try {
-            
+
             const payload = this.jwtService.verify<JwtPayload>(refreshToken, {
                 secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
             });
 
-            if(payload.type !== 'refresh') {
-                throw new UnauthorizedException({message:'Refresh token inválido', detail: 'Refresh token inválido'});
+            if (payload.type !== 'refresh') {
+                throw new UnauthorizedException({ message: 'Refresh token inválido', detail: 'Refresh token inválido' });
             }
             const user = await this.authRepository.findById(payload.sub);
 
             if (!user) {
-                throw new UnauthorizedException({message:'Usuário não encontrado', detail: 'Usuário não encontrado'});
+                throw new UnauthorizedException({ message: 'Usuário não encontrado', detail: 'Usuário não encontrado' });
             }
 
             await this.authRepository.updateLastLogin(user.id);
@@ -75,7 +75,7 @@ export class AuthService {
                 ...tokens,
             };
         } catch {
-            throw new UnauthorizedException({message:'Refresh token inválido ou expirado', detail: 'Refresh token inválido ou expirado'});
+            throw new UnauthorizedException({ message: 'Refresh token inválido ou expirado', detail: 'Refresh token inválido ou expirado' });
         }
     }
 
@@ -93,11 +93,11 @@ export class AuthService {
         };
 
         const [accessToken, refreshToken] = await Promise.all([
-            this.jwtService.signAsync({type: 'access', ...payload}, {
+            this.jwtService.signAsync({ type: 'access', ...payload }, {
                 secret: this.configService.getOrThrow<string>('JWT_SECRET'),
                 expiresIn: '1h',
             }),
-            this.jwtService.signAsync({type: 'refresh', ...payload}, {
+            this.jwtService.signAsync({ type: 'refresh', ...payload }, {
                 secret: this.configService.getOrThrow<string>('JWT_REFRESH_SECRET'),
                 expiresIn: '2h',
             }),

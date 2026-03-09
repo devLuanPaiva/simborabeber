@@ -5,11 +5,12 @@ import { DatabaseModule } from './database/database.module';
 import { UserModule } from './resources/user/user.module';
 import { AuthModule } from './resources/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { BarModule } from './resources/bar/bar.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, UserModule, AuthModule],
+  }), DatabaseModule, UserModule, AuthModule, BarModule],
   controllers: [AppController],
   providers: [AppService],
 })
