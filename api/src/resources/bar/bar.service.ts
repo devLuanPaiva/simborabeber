@@ -1,26 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { CreateBarDto } from './dto/create-bar.dto';
 import { UpdateBarDto } from './dto/update-bar.dto';
+import { BarRepository } from './repository/bar.repository';
+import { BarEntity } from './entities/bar.entity';
 
 @Injectable()
 export class BarService {
-  create(createBarDto: CreateBarDto) {
-    return 'This action adds a new bar';
+
+  constructor(private readonly barRepository: BarRepository) { }
+
+  create(createBarDto: CreateBarDto): Promise<BarEntity> {
+    return this.barRepository.createBar(createBarDto);
   }
 
-  findAll() {
-    return `This action returns all bar`;
+  findAll(): Promise<BarEntity[]> {
+    return this.barRepository.findAll();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} bar`;
+  findBySlug(slug: string): Promise<BarEntity | null> {
+    return this.barRepository.findBySlug(slug);
   }
 
-  update(id: number, updateBarDto: UpdateBarDto) {
-    return `This action updates a #${id} bar`;
+  update(id: string, updateBarDto: UpdateBarDto): Promise<BarEntity> {
+    return this.barRepository.updateBar({ ...updateBarDto, id });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bar`;
+  remove(id: string) {
+    return this.barRepository.deleteBar({ id } as BarEntity);
   }
 }
