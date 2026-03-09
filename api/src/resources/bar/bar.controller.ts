@@ -1,8 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger"
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { BarService } from './bar.service';
 import { CreateBarDto } from './dto/create-bar.dto';
 import { UpdateBarDto } from './dto/update-bar.dto';
+import { AuthGuard } from '../auth/guard/auth.guard';
+import { RolesGuard } from '../../guards/roles.guard';
+import { Roles } from '../../decorators/roles.decorator';
+import { UserRole } from '../user/entities/user.entity';
 
 @Controller('bar')
 @ApiTags('bars')
@@ -10,6 +14,9 @@ export class BarController {
   constructor(private readonly barService: BarService) { }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER)
   @ApiOperation({ summary: "Criar um novo bar" })
   @ApiBody({ type: CreateBarDto })
   @ApiResponse({ status: 201, description: "Bar criado com sucesso" })
@@ -38,6 +45,9 @@ export class BarController {
   }
 
   @Patch(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER)
   @ApiOperation({ summary: "Atualizar um bar pelo ID" })
   @ApiBody({ type: UpdateBarDto })
   @ApiResponse({ status: 200, description: "Bar atualizado com sucesso" })
@@ -49,6 +59,9 @@ export class BarController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER)
   @ApiOperation({ summary: "Remover um bar pelo ID" })
   @ApiResponse({ status: 200, description: "Bar removido com sucesso" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
