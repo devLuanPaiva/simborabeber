@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger"
 import { BarService } from './bar.service';
 import { CreateBarDto } from './dto/create-bar.dto';
@@ -22,8 +22,9 @@ export class BarController {
   @ApiResponse({ status: 201, description: "Bar criado com sucesso" })
   @ApiResponse({ status: 400, description: "Requisição inválida" })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createBarDto: CreateBarDto) {
-    return this.barService.create(createBarDto);
+  create(@Req() req, @Body() createBarDto: CreateBarDto) {
+    const managerId = req.user?.sub
+    return this.barService.create(createBarDto, managerId);
   }
 
   @Get()

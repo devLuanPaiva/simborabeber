@@ -1,16 +1,30 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBarDto } from './dto/create-bar.dto';
 import { UpdateBarDto } from './dto/update-bar.dto';
 import { BarRepository } from './repository/bar.repository';
+import { UserRepository } from '../user/repository/user.repository';
 import { BarEntity } from './entities/bar.entity';
 
 @Injectable()
 export class BarService {
 
-  constructor(private readonly barRepository: BarRepository) { }
+  constructor(
+    private readonly barRepository: BarRepository,
+    private readonly userRepository: UserRepository,
+  ) { }
 
-  create(createBarDto: CreateBarDto): Promise<BarEntity> {
-    return this.barRepository.createBar(createBarDto);
+  async create(createBarDto: CreateBarDto, managerId: string): Promise<BarEntity> {
+    const bar = await this.barRepository.createBar(createBarDto)
+
+    const manager = await this.userRepository.findById(managerId)
+    if (!manager) {
+      throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${managerId} não foi encontrado` })
+    }
+
+    manager.bar = bar
+    await this.userRepository.updateUser(manager)
+
+    return bar
   }
 
   findAll(): Promise<BarEntity[]> {
