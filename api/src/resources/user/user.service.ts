@@ -3,20 +3,22 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
-  HttpException,
+  HttpException, ForbiddenException
 } from '@nestjs/common'
 
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { UserEntity } from './entities/user.entity'
+import { UserEntity, UserRole } from './entities/user.entity'
 import { hashSync as bcryptHashSync } from 'bcrypt'
 import { UserRepository } from './repository/user.repository'
+import { JwtPayload } from '../auth/auth.service'
+import { BarEntity } from '../bar/entities/bar.entity'
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
-  async create(createUserDto: CreateUserDto): Promise<Partial<UserEntity>> {
+  async create(createUserDto: CreateUserDto, actor?: JwtPayload): Promise<Partial<UserEntity>> {
     try {
       const existingUser = await this.userRepository.findByEmail(
         createUserDto.email,
@@ -32,10 +34,28 @@ export class UserService {
 
       const hashedPassword = bcryptHashSync(createUserDto.password, 10)
 
-      const user = await this.userRepository.createUser({
+      const userPayload: Partial<UserEntity> = {
         ...createUserDto,
         password: hashedPassword,
-      })
+      }
+
+      if (actor?.role === UserRole.MANAGER) {
+        if (createUserDto.role !== UserRole.WAITER) {
+          throw new ForbiddenException({ message: 'O gerente só pode criar usuários do tipo garçom', detail: 'Permissão insuficiente para criar usuário com a função solicitada' })
+        }
+
+        const manager: UserEntity | null = await this.userRepository.findById(actor.sub)
+        if (!manager.bar) {
+          throw new BadRequestException({ message: 'O gerente não possui bar associado', detail: 'O gerente precisa estar associado a um bar para criar usuários' })
+        }
+
+        userPayload.bar = manager.bar
+      } else if (createUserDto.barId) {
+        userPayload.bar = { id: createUserDto.barId } as BarEntity
+
+      }
+
+      const user = await this.userRepository.createUser(userPayload)
 
       return this.removePassword(user)
     } catch (error) {

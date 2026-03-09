@@ -31,7 +31,7 @@ export class UserRepository {
         })
     }
 
-    async updateUser(user: UserEntity): Promise<UserEntity> {
+    async updateUser(user: Partial<UserEntity>): Promise<UserEntity> {
         return this.repository.save(user)
     }
 
