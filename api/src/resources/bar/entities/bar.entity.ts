@@ -1,3 +1,4 @@
+import { TabEntity } from "../../tab/entities/tab.entity";
 import { ProductEntity } from "../../product/entities/product.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -53,6 +54,9 @@ export class BarEntity {
 
     @OneToMany(() => ProductEntity, product => product.bar)
     products: ProductEntity[];
+
+    @OneToMany(() => TabEntity, tab => tab.bar)
+    tabs: TabEntity[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
