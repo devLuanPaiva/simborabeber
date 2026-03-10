@@ -15,14 +15,14 @@ export class AuthGuard implements CanActivate {
         const secret = this.configService.get<string>("JWT_SECRET")
         const token = this.extractTokenFromHeader(request)
         if (!token) {
-            throw new UnauthorizedException()
+            throw new UnauthorizedException({ message: 'Acesso não autorizado', field: 'token', detail: 'Nenhum token fornecido.' })
         }
         try {
             const payload = await this.jwtService.verifyAsync(token, { secret })
-            if (!payload) throw new UnauthorizedException("Token inválido")
+            if (!payload) throw new UnauthorizedException({ message: 'Token inválido', field: 'token', detail: 'O token fornecido é inválido ou expirou.' })
             request.user = payload
         } catch {
-            throw new UnauthorizedException()
+            throw new UnauthorizedException({ message: 'Acesso não autorizado', field: 'token', detail: 'O token fornecido é inválido ou expirou.' })
         }
         return true
     }

@@ -25,7 +25,7 @@ export class ProductService {
     }
 
     if (!user.bar) {
-      throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar' })
+      throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
     }
 
     const productData: Partial<ProductEntity> = {
