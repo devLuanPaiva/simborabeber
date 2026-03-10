@@ -1,0 +1,58 @@
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductRepository } from './repository/product.repository';
+import { UserRepository } from '../user/repository/user.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BarEntity } from '../bar/entities/bar.entity';
+import { ProductEntity } from './entities/product.entity';
+
+@Injectable()
+export class ProductService {
+
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly userRepository: UserRepository,
+    @InjectRepository(BarEntity)
+    private readonly barRepository: Repository<BarEntity>,
+  ) { }
+
+  async create(createProductDto: CreateProductDto, userId: string): Promise<ProductEntity> {
+    const user = await this.userRepository.findById(userId)
+    if (!user) {
+      throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${userId} não foi encontrado` })
+    }
+
+    if (!user.bar) {
+      throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
+    }
+
+    const productData: Partial<ProductEntity> = {
+      ...createProductDto,
+      bar: user.bar,
+    }
+
+    return this.productRepository.createProduct(productData)
+  }
+
+  async findAllTheBarProducts(slug: string) {
+    const bar = await this.barRepository.findOne({ where: { slug } })
+    if (!bar) {
+      throw new NotFoundException({ message: 'Bar não encontrado', field: 'slug', detail: `Bar com slug ${slug} não encontrado` })
+    }
+    return this.productRepository.findAllByBarSlug(slug);
+  }
+
+  findOne(id: string) {
+    return this.productRepository.findById(id);
+  }
+
+  update(id: string, updateProductDto: UpdateProductDto) {
+    return this.productRepository.updateProduct(id, updateProductDto);
+  }
+
+  remove(id: string) {
+    return this.productRepository.deleteProduct(id);
+  }
+}

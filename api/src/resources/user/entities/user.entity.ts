@@ -47,6 +47,13 @@ export class UserEntity {
     })
     lastLogin?: Date;
 
+    @Column({
+        type: 'boolean',
+        default: true,
+        name: 'is_active'
+    })
+    isActive: boolean;
+
     @ManyToOne(() => BarEntity, bar => bar.users, {
         nullable: true,
     })

@@ -1,3 +1,4 @@
+import { ProductEntity } from "../../product/entities/product.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
@@ -40,8 +41,18 @@ export class BarEntity {
     })
     accessPlan: AccessPlan;
 
+    @Column({
+        type: 'boolean',
+        default: true,
+        name: 'is_active'
+    })
+    isActive: boolean;
+
     @OneToMany(() => UserEntity, user => user.bar)
     users: UserEntity[];
+
+    @OneToMany(() => ProductEntity, product => product.bar)
+    products: ProductEntity[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
