@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TabEntity, TabStatus } from "../entities/tab.entity";
 import { Repository } from "typeorm";
+import { UserEntity } from "../../user/entities/user.entity";
 
 @Injectable()
 export class TabRepository {
@@ -15,12 +16,14 @@ export class TabRepository {
         return this.repository.save(entity)
     }
 
-    async closeTab(tabId: string): Promise<TabEntity> {
+    async closeTab(tabId: string, waiterClosed: UserEntity): Promise<TabEntity> {
         const tab = await this.repository.findOne({ where: { id: tabId } });
         if (!tab) {
             throw new NotFoundException({ message: "Comanda não encontrada", details: "Nenhuma comanda encontrada com o ID fornecido." });
         }
         tab.status = TabStatus.CLOSED
+        tab.closedAt = new Date();
+        tab.waiterClosed = waiterClosed;
         return this.repository.save(tab);
     }
 
@@ -52,10 +55,10 @@ export class TabRepository {
             t.createdAt = r.createdAt;
             t.updatedAt = r.updatedAt;
             t.closedAt = r.closedAt;
-            t.waiterClosed= r.waiterClosed;
+            t.waiterClosed = r.waiterClosed;
             t.waiterOpen = r.waiterOpen;
             return t;
-        } )
+        })
 
     }
 

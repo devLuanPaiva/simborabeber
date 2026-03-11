@@ -9,6 +9,7 @@ import { Roles } from '../../decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
 
 @Controller('tab')
+@ApiTags('tabs')
 export class TabController {
   constructor(private readonly tabService: TabService) { }
 
@@ -21,8 +22,9 @@ export class TabController {
   @ApiResponse({ status: 201, description: "Comanda criada com sucesso" })
   @ApiResponse({ status: 400, description: "Requisição inválida" })
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createTabDto: CreateTabDto) {
-    return this.tabService.create(createTabDto);
+  create(@Req() req, @Body() createTabDto: CreateTabDto) {
+    const userId = req.user?.sub
+    return this.tabService.create(createTabDto, userId);
   }
 
   @Post('close/:id')
@@ -33,8 +35,9 @@ export class TabController {
   @ApiResponse({ status: 200, description: "Comanda fechada com sucesso" })
   @ApiResponse({ status: 404, description: "Comanda não encontrada" })
   @HttpCode(HttpStatus.OK)
-  closeTab(@Param('id') id: string) {
-    return this.tabService.closeTab(id);
+  closeTab(@Req() req, @Param('id') id: string) {
+    const userId = req.user?.sub
+    return this.tabService.closeTab(id, userId);
   }
   
   @Get('by-bar/:slug')

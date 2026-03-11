@@ -38,7 +38,7 @@ export class TabEntity {
     waiterOpen: UserEntity;
 
     @ManyToOne(() => UserEntity, user => user.closedTabs, {
-        nullable: false,
+        nullable: true,
     })
     @JoinColumn({ name: 'waiter_closed_id' })
     waiterClosed: UserEntity;
@@ -49,6 +49,6 @@ export class TabEntity {
     @UpdateDateColumn({ name: 'updated_at' })
     updatedAt: Date;
 
-    @UpdateDateColumn({ name: 'closed_at' })
-    closedAt: Date;
+    @Column({ name: 'closed_at', type: 'timestamp', nullable: true })
+    closedAt?: Date;
 }
