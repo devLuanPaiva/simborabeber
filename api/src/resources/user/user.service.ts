@@ -44,7 +44,8 @@ export class UserService {
           throw new ForbiddenException({ message: 'O gerente só pode criar usuários do tipo garçom', detail: 'Permissão insuficiente para criar usuário com a função solicitada' })
         }
 
-        const manager: UserEntity | null = await this.userRepository.findById(actor.sub)
+        const manager: UserEntity | null = await this.userRepository.findUserByIdWithBar(actor.sub)
+
         if (!manager.bar) {
           throw new BadRequestException({ message: 'O gerente não possui bar associado', detail: 'O gerente precisa estar associado a um bar para criar usuários' })
         }
@@ -57,7 +58,7 @@ export class UserService {
 
       const user = await this.userRepository.createUser(userPayload)
 
-      return this.removePassword(user)
+      return this.removePasswordAndBar(user)
     } catch (error) {
       if (error instanceof HttpException) {
         throw error
@@ -71,7 +72,7 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<Partial<UserEntity>[]> {
+  async findAll(actor?: JwtPayload): Promise<Partial<UserEntity>[]> {
     const users = await this.userRepository.findAll()
 
     if (users.length === 0) {
@@ -81,7 +82,9 @@ export class UserService {
       })
     }
 
-    return users.map((user) => this.removePassword(user))
+    const filteredUsers = actor?.role === 'manager' ? users.filter(u => u.role === UserRole.WAITER) : users;
+
+    return filteredUsers.map((user) => this.removePasswordAndBar(user))
   }
 
   async findOne(id: string): Promise<Partial<UserEntity>> {
@@ -95,7 +98,7 @@ export class UserService {
       })
     }
 
-    return this.removePassword(user)
+    return this.removePasswordAndBar(user)
   }
 
   async update(
@@ -120,7 +123,7 @@ export class UserService {
 
     const updatedUser = await this.userRepository.updateUser(user)
 
-    return this.removePassword(updatedUser)
+    return this.removePasswordAndBar(updatedUser)
   }
 
   async remove(id: string): Promise<{ message: string }> {
@@ -150,8 +153,8 @@ export class UserService {
     }
   }
 
-  private removePassword(user: UserEntity): Partial<UserEntity> {
-    const { password, ...userWithoutPassword } = user
+  private removePasswordAndBar(user: UserEntity): Partial<UserEntity> {
+    const { password, bar, ...userWithoutPassword } = user
     return userWithoutPassword
   }
 }

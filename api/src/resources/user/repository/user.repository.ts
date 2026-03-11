@@ -25,6 +25,13 @@ export class UserRepository {
         })
     }
 
+    async findUserByIdWithBar(id: string): Promise<UserEntity | null> {
+        return this.repository.findOne({
+            where: { id },
+            relations: ['bar'],
+        })
+    }
+
     async findByEmail(email: string): Promise<UserEntity | null> {
         return this.repository.findOne({
             where: { email },
