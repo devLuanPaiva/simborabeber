@@ -30,36 +30,39 @@ export class TabRepository {
     async findThemAllByBarSlug(bar_slug: string): Promise<Partial<TabEntity[]>> {
         const rows = await this.repository.createQueryBuilder('tab')
             .innerJoin('tab.bar', 'bar', 'bar.slug = :slug', { slug: bar_slug })
+            .leftJoin('tab.waiterOpen', 'waiterOpen')
+            .leftJoin('tab.waiterClosed', 'waiterClosed')
             .select([
                 'tab.id as id',
                 'tab.status as status',
-                'tab.tableNumber as "tableNumber"',
-                'tab.customerName as "customerName"',
-                'tab.totalValue as "totalValue"',
-                'tab.createdAt as "createdAt"',
-                'tab.updatedAt as "updatedAt"',
-                'tab.closedAt as "closedAt"',
-                'waiterOpen as "waiterOpen"',
-                'waiterClosed as "waiterClosed"',
+                'tab.table_number as "tableNumber"',
+                'tab.customer_name as "customerName"',
+                'tab.total_value as "totalValue"',
+                'tab.created_at as "createdAt"',
+                'tab.updated_at as "updatedAt"',
+                'tab.closed_at as "closedAt"',
+                'waiterOpen.id as "waiterOpenId"',
+                'waiterOpen.name as "waiterOpenName"',
+                'waiterClosed.id as "waiterClosedId"',
+                'waiterClosed.name as "waiterClosedName"',
             ])
             .orderBy('tab.created_at', 'DESC')
             .getRawMany();
 
         return rows.map((r) => {
-            const t = new TabEntity()
+            const t = new TabEntity();
             t.id = r.id;
             t.status = r.status;
             t.tableNumber = r.tableNumber;
             t.customerName = r.customerName;
             t.totalValue = typeof r.totalValue === 'string' ? Number.parseFloat(r.totalValue) : r.totalValue;
-            t.createdAt = r.createdAt;
-            t.updatedAt = r.updatedAt;
-            t.closedAt = r.closedAt;
-            t.waiterClosed = r.waiterClosed;
-            t.waiterOpen = r.waiterOpen;
+            t.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
+            t.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
+            t.closedAt = r.closedAt ? new Date(r.closedAt) : undefined;
+            t.waiterOpen = r.waiterOpenId ? ({ id: r.waiterOpenId, name: r.waiterOpenName } as UserEntity) : undefined;
+            t.waiterClosed = r.waiterClosedId ? ({ id: r.waiterClosedId, name: r.waiterClosedName } as UserEntity) : undefined;
             return t;
-        })
-
+        });
     }
 
     async findById(id: string): Promise<TabEntity | null> {

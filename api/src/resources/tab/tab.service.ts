@@ -14,7 +14,7 @@ export class TabService {
 
   ) { }
   async create(createTabDto: CreateTabDto, userId: string) {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.userRepository.findUserByIdWithBar(userId);
     if (!user) {
       throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${userId} não foi encontrado` })
     }
@@ -29,7 +29,8 @@ export class TabService {
       bar: user.bar,
     }
 
-    return this.tabRepository.createTab(tabData);
+    const created = await this.tabRepository.createTab(tabData);
+    return this.shapeTab(created);
   }
 
   async closeTab(tabId: string, userId: string) {
@@ -38,7 +39,8 @@ export class TabService {
       throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${userId} não foi encontrado` })
     }
 
-    return this.tabRepository.closeTab(tabId, user);
+    const closed = await this.tabRepository.closeTab(tabId, user);
+    return this.shapeTab(closed);
   }
 
   findThemAllByBarSlug(slug: string) {
@@ -49,11 +51,32 @@ export class TabService {
     return this.tabRepository.findById(id);
   }
 
-  update(id: string, updateTabDto: UpdateTabDto) {
-    return this.tabRepository.updateTab({ ...updateTabDto, id });
+  async update(id: string, updateTabDto: UpdateTabDto) {
+    const updated = await this.tabRepository.updateTab({ ...updateTabDto, id });
+    return this.shapeTab(updated);
   }
 
   remove(id: string) {
     return this.tabRepository.deleteTab(id);
+  }
+
+  private shapeTab(tab: TabEntity | Partial<TabEntity> | null) {
+    if (!tab) return null;
+
+    const waiterOpen = (tab).waiterOpen ? { id: (tab).waiterOpen.id, name: (tab).waiterOpen.name } : undefined;
+    const waiterClosed = (tab).waiterClosed ? { id: (tab).waiterClosed.id, name: (tab).waiterClosed.name } : undefined;
+
+    return {
+      id: (tab).id,
+      status: (tab).status,
+      tableNumber: (tab).tableNumber,
+      customerName: (tab).customerName,
+      totalValue: (tab).totalValue,
+      createdAt: (tab).createdAt,
+      updatedAt: (tab).updatedAt,
+      closedAt: (tab).closedAt,
+      waiterOpen,
+      waiterClosed,
+    } as Partial<TabEntity>;
   }
 }
