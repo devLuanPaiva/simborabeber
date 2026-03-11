@@ -73,7 +73,7 @@ export class UserService {
   }
 
   async findAll(actor?: JwtPayload): Promise<Partial<UserEntity>[]> {
-    const users = await this.userRepository.findAll()
+    const users = await this.userRepository.findAll({ role: actor?.role as UserRole, id: actor?.sub })
 
     if (users.length === 0) {
       throw new NotFoundException({
@@ -82,9 +82,7 @@ export class UserService {
       })
     }
 
-    const filteredUsers = actor?.role === 'manager' ? users.filter(u => u.role === UserRole.WAITER) : users;
-
-    return filteredUsers.map((user) => this.removePasswordAndBar(user))
+    return users.map((user) => this.removePasswordAndBar(user))
   }
 
   async findOne(id: string): Promise<Partial<UserEntity>> {
