@@ -1,26 +1,36 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTabDto } from './dto/create-tab.dto';
 import { UpdateTabDto } from './dto/update-tab.dto';
+import { TabRepository } from './repository/tab.repository';
 
 @Injectable()
 export class TabService {
+
+  constructor(
+    private readonly tabRepository: TabRepository,
+
+  ) { }
   create(createTabDto: CreateTabDto) {
-    return 'This action adds a new tab';
+    return this.tabRepository.createTab(createTabDto);
   }
 
-  findAll() {
-    return `This action returns all tab`;
+  closeTab(tabId: string) {
+    return this.tabRepository.closeTab(tabId);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tab`;
+  findThemAllByBarSlug(slug: string) {
+    return this.tabRepository.findThemAllByBarSlug(slug);
   }
 
-  update(id: number, updateTabDto: UpdateTabDto) {
-    return `This action updates a #${id} tab`;
+  findOne(id: string) {
+    return this.tabRepository.findById(id);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tab`;
+  update(id: string, updateTabDto: UpdateTabDto) {
+    return this.tabRepository.updateTab({ ...updateTabDto, id });
+  }
+
+  remove(id: string) {
+    return this.tabRepository.deleteTab(id);
   }
 }
