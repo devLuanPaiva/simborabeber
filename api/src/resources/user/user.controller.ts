@@ -34,8 +34,8 @@ export class UserController {
   @ApiResponse({ status: 200, description: "Usuários listados com sucesso" })
   @ApiResponse({ status: 400, description: "Requisição inválida" })
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.userService.findAll();
+  findAll(@Req() req) {
+    return this.userService.findAll(req.user);
   }
 
   @Get(':id')

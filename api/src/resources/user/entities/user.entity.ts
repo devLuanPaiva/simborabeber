@@ -1,3 +1,4 @@
+import { TabEntity } from '../../tab/entities/tab.entity';
 import { BarEntity } from '../../bar/entities/bar.entity';
 import {
     Entity,
@@ -7,6 +8,7 @@ import {
     UpdateDateColumn,
     ManyToOne,
     JoinColumn,
+    OneToMany,
 
 } from 'typeorm';
 
@@ -60,6 +62,12 @@ export class UserEntity {
 
     @JoinColumn({ name: 'bar_id' })
     bar: BarEntity;
+
+    @OneToMany(() => TabEntity, tab => tab.waiterOpen)
+    openTabs: TabEntity[];
+
+    @OneToMany(() => TabEntity, tab => tab.waiterClosed)
+    closedTabs: TabEntity[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
