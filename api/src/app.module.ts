@@ -8,11 +8,12 @@ import { ConfigModule } from '@nestjs/config';
 import { BarModule } from './resources/bar/bar.module';
 import { ProductModule } from './resources/product/product.module';
 import { TabModule } from './resources/tab/tab.module';
+import { TabItemModule } from './resources/tab-item/tab-item.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule],
+  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule],
   controllers: [AppController],
   providers: [AppService],
 })
