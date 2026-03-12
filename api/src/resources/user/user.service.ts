@@ -3,20 +3,22 @@ import {
   BadRequestException,
   ConflictException,
   NotFoundException,
-  HttpException,
+  HttpException, ForbiddenException
 } from '@nestjs/common'
 
 import { CreateUserDto } from './dto/create-user.dto'
 import { UpdateUserDto } from './dto/update-user.dto'
-import { UserEntity } from './entities/user.entity'
+import { UserEntity, UserRole } from './entities/user.entity'
 import { hashSync as bcryptHashSync } from 'bcrypt'
 import { UserRepository } from './repository/user.repository'
+import { JwtPayload } from '../auth/auth.service'
+import { BarEntity } from '../bar/entities/bar.entity'
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepository: UserRepository) { }
 
-  async create(createUserDto: CreateUserDto): Promise<Partial<UserEntity>> {
+  async create(createUserDto: CreateUserDto, actor?: JwtPayload): Promise<Partial<UserEntity>> {
     try {
       const existingUser = await this.userRepository.findByEmail(
         createUserDto.email,
@@ -32,12 +34,31 @@ export class UserService {
 
       const hashedPassword = bcryptHashSync(createUserDto.password, 10)
 
-      const user = await this.userRepository.createUser({
+      const userPayload: Partial<UserEntity> = {
         ...createUserDto,
         password: hashedPassword,
-      })
+      }
 
-      return this.removePassword(user)
+      if (actor?.role === UserRole.MANAGER) {
+        if (createUserDto.role !== UserRole.WAITER) {
+          throw new ForbiddenException({ message: 'O gerente só pode criar usuários do tipo garçom', detail: 'Permissão insuficiente para criar usuário com a função solicitada' })
+        }
+
+        const manager: UserEntity | null = await this.userRepository.findUserByIdWithBar(actor.sub)
+
+        if (!manager.bar) {
+          throw new BadRequestException({ message: 'O gerente não possui bar associado', detail: 'O gerente precisa estar associado a um bar para criar usuários' })
+        }
+
+        userPayload.bar = manager.bar
+      } else if (createUserDto.barId) {
+        userPayload.bar = { id: createUserDto.barId } as BarEntity
+
+      }
+
+      const user = await this.userRepository.createUser(userPayload)
+
+      return this.removePasswordAndBar(user)
     } catch (error) {
       if (error instanceof HttpException) {
         throw error
@@ -51,8 +72,8 @@ export class UserService {
     }
   }
 
-  async findAll(): Promise<Partial<UserEntity>[]> {
-    const users = await this.userRepository.findAll()
+  async findAll(actor?: JwtPayload): Promise<Partial<UserEntity>[]> {
+    const users = await this.userRepository.findAll({ role: actor?.role as UserRole, id: actor?.sub })
 
     if (users.length === 0) {
       throw new NotFoundException({
@@ -61,7 +82,7 @@ export class UserService {
       })
     }
 
-    return users.map((user) => this.removePassword(user))
+    return users.map((user) => this.removePasswordAndBar(user))
   }
 
   async findOne(id: string): Promise<Partial<UserEntity>> {
@@ -75,7 +96,7 @@ export class UserService {
       })
     }
 
-    return this.removePassword(user)
+    return this.removePasswordAndBar(user)
   }
 
   async update(
@@ -100,7 +121,7 @@ export class UserService {
 
     const updatedUser = await this.userRepository.updateUser(user)
 
-    return this.removePassword(updatedUser)
+    return this.removePasswordAndBar(updatedUser)
   }
 
   async remove(id: string): Promise<{ message: string }> {
@@ -130,8 +151,8 @@ export class UserService {
     }
   }
 
-  private removePassword(user: UserEntity): Partial<UserEntity> {
-    const { password, ...userWithoutPassword } = user
+  private removePasswordAndBar(user: UserEntity): Partial<UserEntity> {
+    const { password, bar, ...userWithoutPassword } = user
     return userWithoutPassword
   }
 }

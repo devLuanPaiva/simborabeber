@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
-import { UserEntity } from '../entities/user.entity'
+import { UserEntity, UserRole } from '../entities/user.entity'
 
 @Injectable()
 export class UserRepository {
@@ -15,13 +15,36 @@ export class UserRepository {
         return this.repository.save(entity)
     }
 
-    async findAll(): Promise<UserEntity[]> {
-        return this.repository.find()
+    async findAll(requester?: { role?: UserRole; id?: string }): Promise<UserEntity[]> {
+        if (requester?.role === UserRole.MANAGER) {
+            if (!requester.id) return []
+
+            const manager = await this.repository.findOne({ where: { id: requester.id }, relations: ['bar'] })
+
+            if (!manager.bar) return []
+
+            return this.repository.find({
+                where: {
+                    role: UserRole.WAITER,
+                    bar: { id: manager.bar.id },
+                },
+                relations: ['bar'],
+            })
+        }
+
+        return this.repository.find({ relations: ['bar'] })
     }
 
     async findById(id: string): Promise<UserEntity | null> {
         return this.repository.findOne({
             where: { id },
+        })
+    }
+
+    async findUserByIdWithBar(id: string): Promise<UserEntity | null> {
+        return this.repository.findOne({
+            where: { id },
+            relations: ['bar'],
         })
     }
 
@@ -31,7 +54,7 @@ export class UserRepository {
         })
     }
 
-    async updateUser(user: UserEntity): Promise<UserEntity> {
+    async updateUser(user: Partial<UserEntity>): Promise<UserEntity> {
         return this.repository.save(user)
     }
 
