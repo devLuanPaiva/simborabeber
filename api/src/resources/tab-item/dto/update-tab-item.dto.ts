@@ -1,6 +1,8 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateTabItemDto } from './create-tab-item.dto';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty } from "class-validator";
 
-export class UpdateTabItemDto extends PartialType(CreateTabItemDto) {
-  id: number;
+export class UpdateTabItemDto {
+  @IsNotEmpty({ message: 'Quantidade do item é obrigatória' })
+  @ApiProperty({ example: 10, description: 'Quantidade do item' })
+  quantity: number
 }
