@@ -1,6 +1,7 @@
+import { TabItemEntity } from "../../tab-item/entities/tab-item.entity";
 import { BarEntity } from "../../bar/entities/bar.entity";
 import { UserEntity } from "../../user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 export enum TabStatus {
     OPEN = 'open',
@@ -34,6 +35,7 @@ export class TabEntity {
     @ManyToOne(() => UserEntity, user => user.openTabs, {
         nullable: false,
     })
+
     @JoinColumn({ name: 'waiter_open_id' })
     waiterOpen: UserEntity;
 
@@ -42,6 +44,9 @@ export class TabEntity {
     })
     @JoinColumn({ name: 'waiter_closed_id' })
     waiterClosed: UserEntity;
+
+    @OneToMany(() => TabItemEntity, tabItem => tabItem.tab)
+    items: TabItemEntity[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt: Date;
