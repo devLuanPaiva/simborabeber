@@ -71,6 +71,12 @@ export class TabRepository {
         })
     }
 
+    async findByIdWithBar(id: string): Promise<TabEntity | null> {
+        return this.repository.findOne({
+            where: { id },
+            relations: ['bar'],
+        })
+    }
     async updateTab(tab: Partial<TabEntity>): Promise<TabEntity> {
         return this.repository.save(tab)
     }

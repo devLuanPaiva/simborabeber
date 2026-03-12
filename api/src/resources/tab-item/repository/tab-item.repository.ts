@@ -40,6 +40,10 @@ export class TabItemsRepository {
         return this.repository.find({ where: { tab: { id: tabId } }, relations: ['waiterAdded', 'tab'] });
     }
 
+    async findByIdWithTab(id: string): Promise<TabItemEntity | null> {
+        return this.repository.findOne({ where: { id }, relations: ['tab'] });
+    }
+
     async updateItemQuantity(id: string, quantity: number): Promise<TabItemEntity> {
         return this.repository.manager.transaction(async manager => {
             const itemRepo = manager.getRepository(TabItemEntity);
