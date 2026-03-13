@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@/data/contexts";
 import { useState } from "react";
 import { Menu } from "lucide-react";
 import { IUser } from "@/data/models";
@@ -12,16 +11,15 @@ export function AdminLayout({
   children: React.ReactNode;
 }>) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const { user, logout } = useAuth();
+  
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar
+      {/* <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        currentUser={user as IUser}
-        onLogout={logout}
-      />
+        
+      /> */}
 
       <div className="flex flex-col w-0 flex-1 overflow-hidden">
         <div className="relative z-10 flex-shrink-0">

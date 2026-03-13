@@ -1,4 +1,4 @@
-import { ApiResponse } from "../hooks";
+
 import { IEstablishment, IEstablishmentProduct } from "./IEstablishment";
 
 export enum ProductCategory {
@@ -50,13 +50,3 @@ export interface IProductStock {
     product?: IProduct;
 }
 
-
-
-export interface IProductContextProps {
-    createProductByEstablishment: (productData: Partial<IProduct>) => Promise<ApiResponse<IProduct>>;
-    getProductsByEstablishment: (establishmentId: string) => Promise<ApiResponse<IProduct[]>>;
-    getProductById: (productId: string) => Promise<ApiResponse<IProduct>>;
-    increaseQuantityProduct: (productId: string, establishmentId: string, quantity: number) => Promise<ApiResponse<IProductStock>>;
-    updateProductByEstablishment: (productId: string, establishmentId: string, productData: Partial<IProduct>) => Promise<ApiResponse<IProduct>>;
-    removeProductByEstablishment: (productId: string, establishmentId: string) => Promise<ApiResponse<null>>
-}
