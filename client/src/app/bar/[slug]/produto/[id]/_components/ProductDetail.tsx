@@ -15,9 +15,9 @@ export default function ProductDetail({ product }: Readonly<ProductProps>) {
     const router = useRouter();
 
     return (
-        <div className="max-w-3xl mx-auto pb-20">
+        <div className="max-w-3xl mx-auto pb-10">
 
-            <div className="relative h-72 w-full bg-black">
+            <div className="relative h-96 w-full bg-zinc-100">
 
                 {product.image ? (
                     <Image

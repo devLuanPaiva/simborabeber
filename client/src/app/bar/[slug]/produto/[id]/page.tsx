@@ -1,11 +1,12 @@
 import { ApiResponse, IProduct } from "@/data/models";
 import ProductDetail from "./_components/ProductDetail";
 import { notFound } from "next/navigation";
+import { ProductsByCategory } from "./_components/ProductsByCategory";
 
 export default async function ProductPage(
-    props: Readonly<{ params: Promise<{ id: string }> }>
+    props: Readonly<{ params: Promise<{ slug: string; id: string }> }>
 ) {
-    const { id } = await props.params;
+    const { slug, id } = await props.params;
 
     const base_url = process.env.NEXT_PUBLIC_BASE_URL;
     const response = await fetch(`${base_url}/product/${id}`, {
@@ -24,8 +25,9 @@ export default async function ProductPage(
     }
 
     return (
-        <main className="bg-[#F2F2F2] min-h-screen">
+        <main className=" min-h-screen pb-24">
             <ProductDetail product={product} />
+            <ProductsByCategory slug={slug} category={product.category} />
         </main>
     );
 }

@@ -19,7 +19,7 @@ export default async function BarPage(
 
     const bar = data_bar.results
 
-    const response_products = await fetch(`${base_url}/product/by-bar/${slug}`, {
+    const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
         cache: "force-cache",
         next: {
             revalidate: 3600,
@@ -31,7 +31,7 @@ export default async function BarPage(
     const products = data_products.results;
 
     return (
-        <main className="bg-[#F2F2F2] min-h-screen">
+        <main className="min-h-screen">
             <Menu bar={bar} products={products} />
         </main>
     );
