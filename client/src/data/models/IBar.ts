@@ -1,0 +1,22 @@
+export enum AccessPlan {
+    BASIC = 'basic',
+    MEDIUM = 'medium',
+    PREMIUM = 'premium',
+}
+
+export const AccessPlanLabels: Record<AccessPlan, string> = {
+    [AccessPlan.BASIC]: 'Básico',
+    [AccessPlan.MEDIUM]: 'Médio',
+    [AccessPlan.PREMIUM]: 'Premium',
+};
+
+export interface IBar{
+    id: string;
+    name: string;
+    slug: string;
+    image?: string;
+    accessPlan: AccessPlan;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+}
