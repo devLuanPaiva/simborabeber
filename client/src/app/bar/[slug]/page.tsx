@@ -11,7 +11,7 @@ export default async function BarPage(
     const response_bar = await fetch(`${base_url}/bar/${slug}`, {
         cache: "force-cache",
         next: {
-            revalidate: 3600,
+            revalidate: 60,
         }
     });
 

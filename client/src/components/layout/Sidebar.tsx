@@ -122,7 +122,7 @@ export function Sidebar({
           aria-modal="true"
         >
           <div
-            className="fixed inset-0 bg-gray-600 bg-opacity-75"
+            className="fixed inset-0 bg-zinc-600 bg-opacity-75"
             onClick={() => setSidebarOpen(false)}
             aria-label="Fechar menu lateral clicando fora"
             tabIndex={0}

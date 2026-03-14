@@ -89,7 +89,7 @@ export default function Menu({ bar, products }: Readonly<MenuProps>) {
                                         transition={{ delay: index * 0.04 }}
                                         className="flex gap-4 bg-white rounded-xl shadow-sm hover:shadow-md transition p-3 border border-[#BFAE99]/20"
                                     >
-                                        <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-gray-100">
+                                        <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-zinc-100">
                                             {product.image ? (
                                                 <Image
                                                     src={product.image}
@@ -107,11 +107,11 @@ export default function Menu({ bar, products }: Readonly<MenuProps>) {
                                         <div className="flex-1 flex flex-col justify-between">
 
                                             <div>
-                                                <h3 className="font-semibold text-lg text-gray-800">
+                                                <h3 className="font-semibold text-lg text-zinc-800">
                                                     {product.name}
                                                 </h3>
 
-                                                <p className="text-sm text-gray-500 line-clamp-2">
+                                                <p className="text-sm text-zinc-500 line-clamp-2">
                                                     {product.description}
                                                 </p>
                                             </div>
