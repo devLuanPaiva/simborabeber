@@ -19,7 +19,7 @@ export default async function Home() {
   const bars = data.results.filter((bar) => bar.isActive);
 
   return (
-    <main className="min-h-screen bg-[#F2F2F2] p-8">
+    <main className="min-h-screen  p-8">
       <div className="max-w-6xl mx-auto">
 
         <header className="mb-10">

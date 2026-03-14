@@ -95,7 +95,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${bebasNueve.variable} ${roboto.variable} ${montSerrat.variable} antialiased`}
+        className={`${bebasNueve.variable} ${roboto.variable} ${montSerrat.variable} bg-[#F2F2F2]`}
         cz-shortcut-listen="false"
       >
         {children}
