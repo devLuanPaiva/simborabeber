@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateManyProductsDto, CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductRepository } from './repository/product.repository';
 import { UserRepository } from '../user/repository/user.repository';
@@ -34,6 +34,24 @@ export class ProductService {
     }
 
     return this.productRepository.createProduct(productData)
+  }
+
+  async createMany(createManyProductsDto: CreateManyProductsDto, userId: string): Promise<ProductEntity[]> {
+    const user = await this.userRepository.findUserByIdWithBar(userId)
+    if (!user) {
+      throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${userId} não foi encontrado` })
+    }
+
+    if (!user.bar) {
+      throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
+    }
+
+    const productsData: Partial<ProductEntity>[] = createManyProductsDto.products.map((product) => ({
+      ...product,
+      bar: user.bar,
+    }))
+
+    return this.productRepository.createProducts(productsData)
   }
 
   async findAllTheBarProducts(slug: string) {

@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { ProductService } from './product.service';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateManyProductsDto, CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guard/auth.guard';
@@ -25,6 +25,20 @@ export class ProductController {
   create(@Req() req, @Body() createProductDto: CreateProductDto) {
     const userId = req.user?.sub
     return this.productService.create(createProductDto, userId);
+  }
+
+  @Post('bulk')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.WAITER)
+  @ApiOperation({ summary: "Criar vários produtos em lote" })
+  @ApiBody({ type: CreateManyProductsDto })
+  @ApiResponse({ status: 201, description: "Produtos criados com sucesso" })
+  @ApiResponse({ status: 400, description: "Requisição inválida" })
+  @HttpCode(HttpStatus.CREATED)
+  createMany(@Req() req, @Body() createManyProductsDto: CreateManyProductsDto) {
+    const userId = req.user?.sub
+    return this.productService.createMany(createManyProductsDto, userId);
   }
 
   @Get('by-bar/:slug')

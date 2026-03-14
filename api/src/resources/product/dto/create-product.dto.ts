@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator"
+import { Type } from "class-transformer"
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator"
 import { ProductCategory } from "../entities/product.entity"
 
 export class CreateProductDto {
@@ -28,4 +29,13 @@ export class CreateProductDto {
     @ApiProperty({ example: 'https://...', description: 'URL da imagem do produto' })
     image: string
 
+}
+
+export class CreateManyProductsDto {
+    @IsArray({ message: 'Produtos deve ser um array' })
+    @ArrayMinSize(1, { message: 'Informe ao menos um produto' })
+    @ValidateNested({ each: true })
+    @Type(() => CreateProductDto)
+    @ApiProperty({ type: [CreateProductDto], description: 'Lista de produtos para cadastro em lote' })
+    products: CreateProductDto[]
 }

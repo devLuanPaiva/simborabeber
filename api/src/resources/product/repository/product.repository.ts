@@ -15,6 +15,11 @@ export class ProductRepository {
         return this.repository.save(entity)
     }
 
+    async createProducts(products: Partial<ProductEntity>[]): Promise<ProductEntity[]> {
+        const entities = this.repository.create(products)
+        return this.repository.save(entities)
+    }
+
     async findAllByBarSlug(slug: string): Promise<ProductEntity[]> {
         const rows = await this.repository.createQueryBuilder('product')
             .innerJoin('product.bar', 'bar', 'bar.slug = :slug', { slug })
