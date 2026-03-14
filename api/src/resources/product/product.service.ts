@@ -54,12 +54,12 @@ export class ProductService {
     return this.productRepository.createProducts(productsData)
   }
 
-  async findAllTheBarProducts(slug: string) {
+  async findAllTheBarProducts(slug: string, category?: string) {
     const bar = await this.barRepository.findOne({ where: { slug } })
     if (!bar) {
       throw new NotFoundException({ message: 'Bar não encontrado', field: 'slug', detail: `Bar com slug ${slug} não encontrado` })
     }
-    return this.productRepository.findAllByBarSlug(slug);
+    return this.productRepository.findAllByBarSlug(slug, category);
   }
 
   findOne(id: string) {

@@ -1,8 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Req, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateManyProductsDto, CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../decorators/roles.decorator';
@@ -41,13 +41,18 @@ export class ProductController {
     return this.productService.createMany(createManyProductsDto, userId);
   }
 
-  @Get('by-bar/:slug')
+  @Get('by-bar')
+  @ApiQuery({ name: 'slug', description: 'Slug do bar para filtrar os produtos', required: true })
+  @ApiQuery({ name: 'category', description: 'Categoria do produto para filtrar (opcional)', required: false })
   @ApiOperation({ summary: "Listar todos os produtos de um bar" })
   @ApiResponse({ status: 200, description: "Produtos listados com sucesso" })
   @ApiResponse({ status: 400, description: "Requisição inválida" })
   @HttpCode(HttpStatus.OK)
-  findAllTheBarProducts(@Param('slug') slug: string) {
-    return this.productService.findAllTheBarProducts(slug);
+  findAllTheBarProducts(
+    @Query('slug') slug: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productService.findAllTheBarProducts(slug, category);
   }
 
   @Get(':id')
