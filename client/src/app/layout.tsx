@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Bebas_Neue, Roboto, Montserrat } from "next/font/google";
 import "./globals.css";
+import { ScrollUp } from "@/components/layout/ScrollUp";
 
 const bebasNueve = Bebas_Neue({
   subsets: ["latin"],
@@ -99,6 +100,7 @@ export default function RootLayout({
         cz-shortcut-listen="false"
       >
         {children}
+        <ScrollUp/>
       </body>
     </html>
   );
