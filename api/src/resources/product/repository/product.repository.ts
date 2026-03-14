@@ -15,8 +15,13 @@ export class ProductRepository {
         return this.repository.save(entity)
     }
 
-    async findAllByBarSlug(slug: string): Promise<ProductEntity[]> {
-        const rows = await this.repository.createQueryBuilder('product')
+    async createProducts(products: Partial<ProductEntity>[]): Promise<ProductEntity[]> {
+        const entities = this.repository.create(products)
+        return this.repository.save(entities)
+    }
+
+    async findAllByBarSlug(slug: string, category?: string): Promise<ProductEntity[]> {
+        const queryBuilder = this.repository.createQueryBuilder('product')
             .innerJoin('product.bar', 'bar', 'bar.slug = :slug', { slug })
             .select([
                 'product.id as id',
@@ -29,6 +34,12 @@ export class ProductRepository {
                 'product.updated_at as "updatedAt"',
             ])
             .where('product.is_active = :isActive', { isActive: true })
+
+        if (category) {
+            queryBuilder.andWhere('product.category = :category', { category })
+        }
+
+        const rows = await queryBuilder
             .orderBy('product.created_at', 'DESC')
             .getRawMany();
 

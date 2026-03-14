@@ -51,7 +51,7 @@ export class ResponseInterceptor implements NestInterceptor {
 
                 return {
                     status: "success",
-                    data: data,
+                    results: data,
                 }
             }),
         )
