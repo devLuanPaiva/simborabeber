@@ -1,5 +1,6 @@
-import { ApiResponse, IBar, IProduct } from "@/data/models";
+import { IBar, IProduct } from "@/data/models";
 import Menu from "./_components/Menu";
+import { ApiResponse } from "@/data/types";
 
 export default async function BarPage(
     props: Readonly<{ params: Promise<{ slug: string }> }>
