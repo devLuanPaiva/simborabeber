@@ -1,10 +1,9 @@
 
-import { IEstablishment } from "./IEstablishment";
 
 export enum UserRole {
-    WAITER = "WAITER",
-    MANAGER = "MANAGER",
-    ADMIN = "ADMIN"
+    WAITER = "waiter",
+    MANAGER = "manager",
+    ADMIN = "admin"
 }
 export const UserRolesLabels: Record<UserRole, string> = {
     [UserRole.WAITER]: "Garçom",
@@ -18,8 +17,6 @@ export interface IUser {
     role: UserRole;
     createdAt: Date;
     isActive: boolean;
-    establishmentId?: string;
-    establishment?: IEstablishment | null;
 }
 
 export interface ITokenPayload extends Partial<IUser> {
