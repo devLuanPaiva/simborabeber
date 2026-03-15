@@ -1,8 +1,8 @@
 "use server";
 
 import { ApiResponse, AuthResponse } from "@/data/types";
-import { decodeToken } from "@/lib/decodeToken";
-import { redirectByRole } from "@/lib/redirectByRole";
+import { decodeToken } from "@/lib/auth/decodeToken";
+import { redirectByRole } from "@/lib/auth/redirectByRole";
 import { cookies } from "next/headers";
 
 export type LoginActionState = {
