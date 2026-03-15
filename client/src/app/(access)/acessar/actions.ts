@@ -61,14 +61,18 @@ export async function loginAction(_: LoginActionState, formData: FormData): Prom
 
         cookieStore.set("accessToken", accessToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
             path: "/",
+            maxAge: 60 * 15, 
         });
 
         cookieStore.set("refreshToken", refreshToken, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
             path: "/",
+            maxAge: 60 * 60 * 24 * 7,
         });
 
         const user = decodeToken(accessToken);
