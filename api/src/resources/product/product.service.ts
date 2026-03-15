@@ -19,7 +19,7 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto, userId: string): Promise<ProductEntity> {
-    const user = await this.userRepository.findById(userId)
+    const user = await this.userRepository.findUserByIdWithBar(userId)
     if (!user) {
       throw new NotFoundException({ message: 'Usuário não encontrado', field: 'id', detail: `Usuário com id ${userId} não foi encontrado` })
     }

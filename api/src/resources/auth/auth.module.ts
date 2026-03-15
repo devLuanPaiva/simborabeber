@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { AuthController } from './auth.controller';
@@ -7,6 +7,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthRepository } from './repository/auth.repository';
 import { AuthGuard } from './guard/auth.guard';
+import { UserModule } from '../user/user.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { AuthGuard } from './guard/auth.guard';
         signOptions: { expiresIn: '1h' },
       }),
     }),
+    forwardRef(() => UserModule),
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthRepository, AuthGuard],
