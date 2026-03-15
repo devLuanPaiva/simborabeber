@@ -9,6 +9,6 @@ export interface ApiResponse<T> {
     count: number;
     next: string | null;
     previous: string | null;
-    error: APIError | null;
+    errors: APIError | null;
     isLoading: boolean;
 }
