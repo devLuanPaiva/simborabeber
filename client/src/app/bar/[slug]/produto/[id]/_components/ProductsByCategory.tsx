@@ -1,8 +1,9 @@
-import { ApiResponse, IProduct, ProductCategory, ProductCategoryLabels } from "@/data/models";
+import { IProduct, ProductCategory, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import Link from "next/link";
 import { Beer } from "lucide-react";
 import { formatCurrency } from "@/data/functions";
+import { ApiResponse } from "@/data/types";
 
 interface ProductsByCategoryProps {
   slug: string;

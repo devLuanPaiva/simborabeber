@@ -1,5 +1,6 @@
 import { BarsList } from "@/components/bars/BarsList";
-import { ApiResponse, IBar } from "@/data/models";
+import {  IBar } from "@/data/models";
+import { ApiResponse } from "@/data/types";
 
 
 import { Beer } from "lucide-react";
