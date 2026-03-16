@@ -7,6 +7,7 @@ export enum ProductCategory {
     SNACKS = 'snacks',
     NON_ALCOHOLIC = 'non_alcoholic',
     OTHER = 'other',
+    SKEWER = 'skewer',
 }
 
 @Entity({ name: 'products', schema: 'public' })
