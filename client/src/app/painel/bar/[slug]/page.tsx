@@ -1,7 +1,7 @@
 import { Header } from "@/components/layout/Header";
 import { TabCard } from "./_components/TabCard";
-import { Button } from "@/components/ui/button";
 import { PanelBarActions } from "./actions";
+import { CreateTabDialog } from "./_components/CreateTabDialog";
 
 export default async function PanelBarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -18,9 +18,7 @@ export default async function PanelBarPage(
         <div className="flex items-start justify-between mb-6">
           <h1 className="text-2xl font-bold text-zinc-800">Comandas</h1>
 
-          <Button className="px-4 py-2 bg-[#F28B0C] text-white hover:bg-[#F2BE5C] rounded-md text-sm md:text-base font-medium transition">
-            Nova Comanda
-          </Button>
+          <CreateTabDialog />
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
