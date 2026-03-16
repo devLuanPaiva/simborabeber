@@ -37,7 +37,33 @@ export class TabItemsRepository {
     }
 
     async findItemsByTab(tabId: string): Promise<TabItemEntity[]> {
-        return this.repository.find({ where: { tab: { id: tabId } }, relations: ['waiterAdded', 'tab'] });
+        const rows = await this.repository.createQueryBuilder('item')
+            .innerJoin('item.tab', 'tab', 'tab.id = :tabId', { tabId })
+            .leftJoin('item.waiterAdded', 'waiterAdded')
+            .select([
+                'item.id as id',
+                'item.name as name',
+                'item.price as price',
+                'item.quantity as quantity',
+                'item.created_at as createdAt',
+                'item.updated_at as updatedAt',
+                'waiterAdded.id as "waiterAddedId"',
+                'waiterAdded.name as "waiterAddedName"',
+            ])
+            .getRawMany();
+
+        return rows.map((r) => {
+            const item = new TabItemEntity();
+            item.id = r.id;
+            item.name = r.name;
+            item.price = Number.parseFloat(r.price)
+            item.quantity = typeof r.quantity === 'string' ? Number.parseInt(r.quantity) : r.quantity;
+            item.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
+            item.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
+            item.waiterAdded = r.waiterAddedId ? ({ id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity) : undefined;
+            return item;
+        });
+
     }
 
     async findByIdWithTab(id: string): Promise<TabItemEntity | null> {

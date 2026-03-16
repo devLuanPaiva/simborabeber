@@ -17,7 +17,7 @@ export class TabItemService {
     return created;
   }
 
-  findItemsByTab(tabId: string) {
+  async findItemsByTab(tabId: string) {
     return this.tabItemRepository.findItemsByTab(tabId);
   }
 

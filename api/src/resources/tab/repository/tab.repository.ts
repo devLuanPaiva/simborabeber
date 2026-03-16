@@ -66,9 +66,16 @@ export class TabRepository {
     }
 
     async findById(id: string): Promise<TabEntity | null> {
-        return this.repository.findOne({
+        const response = await this.repository.findOne({
             where: { id },
         })
+
+        const tab = {
+            ...response,
+            totalValue: Number(response?.totalValue ?? 0)
+        }
+        return tab as TabEntity;
+
     }
 
     async findByIdWithBar(id: string): Promise<TabEntity | null> {
