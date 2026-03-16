@@ -1,15 +1,13 @@
+import { Suspense } from "react";
 import { Header } from "@/components/layout/Header";
-import { TabCard } from "./_components/TabCard";
-import { PanelBarActions } from "./actions";
+import { TabsList } from "./_components/TabsList";
 import { CreateTabDialog } from "./_components/CreateTabDialog";
+import { TabsListLoading } from "./_components/TabsListLoading";
 
 export default async function PanelBarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
 ) {
   const { slug } = await props.params;
-
-  const tabs = await PanelBarActions(slug);
-
   return (
     <main className="min-h-screen bg-[#F2F2F2]">
       <Header slug_bar={slug} />
@@ -20,12 +18,9 @@ export default async function PanelBarPage(
 
           <CreateTabDialog />
         </div>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {tabs.map((tab) => (
-            <TabCard key={tab.id} tab={tab} slug={slug} />
-          ))}
-        </div>
+        <Suspense fallback={<TabsListLoading />}>
+          <TabsList slug={slug} />
+        </Suspense>
       </div>
     </main>
   );
