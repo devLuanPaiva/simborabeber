@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogHeader,
   DialogTitle,
@@ -63,12 +64,14 @@ export function CreateTabDialog() {
             />
           </div>
 
-          <Button
-            type="submit"
-            className="w-full bg-[#F2A20C] hover:bg-[#F28B0C] text-white font-semibold py-2.5 rounded-lg transition-colors"
-          >
-            Criar Comanda
-          </Button>
+          <DialogClose asChild>
+            <Button
+              type="submit"
+              className="w-full bg-[#F2A20C] hover:bg-[#F28B0C] text-white font-semibold py-2.5 rounded-lg transition-colors cursor-pointer"
+            >
+              Criar Comanda
+            </Button>
+          </DialogClose>
         </form>
       </DialogContent>
     </Dialog>
