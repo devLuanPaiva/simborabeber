@@ -36,6 +36,31 @@ export class TabItemsRepository {
         });
     }
 
+    async createItemsByTab(tabId: string, itemsData: Partial<TabItemEntity>[], userId: string): Promise<TabItemEntity[]> {
+        return this.repository.manager.transaction(async manager => {
+            const tabRepo = manager.getRepository(TabEntity);
+            const tab = await tabRepo.findOne({ where: { id: tabId } });
+            if (!tab) {
+                throw new NotFoundException({ message: 'Comanda não encontrada', field: 'tabId', detail: `Comanda com id ${tabId} não foi encontrada` });
+            }
+
+            const user = new UserEntity();
+            user.id = userId;
+
+            const itemRepo = manager.getRepository(TabItemEntity);
+
+            const itemsToCreate = itemsData.map(d => ({ ...d, tab, waiterAdded: user }));
+            const created = itemRepo.create(itemsToCreate as any[]);
+            const saved = await itemRepo.save(created);
+
+            const addedValue = saved.reduce((acc, it) => acc + (Number(it.price) * Number(it.quantity)), 0);
+            tab.totalValue = Number(tab.totalValue || 0) + addedValue;
+            await tabRepo.save(tab);
+
+            return saved;
+        });
+    }
+
     async findItemsByTab(tabId: string): Promise<TabItemEntity[]> {
         const rows = await this.repository.createQueryBuilder('item')
             .innerJoin('item.tab', 'tab', 'tab.id = :tabId', { tabId })

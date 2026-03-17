@@ -17,6 +17,13 @@ export class TabItemService {
     return created;
   }
 
+  async createItemsByTab(tabId: string, createManyDto: { items: CreateTabItemDto[] }, userId: string) {
+    const itemsData = createManyDto.items.map(i => ({ ...i }));
+    const created = await this.tabItemRepository.createItemsByTab(tabId, itemsData, userId);
+    await this.tabItemGateway.notifyItemsAdded(tabId, created);
+    return created;
+  }
+
   async findItemsByTab(tabId: string) {
     return this.tabItemRepository.findItemsByTab(tabId);
   }
