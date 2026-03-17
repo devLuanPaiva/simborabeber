@@ -1,3 +1,4 @@
+"use server"
 import { IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 
