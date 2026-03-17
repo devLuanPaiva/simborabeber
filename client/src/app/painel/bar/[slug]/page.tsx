@@ -20,7 +20,7 @@ export default async function PanelBarPage(
   const tabs = data_tabs.results ?? []
 
   return (
-    <main className="min-h-screen bg-[#F2F2F2]">
+    <main className="min-h-screen">
 
       <Header slug_bar={slug} />
 
