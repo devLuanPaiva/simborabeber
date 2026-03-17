@@ -45,7 +45,7 @@ export class UserEntity {
 
     @Column({
         name: 'last_login',
-        type: 'timestamp',
+        type: 'timestamptz',
         nullable: true
     })
     lastLogin?: Date;
@@ -73,10 +73,10 @@ export class UserEntity {
     @OneToMany(() => TabItemEntity, tabItem => tabItem.waiterAdded)
     addedTabItems: TabItemEntity[];
 
-    @CreateDateColumn({ name: 'created_at' })
+    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
     createdAt: Date;
 
-    @UpdateDateColumn({ name: 'updated_at' })
+    @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
     updatedAt: Date;
 }
 
