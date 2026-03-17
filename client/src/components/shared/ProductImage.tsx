@@ -17,7 +17,6 @@ export function ProductImage({ src, alt }: Readonly<ProductImageProps>) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-zinc-400 text-xs gap-1">
         <ImageOff size={32} />
-        <span className="text-center">Imagem indisponível</span>
       </div>
     );
   }

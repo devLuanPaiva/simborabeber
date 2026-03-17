@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/data/functions";
-import { ProductImage } from "./ProductImage";
+import { ProductImage } from "@/components/shared/ProductImage";
 
 interface MenuProps {
   bar: IBar;
