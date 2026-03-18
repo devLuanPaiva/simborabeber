@@ -5,6 +5,7 @@ import { addTabItem, addTabItems } from "../actions";
 import { IProduct } from "@/data/models";
 import { Plus } from "lucide-react";
 import { formatCurrency } from "@/data/functions";
+import { ProductImage } from "@/components/shared/ProductImage";
 
 interface AddProductsProps {
   products: IProduct[];
@@ -19,11 +20,9 @@ export function AddProducts({
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Record<string, number>>({});
 
-  const filtered = products
-    .filter((p: IProduct) =>
-      p.name.toLowerCase().includes(search.toLowerCase()),
-    )
-    .slice(0, 6);
+  const filtered = products.filter((p: IProduct) =>
+    p.name.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleAdd = (product: IProduct) => {
     setSelected((prev) => ({
@@ -66,14 +65,22 @@ export function AddProducts({
         className="w-full p-2 border rounded-md"
       />
 
-      <div className="space-y-2">
+      <div className="space-y-2 max-h-[550px] overflow-y-auto divide-y-4 divide-slate-200">
         {filtered.map((product: IProduct) => (
-          <div key={product.id} className="flex justify-between items-center">
-            <div>
-              <p className="text-sm font-medium">{product.name}</p>
-              <p className="text-xs text-zinc-500">
-                {formatCurrency(product.price)}
-              </p>
+          <div
+            key={product.id}
+            className="flex justify-between items-center py-2"
+          >
+            <div className="flex items-center gap-1.5">
+              <div className="relative w-16 h-16 rounded overflow-hidden bg-zinc-100">
+                <ProductImage src={product.image} alt={product.name} />
+              </div>
+              <div>
+                <p className="text-sm font-medium">{product.name}</p>
+                <p className="text-xs text-zinc-500">
+                  {formatCurrency(product.price)}
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">
@@ -81,7 +88,7 @@ export function AddProducts({
 
               <button
                 onClick={() => handleAdd(product)}
-                className="p-2 bg-[#F2A20C] text-white rounded-md"
+                className="p-2 bg-[#F2A20C] hover:bg-[#F28B0C] text-white rounded-md cursor-pointer"
               >
                 <Plus size={16} />
               </button>
@@ -93,7 +100,7 @@ export function AddProducts({
       {Object.keys(selected).length > 0 && (
         <button
           onClick={handleSubmit}
-          className="w-full bg-[#F28B0C] text-white py-2 rounded-lg"
+          className="w-full bg-[#F2A20C] hover:bg-[#F28B0C] cursor-pointer text-white py-2 rounded-lg"
         >
           Adicionar itens
         </button>

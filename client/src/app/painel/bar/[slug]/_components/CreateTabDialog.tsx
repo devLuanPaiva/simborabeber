@@ -18,7 +18,7 @@ export function CreateTabDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="px-4 py-2 bg-[#F2A20C] text-white hover:bg-[#F28B0C] transition-colors">
+        <Button className="px-4 py-2 bg-[#F2A20C] text-white hover:bg-[#F28B0C] transition-colors cursor-pointer">
           Nova Comanda
         </Button>
       </DialogTrigger>
