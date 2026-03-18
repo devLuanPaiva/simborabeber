@@ -40,7 +40,8 @@ export class ProductRepository {
         }
 
         const rows = await queryBuilder
-            .orderBy('product.created_at', 'DESC')
+            .orderBy("LOWER(unaccent(product.name))", 'ASC')
+            .addOrderBy('product.created_at', 'DESC')
             .getRawMany();
 
         return rows.map((r) => {
