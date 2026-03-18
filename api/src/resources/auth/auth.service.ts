@@ -4,12 +4,14 @@ import { compareSync } from 'bcrypt';
 import { AuthRepository } from './repository/auth.repository';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
+import { UserRepository } from '../user/repository/user.repository';
 
 export interface JwtPayload {
     sub: string;
     email: string;
     name: string;
     role: string;
+    slug: string;
     type: 'access' | 'refresh';
 }
 
@@ -25,6 +27,7 @@ export class AuthService {
         private readonly authRepository: AuthRepository,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly userRepository: UserRepository,
     ) { }
 
     async login(loginDto: LoginDto): Promise<AuthResponse> {
@@ -40,9 +43,12 @@ export class AuthService {
             throw new UnauthorizedException({ message: 'Credenciais inválidas', detail: 'Credenciais inválidas' });
         }
 
+        const userWithBar = await this.userRepository.findUserByIdWithBar(user.id);
+        const slug = userWithBar?.bar?.slug || '';
+
         await this.authRepository.updateLastLogin(user.id);
 
-        const tokens = await this.generateTokens(user.id, user.email, user.name, user.role);
+        const tokens = await this.generateTokens(user.id, user.email, user.name, user.role, slug);
 
         return {
             ...tokens,
@@ -67,9 +73,11 @@ export class AuthService {
                 throw new UnauthorizedException({ message: 'Usuário não encontrado', detail: 'Usuário não encontrado' });
             }
 
+            const userWithBar = await this.userRepository.findUserByIdWithBar(user.id);
+            const slug = userWithBar?.bar?.slug || '';
             await this.authRepository.updateLastLogin(user.id);
 
-            const tokens = await this.generateTokens(user.id, user.email, user.name, user.role);
+            const tokens = await this.generateTokens(user.id, user.email, user.name, user.role, slug);
 
             return {
                 ...tokens,
@@ -84,12 +92,14 @@ export class AuthService {
         email: string,
         name: string,
         role: string,
+        slug: string
     ): Promise<{ accessToken: string; refreshToken: string }> {
         const payload: Partial<JwtPayload> = {
             sub: userId,
             email,
             name,
             role,
+            slug,
         };
 
         const [accessToken, refreshToken] = await Promise.all([

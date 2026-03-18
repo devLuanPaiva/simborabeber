@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, UseGuards, Req } from '@nestjs/common';
 import { TabItemService } from "./tab-item.service";
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateTabItemDto } from './dto/create-tab-item.dto';
+import { CreateManyTabItemsDto, CreateTabItemDto } from './dto/create-tab-item.dto';
 import { UpdateTabItemDto } from './dto/update-tab-item.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
@@ -27,6 +27,20 @@ export class TabItemController {
     createItemByTab(@Param('tabId') tabId: string, @Body() createTabItemDto: CreateTabItemDto, @Req() req,) {
         const userId = req.user?.sub
         return this.tabItemService.createItemByTab(tabId, createTabItemDto, userId);
+    }
+
+    @Post('bulk/by-tab/:tabId')
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles(UserRole.MANAGER, UserRole.WAITER)
+    @ApiOperation({ summary: "Adicionar vários items a uma comanda pelo ID da comanda" })
+    @ApiBody({ type: CreateManyTabItemsDto })
+    @ApiResponse({ status: 201, description: "Items adicionados com sucesso" })
+    @ApiResponse({ status: 400, description: "Requisição inválida" })
+    @HttpCode(HttpStatus.CREATED)
+    createItemsByTab(@Param('tabId') tabId: string, @Body() createManyTabItemsDto: CreateManyTabItemsDto, @Req() req,) {
+        const userId = req.user?.sub
+        return this.tabItemService.createItemsByTab(tabId, createManyTabItemsDto, userId);
     }
 
     @Get('by-tab/:tabId')

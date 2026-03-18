@@ -78,6 +78,13 @@ export class TabItemGateway implements OnGatewayConnection, OnGatewayDisconnect 
     this.server.to(this.roomName(barId)).emit('tab_item_added', { tabId, item });
   }
 
+  async notifyItemsAdded(tabId: string, items: TabItemEntity[]) {
+    const tab = await this.tabRepository.findByIdWithBar(tabId);
+    const barId = tab?.bar?.id;
+    if (!barId) return;
+    this.server.to(this.roomName(barId)).emit('tab_items_added', { tabId, items, count: items.length });
+  }
+
   async notifyItemUpdated(tabId: string, item: TabItemEntity) {
     const tab = await this.tabRepository.findByIdWithBar(tabId);
     const barId = tab?.bar?.id;
