@@ -58,6 +58,7 @@ export function AddProducts({
 
   return (
     <section className="bg-white p-4 rounded-xl border border-[#BFAE99]/20 space-y-3">
+      <h3 className="font-bold text-zinc-800">Adicionar Produtos</h3>
       <input
         placeholder="Buscar produto..."
         value={search}
