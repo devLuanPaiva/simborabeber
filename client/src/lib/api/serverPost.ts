@@ -1,27 +1,28 @@
 import { cookies } from "next/headers"
 import { refreshToken } from "../auth/refreshToken"
 
-export async function serverFetch(
+export async function serverPost(
     url: string,
+    body: unknown,
     options: RequestInit = {}
 ) {
-
     const cookieStore = await cookies()
 
     let accessToken = cookieStore.get("accessToken")?.value
 
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-    const doRequest = async (token?: string) => {
+    const base_url = process.env.NEXT_PUBLIC_BASE_URL
 
+    const doRequest = async (token?: string) => {
         return fetch(`${base_url}${url}`, {
+            method: "POST",
             ...options,
             headers: {
                 "Content-Type": "application/json",
                 Authorization: token ? `Bearer ${token}` : "",
                 ...(options.headers || {})
-            }
+            },
+            body: JSON.stringify(body)
         })
-
     }
 
     let response = await doRequest(accessToken)

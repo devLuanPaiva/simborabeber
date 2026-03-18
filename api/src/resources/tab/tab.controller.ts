@@ -41,6 +41,9 @@ export class TabController {
   }
   
   @Get('by-bar/:slug')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.WAITER)
   @ApiOperation({ summary: "Listar todas as comandas de um bar" })
   @ApiResponse({ status: 200, description: "Comandas listadas com sucesso" })
   @ApiResponse({ status: 400, description: "Requisição inválida" })
@@ -50,6 +53,9 @@ export class TabController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.WAITER)
   @ApiOperation({ summary: "Obter uma comanda pelo ID" })
   @ApiResponse({ status: 200, description: "Comanda obtida com sucesso" })
   @ApiResponse({ status: 404, description: "Comanda não encontrada" })
