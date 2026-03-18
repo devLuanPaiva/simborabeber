@@ -5,6 +5,8 @@ import { TabItems } from "./_components/TabItem";
 import { panelTabActions } from "./actions";
 import { formatCurrency, formatDate } from "@/data/functions";
 import { TabStatus } from "@/data/models";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 
 export default async function PanelTabPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
@@ -21,7 +23,15 @@ export default async function PanelTabPage(
   return (
     <main className=" bg-[#F2F2F2] min-h-screen">
       <Header slug_bar={slug} />
-      <div className="mx-auto w-11/12 max-w-7xl space-y-6 py-8">
+      <div className="mx-auto w-11/12 max-w-7xl flex justify-start py-6">
+        <Link
+          href={`/painel/bar/${slug}/`}
+          className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white cursor-pointer px-3 py-1 rounded-md text-sm font-medium"
+        >
+          <ChevronLeft /> Voltar para Comandas
+        </Link>
+      </div>
+      <div className="mx-auto w-11/12 max-w-7xl space-y-6 pb-8">
         <section className="bg-white rounded-2xl p-5 shadow-sm border border-[#BFAE99]/20 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
