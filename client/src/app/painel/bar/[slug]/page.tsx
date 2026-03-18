@@ -9,7 +9,8 @@ export default async function PanelBarPage(
 ) {
   const { slug } = await props.params;
   return (
-    <main className="min-h-screen bg-[#F2F2F2]">
+    <main className="min-h-screen">
+
       <Header slug_bar={slug} />
 
       <div className="w-11/12 mx-auto py-8 max-w-7xl">
