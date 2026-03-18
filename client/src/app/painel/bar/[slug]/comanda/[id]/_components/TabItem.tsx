@@ -18,69 +18,109 @@ export function TabItems({
   tabId,
   tabStatus,
 }: Readonly<TabItemsProps>) {
+  const isOpen = tabStatus === TabStatus.OPEN;
+
   return (
-    <section className="space-y-2">
-      {items.map((item: ITabItem) => (
-        <div
-          key={item.id}
-          className="bg-white p-3 rounded-lg flex justify-between items-center border border-[#BFAE99]/20"
-        >
-          <div>
-            <p className="font-semibold text-zinc-800">{item.name}</p>
-            <p className="text-sm text-zinc-500">
-              {formatCurrency(item.price)}
-            </p>
+    <section className="space-y-3">
+      <h3 className="font-bold text-zinc-800 text-lg">Itens da Comanda</h3>
+
+      <div className="max-h-[550px] overflow-y-auto grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4">
+        {items.map((item: ITabItem) => (
+          <div
+            key={item.id}
+            className="bg-white border border-[#BFAE99]/30 rounded-md p-3 shadow-sm hover:shadow-md transition-all"
+          >
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-1">
+                <span className="font-semibold text-zinc-800 leading-tight text-sm md:text-base">
+                  {item.name}
+                </span>
+                <span className=" text-[#BFAE99] font-medium text-xs md:text-sm">
+                  {formatCurrency(item.price)}
+                </span>
+              </div>
+
+              <button
+                disabled={!isOpen}
+                onClick={() =>
+                  deleteTabItem({
+                    slug,
+                    tabId,
+                    itemId: item.id,
+                  })
+                }
+                className={`p-2 rounded-lg transition ${
+                  isOpen
+                    ? "text-red-500 hover:bg-red-50 cursor-pointer"
+                    : "text-zinc-300 cursor-not-allowed"
+                }`}
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+
+            <div className="mt-3 flex flex-col sm:flex-row  items-center  sm:justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 bg-zinc-100 rounded-xl p-1 w-full sm:w-fit">
+                <button
+                  disabled={!isOpen}
+                  onClick={() =>
+                    updateItemQuantity({
+                      slug,
+                      tabId,
+                      itemId: item.id,
+                      quantity: item.quantity - 1,
+                    })
+                  }
+                  className={`
+                    flex items-center justify-center
+                    w-8 h-8 rounded-lg
+                    transition-all duration-200
+                    ${
+                      isOpen
+                        ? "bg-white text-red-500 hover:bg-red-500 hover:text-white shadow-sm cursor-pointer"
+                        : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                    }
+                  `}
+                >
+                  <Minus size={16} />
+                </button>
+
+                <span className="min-w-[24px] text-center font-semibold text-sm text-zinc-800">
+                  {item.quantity}
+                </span>
+
+                <button
+                  disabled={!isOpen}
+                  onClick={() =>
+                    updateItemQuantity({
+                      slug,
+                      tabId,
+                      itemId: item.id,
+                      quantity: item.quantity + 1,
+                    })
+                  }
+                  className={`
+                    flex items-center justify-center
+                    w-8 h-8 rounded-lg
+                    transition-all duration-200 
+                    ${
+                      isOpen
+                        ? "bg-white text-amber-500 hover:bg-amber-500 hover:text-white shadow-sm cursor-pointer"
+                        : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                    }
+                  `}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
+
+              <span className="text-sm font-semibold text-zinc-700">
+                {formatCurrency(item.price * item.quantity)}
+              </span>
+            </div>
           </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              disabled={tabStatus !== TabStatus.OPEN}
-              onClick={() =>
-                updateItemQuantity({
-                  slug,
-                  tabId,
-                  itemId: item.id,
-                  quantity: item.quantity - 1,
-                })
-              }
-              className={`p-2  bg-[#F2F2F2] rounded-md ${tabStatus === TabStatus.OPEN ? "hover:bg-[#E0E0E0] cursor-pointer" : "cursor-not-allowed"}`}
-            >
-              <Minus size={16} />
-            </button>
-
-            <span className="font-bold">{item.quantity}</span>
-
-            <button
-              disabled={tabStatus !== TabStatus.OPEN}
-              onClick={() =>
-                updateItemQuantity({
-                  slug,
-                  tabId,
-                  itemId: item.id,
-                  quantity: item.quantity + 1,
-                })
-              }
-              className={`p-2 ${tabStatus === TabStatus.OPEN ? "bg-[#F2A20C] hover:bg-[#F28B0C] text-white cursor-pointer" : "bg-[#F2F2F2] text-zinc-400 cursor-not-allowed"}`}
-            >
-              <Plus size={16} />
-            </button>
-
-            <button
-              disabled={tabStatus !== TabStatus.OPEN}
-              onClick={() =>
-                deleteTabItem({
-                  slug,
-                  tabId,
-                  itemId: item.id,
-                })
-              }
-              className={`p-2 ${tabStatus === TabStatus.OPEN ? "text-red-500 cursor-pointer" : "text-zinc-400 cursor-not-allowed"}`}
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </section>
   );
 }
