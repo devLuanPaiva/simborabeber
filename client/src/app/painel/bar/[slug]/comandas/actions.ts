@@ -5,7 +5,7 @@ import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-export async function PanelBarActions(slug: string): Promise<ITab[]> {
+export async function tabsPanelBarActions(slug: string): Promise<ITab[]> {
     const response_tabs = await serverFetch(`/tab/by-bar/${slug}`, {
         cache: "no-cache",
     });

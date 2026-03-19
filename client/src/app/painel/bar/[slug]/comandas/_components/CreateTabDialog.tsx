@@ -1,6 +1,5 @@
 "use client";
 
-import { createTab } from "../actions";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { createTab } from "../actions";
 
 export function CreateTabDialog() {
   const { slug } = useParams();
