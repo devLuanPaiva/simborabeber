@@ -1,4 +1,4 @@
-import Menu from "./_components/Menu";
+import Menu from "@/components/bars/Menu";
 import { BarActions } from "./actions";
 
 export default async function BarPage(
@@ -10,7 +10,7 @@ export default async function BarPage(
 
   return (
     <main className="min-h-screen">
-      <Menu bar={bar} products={products} />
+      <Menu bar={bar} products={products} mode="client" />
     </main>
   );
 }
