@@ -6,9 +6,9 @@ export async function serverDelete(
     options: RequestInit = {}
 ) {
     const cookieStore = await cookies()
-    let accessToken = cookieStore.get("accessToken")?.value
-
+    const accessToken = cookieStore.get("accessToken")?.value
     const base_url = process.env.NEXT_PUBLIC_BASE_URL
+
     const doRequest = async (token?: string) => {
         return fetch(`${base_url}${url}`, {
             method: "DELETE",
