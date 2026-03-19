@@ -8,7 +8,7 @@ export async function BarActions(slug: string) {
     const response_bar = await fetch(`${base_url}/bar/${slug}`, {
         cache: "force-cache",
         next: {
-            revalidate: 60,
+            revalidate: 3600,
         }
     });
 
