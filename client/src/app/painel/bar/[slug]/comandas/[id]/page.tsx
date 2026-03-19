@@ -25,7 +25,7 @@ export default async function PanelTabPage(
       <Header slug_bar={slug} />
       <div className="mx-auto w-11/12 max-w-7xl flex justify-start py-6">
         <Link
-          href={`/painel/bar/${slug}/`}
+          href={`/painel/bar/${slug}/comandas`}
           className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white cursor-pointer px-3 py-1 rounded-md text-sm font-medium"
         >
           <ChevronLeft /> Voltar para Comandas
