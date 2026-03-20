@@ -1,3 +1,4 @@
+"use server"
 import { IProduct, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverDelete } from "@/lib/api/serverDelete";
