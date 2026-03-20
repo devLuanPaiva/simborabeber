@@ -59,8 +59,8 @@ export default function Menu({ bar, products, mode, slug }: Readonly<MenuProps>)
           </div>
         </header>
       )}
-      <nav className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30">
-        <div className="flex overflow-x-auto gap-3 p-3 scrollbar-hide">
+      <nav className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30 md:flex md:justify-center">
+        <div className=" flex overflow-x-auto gap-3 p-3 scrollbar-hide">
           {categories.map((cat) => (
             <button
               key={cat}
