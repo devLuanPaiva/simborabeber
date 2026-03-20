@@ -47,6 +47,7 @@ export default async function PanelBarProductPage(
         </div>
 
         <form
+          id="update-product-form"
           action={updateProduct.bind(null, id)}
           className="bg-white rounded-xl border border-[#BFAE99]/20 p-5 shadow-sm space-y-4"
         >
@@ -102,38 +103,39 @@ export default async function PanelBarProductPage(
               className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
             />
           </div>
+        </form>
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <button
+            form="update-product-form"
+            type="submit"
+            className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] cursor-pointer text-white py-2.5 rounded-lg font-semibold transition"
+          >
+            Salvar alterações
+          </button>
+
+          <form action={toggleProductActive.bind(null, id, product.isActive)}>
             <button
               type="submit"
-              className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] cursor-pointer text-white py-2.5 rounded-lg font-semibold transition"
+              className={`flex-1 py-2.5 rounded-lg font-semibold cursor-pointer transition ${
+                product.isActive
+                  ? "bg-zinc-200 text-zinc-700"
+                  : "bg-green-500 text-white"
+              }`}
             >
-              Salvar alterações
+              {product.isActive ? "Desativar" : "Ativar"}
             </button>
+          </form>
 
-            <form action={toggleProductActive.bind(null, id, product.isActive)}>
-              <button
-                type="submit"
-                className={`flex-1 py-2.5 rounded-lg font-semibold cursor-pointer transition ${
-                  product.isActive
-                    ? "bg-zinc-200 text-zinc-700"
-                    : "bg-green-500 text-white"
-                }`}
-              >
-                {product.isActive ? "Desativar" : "Ativar"}
-              </button>
-            </form>
-
-            <form action={deleteProduct.bind(null, id)}>
-              <button
-                type="submit"
-                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-semibold transition cursor-pointer"
-              >
-                Excluir
-              </button>
-            </form>
-          </div>
-        </form>
+          <form action={deleteProduct.bind(null, id)}>
+            <button
+              type="submit"
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-semibold transition cursor-pointer"
+            >
+              Excluir
+            </button>
+          </form>
+        </div>
       </div>
     </main>
   );
