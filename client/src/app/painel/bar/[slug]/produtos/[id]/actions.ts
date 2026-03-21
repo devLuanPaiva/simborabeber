@@ -3,6 +3,7 @@ import { IProduct, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverDelete } from "@/lib/api/serverDelete";
 import { serverPatch } from "@/lib/api/serverPatch";
+import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
 export async function panelBarProductActions(id: string) {
@@ -48,15 +49,13 @@ export async function updateProduct(id: string, slug: string, formData: FormData
     if (typeof imageVal === "string" && imageVal.trim() !== "") payload.image = imageVal.trim();
 
     if (Object.keys(payload).length === 0) return;
-    console.log("Payload to update product:", JSON.stringify(payload, null, 2));
     await serverPatch(`/product/${id}`, payload);
     revalidatePath(`/painel/bar/${slug}/produtos/${id}`)
 }
 
-export async function toggleProductActive(id: string, isActive: boolean) {
-    await serverPatch(`/product/${id}`, {
-        isActive: !isActive
-    })
+export async function toggleProductStatus(id: string, slug: string) {
+    await serverPost(`/product/toggle-status/${id}`, {})
+    revalidatePath(`/painel/bar/${slug}/produtos/${id}`)
 }
 
 export async function deleteProduct(id: string) {
