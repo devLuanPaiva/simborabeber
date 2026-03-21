@@ -79,4 +79,13 @@ export class ProductRepository {
         }
         await this.repository.remove(product)
     }
+
+    async toggleProductStatus(id: string): Promise<ProductEntity> {
+        const product = await this.findById(id);
+        if (!product) {
+            throw new NotFoundException({ message: 'Produto não encontrado', field: 'id', detail: `Produto com id ${id} não encontrado` })
+        }
+        product.isActive = !product.isActive;
+        return this.repository.save(product)
+    }
 }
