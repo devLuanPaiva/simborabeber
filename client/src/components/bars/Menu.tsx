@@ -12,6 +12,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/data/functions";
 import { ProductImage } from "@/components/shared/ProductImage";
+import { Badge } from "../ui/badge";
 
 interface MenuProps {
   bar?: IBar;
@@ -20,7 +21,12 @@ interface MenuProps {
   mode: "client" | "panel";
 }
 
-export default function Menu({ bar, products, mode, slug }: Readonly<MenuProps>) {
+export default function Menu({
+  bar,
+  products,
+  mode,
+  slug,
+}: Readonly<MenuProps>) {
   const productsByCategory = useMemo(() => {
     const map: Record<string, IProduct[]> = {};
 
@@ -101,14 +107,26 @@ export default function Menu({ bar, products, mode, slug }: Readonly<MenuProps>)
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg text-zinc-800">
-                          {product.name}
-                        </h3>
-
-                        <p className="text-sm text-zinc-500 line-clamp-2">
-                          {product.description}
-                        </p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-lg text-zinc-800">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-zinc-500 line-clamp-2">
+                            {product.description}
+                          </p>
+                        </div>
+                        {mode === "panel" && (
+                          <Badge
+                            className={
+                              product.isActive
+                                ? "bg-green-500 text-white"
+                                : "bg-red-500 text-white"
+                            }
+                          >
+                            {product.isActive ? "Ativo" : "Inativo"}
+                          </Badge>
+                        )}
                       </div>
 
                       <span className="font-bold text-[#F2A20C] mt-2">
