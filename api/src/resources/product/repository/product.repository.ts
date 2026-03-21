@@ -29,11 +29,11 @@ export class ProductRepository {
                 'product.description as description',
                 'product.image as image',
                 'product.price as price',
+                'product.is_active as "isActive"',
                 'product.category as category',
                 'product.created_at as "createdAt"',
                 'product.updated_at as "updatedAt"',
             ])
-            .where('product.is_active = :isActive', { isActive: true })
 
         if (category) {
             queryBuilder.andWhere('product.category = :category', { category })
@@ -52,6 +52,7 @@ export class ProductRepository {
             p.image = r.image;
             p.price = typeof r.price === 'string' ? Number.parseFloat(r.price) : r.price;
             p.category = r.category;
+            p.isActive = r.isActive;
             p.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
             p.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
             return p;
