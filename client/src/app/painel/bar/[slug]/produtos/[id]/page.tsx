@@ -8,8 +8,7 @@ import {
 import { ProductCategory, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import { formatCurrency } from "@/data/functions";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { BackLink } from "@/components/shared/BackLink";
 
 export default async function PanelBarProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
@@ -23,15 +22,10 @@ export default async function PanelBarProductPage(
   return (
     <main className="min-h-screen bg-[#F2F2F2]">
       <Header slug_bar={slug} />
-      <div className="mx-auto w-11/12 max-w-7xl flex justify-start py-6">
-        <Link
-          href={`/painel/bar/${slug}/produtos`}
-          className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white cursor-pointer px-3 py-1 rounded-md text-sm font-medium"
-        >
-          <ChevronLeft /> Voltar para Produtos
-        </Link>
-      </div>
-
+      <BackLink
+        slug={`painel/bar/${slug}/produtos`}
+        label="Voltar para Produtos"
+      />
       <div className="w-11/12 mx-auto py-8 max-w-2xl space-y-6">
         <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-4 shadow-sm flex items-center gap-4">
           <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[#F2BE5C]/30">
