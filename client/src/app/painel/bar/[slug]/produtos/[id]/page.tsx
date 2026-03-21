@@ -48,7 +48,7 @@ export default async function PanelBarProductPage(
 
         <form
           id="update-product-form"
-          action={updateProduct.bind(null, id)}
+          action={updateProduct.bind(null, id, slug)}
           className="bg-white rounded-xl border border-[#BFAE99]/20 p-5 shadow-sm space-y-4"
         >
           <div className="space-y-1">
