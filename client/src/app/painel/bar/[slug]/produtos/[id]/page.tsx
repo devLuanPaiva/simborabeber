@@ -1,14 +1,11 @@
 import { Header } from "@/components/layout/Header";
-import {
-  panelBarProductActions,
-  updateProduct,
-  deleteProduct,
-  toggleProductActive,
-} from "./actions";
+import { panelBarProductActions, updateProduct } from "./actions";
 import { ProductCategory, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import { formatCurrency } from "@/data/functions";
 import { BackLink } from "@/components/shared/BackLink";
+import { ActionButtons } from "./_components/ActionButtons";
+import { Badge } from "@/components/ui/badge";
 
 export default async function PanelBarProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
@@ -27,27 +24,37 @@ export default async function PanelBarProductPage(
         label="Voltar para Produtos"
       />
       <div className="w-11/12 mx-auto py-8 max-w-2xl space-y-6">
-        <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-4 shadow-sm flex items-center gap-4">
-          <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[#F2BE5C]/30">
-            {product.image ? (
-              <Image
-                src={product.image}
-                alt={product.name}
-                fill
-                className="object-cover"
-              />
-            ) : null}
+        <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-4 shadow-sm flex items-start justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[#F2BE5C]/30">
+              {product.image ? (
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                />
+              ) : null}
+            </div>
+            <div>
+              <p className="font-semibold text-zinc-800">{product.name}</p>
+              <p className="text-sm text-[#F28B0C] font-bold">
+                {formatCurrency(Number(product.price))}
+              </p>
+              <p className="text-xs text-zinc-500">
+                {ProductCategoryLabels[product.category]}
+              </p>
+            </div>
           </div>
-
-          <div>
-            <p className="font-semibold text-zinc-800">{product.name}</p>
-            <p className="text-sm text-[#F28B0C] font-bold">
-              {formatCurrency(product.price)}
-            </p>
-            <p className="text-xs text-zinc-500">
-              {ProductCategoryLabels[product.category]}
-            </p>
-          </div>
+          <Badge
+            className={
+              product.isActive
+                ? "bg-green-500 text-white"
+                : "bg-red-500 text-white"
+            }
+          >
+            {product.isActive ? "Ativo" : "Inativo"}
+          </Badge>
         </div>
 
         <form
@@ -118,27 +125,7 @@ export default async function PanelBarProductPage(
             Salvar alterações
           </button>
 
-          <form action={toggleProductActive.bind(null, id, product.isActive)}>
-            <button
-              type="submit"
-              className={`flex-1 py-2.5 rounded-lg font-semibold cursor-pointer transition ${
-                product.isActive
-                  ? "bg-zinc-200 text-zinc-700"
-                  : "bg-green-500 text-white"
-              }`}
-            >
-              {product.isActive ? "Desativar" : "Ativar"}
-            </button>
-          </form>
-
-          <form action={deleteProduct.bind(null, id)}>
-            <button
-              type="submit"
-              className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2.5 rounded-lg font-semibold transition cursor-pointer"
-            >
-              Excluir
-            </button>
-          </form>
+          <ActionButtons product={product} id={id} slug={slug} />
         </div>
       </div>
     </main>
