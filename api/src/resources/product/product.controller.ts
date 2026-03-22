@@ -88,4 +88,16 @@ export class ProductController {
   remove(@Param('id') id: string) {
     return this.productService.remove(id);
   }
+
+  @Post('toggle-status/:id')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.MANAGER, UserRole.WAITER)
+  @ApiOperation({ summary: "Alternar o status de um produto" })
+  @ApiResponse({ status: 200, description: "Status do produto alterado com sucesso" })
+  @ApiResponse({ status: 404, description: "Produto não encontrado" })
+  @HttpCode(HttpStatus.OK)
+  toggleProductStatus(@Param('id') id: string) {
+    return this.productService.toggleProductStatus(id);
+  }
 }

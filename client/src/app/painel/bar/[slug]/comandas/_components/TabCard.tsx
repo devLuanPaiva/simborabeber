@@ -12,7 +12,7 @@ export function TabCard({ tab, slug }: Readonly<TabCardProps>) {
   const isOpen = tab.status === TabStatus.OPEN;
 
   return (
-    <Link href={`/painel/bar/${slug}/comanda/${tab.id}`} className="block">
+    <Link href={`/painel/bar/${slug}/comandas/${tab.id}`} className="block">
       <div className="bg-white rounded-xl border border-[#BFAE99]/20 shadow-sm p-4 hover:shadow-md transition">
         <div className="flex items-center justify-between mb-3">
           <span

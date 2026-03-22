@@ -73,4 +73,8 @@ export class ProductService {
   remove(id: string) {
     return this.productRepository.deleteProduct(id);
   }
+
+  toggleProductStatus(id: string) {
+    return this.productRepository.toggleProductStatus(id);
+  }
 }

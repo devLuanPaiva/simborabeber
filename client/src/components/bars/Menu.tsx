@@ -12,13 +12,21 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/data/functions";
 import { ProductImage } from "@/components/shared/ProductImage";
+import { Badge } from "../ui/badge";
 
 interface MenuProps {
-  bar: IBar;
+  bar?: IBar;
+  slug?: string;
   products: IProduct[];
+  mode: "client" | "panel";
 }
 
-export default function Menu({ bar, products }: Readonly<MenuProps>) {
+export default function Menu({
+  bar,
+  products,
+  mode,
+  slug,
+}: Readonly<MenuProps>) {
   const productsByCategory = useMemo(() => {
     const map: Record<string, IProduct[]> = {};
 
@@ -41,23 +49,24 @@ export default function Menu({ bar, products }: Readonly<MenuProps>) {
 
   return (
     <div className="pb-20">
-      <header className="relative h-52 w-full bg-black">
-        {bar.image && (
-          <Image
-            src={bar.image}
-            alt={bar.name}
-            fill
-            className="object-cover opacity-70"
-          />
-        )}
+      {bar && mode === "client" && (
+        <header className="relative h-52 w-full bg-black">
+          {bar.image && (
+            <Image
+              src={bar.image}
+              alt={bar.name}
+              fill
+              className="object-cover opacity-70"
+            />
+          )}
 
-        <div className="absolute bottom-4 left-6 text-white">
-          <h1 className="text-3xl font-bold">{bar.name}</h1>
-        </div>
-      </header>
-
-      <nav className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30">
-        <div className="flex overflow-x-auto gap-3 p-3 scrollbar-hide">
+          <div className="absolute bottom-4 left-6 text-white">
+            <h1 className="text-3xl font-bold">{bar.name}</h1>
+          </div>
+        </header>
+      )}
+      <nav className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30 md:flex md:justify-center">
+        <div className=" flex overflow-x-auto gap-3 p-3 scrollbar-hide">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -81,7 +90,11 @@ export default function Menu({ bar, products }: Readonly<MenuProps>) {
               {productsByCategory[category].map((product, index) => (
                 <Link
                   key={product.id}
-                  href={`/bar/${bar.slug}/produto/${product.id}`}
+                  href={
+                    mode === "client"
+                      ? `/bar/${bar?.slug}/produto/${product.id}`
+                      : `/painel/bar/${slug}/produtos/${product.id}`
+                  }
                 >
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -94,14 +107,26 @@ export default function Menu({ bar, products }: Readonly<MenuProps>) {
                     </div>
 
                     <div className="flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-semibold text-lg text-zinc-800">
-                          {product.name}
-                        </h3>
-
-                        <p className="text-sm text-zinc-500 line-clamp-2">
-                          {product.description}
-                        </p>
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold text-lg text-zinc-800">
+                            {product.name}
+                          </h3>
+                          <p className="text-sm text-zinc-500 line-clamp-2">
+                            {product.description}
+                          </p>
+                        </div>
+                        {mode === "panel" && (
+                          <Badge
+                            className={
+                              product.isActive
+                                ? "bg-green-500 text-white"
+                                : "bg-red-500 text-white"
+                            }
+                          >
+                            {product.isActive ? "Ativo" : "Inativo"}
+                          </Badge>
+                        )}
                       </div>
 
                       <span className="font-bold text-[#F2A20C] mt-2">

@@ -8,7 +8,7 @@ export async function BarActions(slug: string) {
     const response_bar = await fetch(`${base_url}/bar/${slug}`, {
         cache: "force-cache",
         next: {
-            revalidate: 60,
+            revalidate: 3600,
         }
     });
 
@@ -25,7 +25,9 @@ export async function BarActions(slug: string) {
 
     const data_products: ApiResponse<IProduct[]> = await response_products.json();
 
-    const products = data_products.results;
+    const products_results = data_products.results;
+
+    const products = products_results.filter(p => p.isActive)
 
     return { bar, products };
 }

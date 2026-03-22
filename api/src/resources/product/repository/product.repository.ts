@@ -29,18 +29,19 @@ export class ProductRepository {
                 'product.description as description',
                 'product.image as image',
                 'product.price as price',
+                'product.is_active as "isActive"',
                 'product.category as category',
                 'product.created_at as "createdAt"',
                 'product.updated_at as "updatedAt"',
             ])
-            .where('product.is_active = :isActive', { isActive: true })
 
         if (category) {
             queryBuilder.andWhere('product.category = :category', { category })
         }
 
         const rows = await queryBuilder
-            .orderBy('product.created_at', 'DESC')
+            .orderBy("LOWER(unaccent(product.name))", 'ASC')
+            .addOrderBy('product.created_at', 'DESC')
             .getRawMany();
 
         return rows.map((r) => {
@@ -51,6 +52,7 @@ export class ProductRepository {
             p.image = r.image;
             p.price = typeof r.price === 'string' ? Number.parseFloat(r.price) : r.price;
             p.category = r.category;
+            p.isActive = r.isActive;
             p.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
             p.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
             return p;
@@ -77,5 +79,14 @@ export class ProductRepository {
             throw new NotFoundException({ message: 'Produto não encontrado', field: 'id', detail: `Produto com id ${id} não encontrado` })
         }
         await this.repository.remove(product)
+    }
+
+    async toggleProductStatus(id: string): Promise<ProductEntity> {
+        const product = await this.findById(id);
+        if (!product) {
+            throw new NotFoundException({ message: 'Produto não encontrado', field: 'id', detail: `Produto com id ${id} não encontrado` })
+        }
+        product.isActive = !product.isActive;
+        return this.repository.save(product)
     }
 }

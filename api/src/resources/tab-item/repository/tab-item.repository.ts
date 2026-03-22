@@ -75,6 +75,8 @@ export class TabItemsRepository {
                 'waiterAdded.id as "waiterAddedId"',
                 'waiterAdded.name as "waiterAddedName"',
             ])
+            .orderBy("LOWER(unaccent(item.name))", 'ASC')
+            .addOrderBy('item.created_at', 'DESC')
             .getRawMany();
 
         return rows.map((r) => {
