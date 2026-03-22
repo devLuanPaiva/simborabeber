@@ -58,6 +58,7 @@ export async function toggleProductStatus(id: string, slug: string) {
     revalidatePath(`/painel/bar/${slug}/produtos/${id}`)
 }
 
-export async function deleteProduct(id: string) {
+export async function deleteProduct(id: string, slug: string) {
     await serverDelete(`/product/${id}`)
+    revalidatePath(`/painel/bar/${slug}/produtos`)
 }
