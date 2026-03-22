@@ -46,7 +46,10 @@ export class TabRepository {
                 'waiterClosed.id as "waiterClosedId"',
                 'waiterClosed.name as "waiterClosedName"',
             ])
-            .orderBy('tab.created_at', 'DESC')
+
+            .orderBy('(tab.status = :open)', 'DESC')
+            .addOrderBy('CASE WHEN tab.status = :open THEN tab.created_at ELSE tab.closed_at END', 'DESC')
+            .setParameter('open', TabStatus.OPEN)
             .getRawMany();
 
         return rows.map((r) => {
