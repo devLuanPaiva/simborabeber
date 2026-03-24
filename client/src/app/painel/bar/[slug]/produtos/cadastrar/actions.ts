@@ -3,6 +3,11 @@
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
+function getFormStringValue(formData: FormData, key: string) {
+    const value = formData.get(key);
+    return typeof value === "string" ? value : "";
+}
+
 export async function uploadImage(file: File) {
     const formData = new FormData();
     formData.append("file", file);
@@ -23,10 +28,10 @@ export async function uploadImage(file: File) {
 }
 
 export async function createProduct(formData: FormData, slug: string) {
-    const productName = String(formData.get("productName"));
+    const productName = getFormStringValue(formData, "productName");
     const price = Number(formData.get("price"));
-    const description = String(formData.get("description"));
-    const imageUrl = String(formData.get("imageUrl"));
+    const description = getFormStringValue(formData, "description");
+    const imageUrl = getFormStringValue(formData, "imageUrl");
 
     await serverPost("/product", {
         name: productName,
