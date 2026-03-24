@@ -1,3 +1,4 @@
+"use client";
 import { tabsPanelBarActions } from "../actions";
 import { TabCard } from "./TabCard";
 

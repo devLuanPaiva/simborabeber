@@ -1,3 +1,4 @@
+"use server"
 import { IJwtPayload } from "@/data/types"
 import { cookies } from "next/headers"
 import { decodeToken } from "./decodeToken"
