@@ -93,7 +93,7 @@ export default function Menu({
                   href={
                     mode === "client"
                       ? `/bar/${bar?.slug}/produto/${product.id}`
-                      : `/painel/bar/${slug}/produtos/${product.id}`
+                      : `/painel/bar/${slug}/produtos/editar/${product.id}`
                   }
                 >
                   <motion.div
