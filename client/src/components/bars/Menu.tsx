@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { formatCurrency } from "@/data/functions";
 import { ProductImage } from "@/components/shared/ProductImage";
 import { Badge } from "../ui/badge";
+import { ChevronLeft, Plus } from "lucide-react";
 
 interface MenuProps {
   bar?: IBar;
@@ -79,7 +80,25 @@ export default function Menu({
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4 mt-8 space-y-10">
+      {mode === "panel" && (
+        <div className="mx-auto w-11/12 max-w-4xl flex justify-between py-6">
+          <Link
+            href={`/painel/bar/${slug}`}
+            className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white cursor-pointer px-3 py-1 rounded-md text-sm font-medium"
+          >
+            <ChevronLeft />
+            Voltar
+          </Link>
+          <Link
+            href={`/painel/bar/${slug}/produtos/cadastrar`}
+            className="flex items-center gap-1 bg-green-600 hover:bg-green-700 text-white cursor-pointer px-3 py-1 rounded-md text-sm font-medium"
+          >
+            <Plus />
+            Cadastrar Produto
+          </Link>
+        </div>
+      )}
+      <div className="w-11/12 max-w-4xl mx-auto mt-8 space-y-10">
         {categories.map((category) => (
           <section key={category} id={category}>
             <h2 className="text-2xl font-bold text-[#F28B0C] mb-4">
