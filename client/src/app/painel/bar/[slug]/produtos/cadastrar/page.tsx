@@ -11,7 +11,7 @@ export default async function ProductRegistrationPage(
     <main className="min-h-screen bg-[#F2F2F2]">
       <Header slug_bar={slug} />
       <BackLink
-        slug={`/painel/${slug}/produtos`}
+        slug={`painel/bar/${slug}/produtos`}
         label="Voltar para produtos"
       />
 
