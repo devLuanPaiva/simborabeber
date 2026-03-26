@@ -1,5 +1,7 @@
 "use server"
 
+import { IProduct } from "@/data/models";
+import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
@@ -34,13 +36,21 @@ export async function createProduct(formData: FormData, slug: string) {
     const category = getFormStringValue(formData, "category");
     const imageUrl = getFormStringValue(formData, "imageUrl");
 
-    await serverPost("/product", {
+    const product: Partial<IProduct> = {
         name: productName,
         price,
         description,
-        imageUrl,
-        category,
-    })
+        category: category as IProduct["category"],
+        image: imageUrl,
+    }
+
+    const response_post = await serverPost("/product", product)
+
+    const response: ApiResponse<IProduct> = await response_post.json()
+
+    if (response.errors) {
+        console.error(response.errors.detail || "Erro ao criar produto.")
+    }
 
     revalidatePath(`/painel/bar/${slug}/produtos`)
 
