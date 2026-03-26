@@ -31,6 +31,7 @@ export async function createProduct(formData: FormData, slug: string) {
     const productName = getFormStringValue(formData, "productName");
     const price = Number(formData.get("price"));
     const description = getFormStringValue(formData, "description");
+    const category = getFormStringValue(formData, "category");
     const imageUrl = getFormStringValue(formData, "imageUrl");
 
     await serverPost("/product", {
@@ -38,6 +39,7 @@ export async function createProduct(formData: FormData, slug: string) {
         price,
         description,
         imageUrl,
+        category,
     })
 
     revalidatePath(`/painel/bar/${slug}/produtos`)

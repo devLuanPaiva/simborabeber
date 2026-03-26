@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { Upload, Link as LinkIcon } from "lucide-react";
 import { createProduct, uploadImage } from "../actions";
+import { ProductCategoryLabels } from "@/data/models/IProduct";
 
 type ProductRegistrationFormProps = {
   slug: string;
 };
 
-export function ProductRegistrationForm({ slug }: Readonly<ProductRegistrationFormProps>) {
+export function ProductRegistrationForm({
+  slug,
+}: Readonly<ProductRegistrationFormProps>) {
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
   const [imageUrl, setImageUrl] = useState("");
   const [loadingUpload, setLoadingUpload] = useState(false);
@@ -44,18 +47,41 @@ export function ProductRegistrationForm({ slug }: Readonly<ProductRegistrationFo
         />
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="price" className="text-sm text-zinc-600">
-          Preço
-        </label>
-        <input
-          id="price"
-          name="price"
-          type="number"
-          step="0.01"
-          required
-          className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <label htmlFor="price" className="text-sm text-zinc-600">
+            Preço
+          </label>
+          <input
+            id="price"
+            name="price"
+            type="number"
+            step="0.01"
+            required
+            className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
+          />
+        </div>
+        <div className="space-y-1">
+          <label htmlFor="category" className="text-sm text-zinc-600">
+            Categoria
+          </label>
+          <select
+            id="category"
+            name="category"
+            required
+            defaultValue=""
+            className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
+          >
+            <option value="" disabled>
+              Selecione uma categoria
+            </option>
+            {Object.entries(ProductCategoryLabels).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       <div className="space-y-1">
@@ -134,7 +160,11 @@ export function ProductRegistrationForm({ slug }: Readonly<ProductRegistrationFo
 
       {imageUrl && (
         <div className="w-32 h-32 rounded-lg overflow-hidden border border-[#BFAE99]/20">
-          <img src={imageUrl} alt="preview" className="w-full h-full object-cover" />
+          <img
+            src={imageUrl}
+            alt="preview"
+            className="w-full h-full object-cover"
+          />
         </div>
       )}
 
