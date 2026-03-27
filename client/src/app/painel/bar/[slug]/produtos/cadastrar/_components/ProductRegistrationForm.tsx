@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Upload, Link as LinkIcon } from "lucide-react";
 import { createProduct, uploadImage } from "../actions";
 import { ProductCategoryLabels } from "@/data/models/IProduct";
+import { appToast } from "@/utils/toast-ui";
 
 type ProductRegistrationFormProps = {
   slug: string;
@@ -23,6 +24,7 @@ export function ProductRegistrationForm({
       setImageUrl(url);
     } catch (err) {
       console.error("Upload error:", err);
+      appToast.error("Erro ao enviar imagem");
     } finally {
       setLoadingUpload(false);
     }
@@ -31,7 +33,19 @@ export function ProductRegistrationForm({
   return (
     <form
       action={async (formData) => {
-        await createProduct(formData, slug);
+        try {
+          const res = await createProduct(formData, slug);
+          if (res?.success) {
+            appToast.success(res.message || "Produto criado com sucesso");
+            setImageUrl("");
+            setImageMode("upload");
+          } else {
+            appToast.error(res?.error || "Erro ao criar produto");
+          }
+        } catch (err) {
+          console.error("Create product error:", err);
+          appToast.error("Erro inesperado");
+        }
       }}
       className="bg-white p-5 rounded-xl border border-[#BFAE99]/20 shadow-sm space-y-5"
     >

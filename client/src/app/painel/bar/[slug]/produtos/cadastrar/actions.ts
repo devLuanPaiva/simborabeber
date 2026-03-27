@@ -44,14 +44,19 @@ export async function createProduct(formData: FormData, slug: string) {
         image: imageUrl,
     }
 
-    const response_post = await serverPost("/product", product)
+    try {
+        const response_post = await serverPost("/product", product);
+        const responseBody: ApiResponse<IProduct> = await response_post.json().catch(() => ({} as ApiResponse<IProduct>));
 
-    const response: ApiResponse<IProduct> = await response_post.json()
+        if (!response_post.ok) {
+            return { success: false, error: responseBody.errors?.detail || "Erro ao criar produto" };
+        }
 
-    if (response.errors) {
-        console.error(response.errors.detail || "Erro ao criar produto.")
+        revalidatePath(`/painel/bar/${slug}/produtos`);
+        return { success: true, message: "Produto criado com sucesso" };
+    } catch (err) {
+        console.error("Error creating product:", err);
+        return { success: false, error: "Erro inesperado" };
     }
-
-    revalidatePath(`/painel/bar/${slug}/produtos`)
 
 }
