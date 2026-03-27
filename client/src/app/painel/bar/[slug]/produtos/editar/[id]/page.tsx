@@ -116,7 +116,7 @@ export default async function PanelBarProductPage(
           </div>
         </form>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-2">
           <button
             form="update-product-form"
             type="submit"
