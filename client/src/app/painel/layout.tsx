@@ -5,8 +5,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <>
+      <Toaster position="top-right" />
       {children}
-      <Toaster />
     </>
   );
 }
