@@ -53,6 +53,7 @@ function showToast(
         style: {
             ...toastStyles[type],
             ...options?.style,
+            padding: "0.75rem 1.25rem",
         },
     })
 }
