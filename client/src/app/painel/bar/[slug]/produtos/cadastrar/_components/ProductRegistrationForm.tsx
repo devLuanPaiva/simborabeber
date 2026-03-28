@@ -5,6 +5,7 @@ import { Upload, Link as LinkIcon } from "lucide-react";
 import { createProduct, uploadImage } from "../actions";
 import { ProductCategoryLabels } from "@/data/models/IProduct";
 import { appToast } from "@/utils/toast-ui";
+import { FileUpload } from "@/components/ui/file-upload";
 
 type ProductRegistrationFormProps = {
   slug: string;
@@ -143,21 +144,33 @@ export function ProductRegistrationForm({
       </div>
 
       {imageMode === "upload" && (
-        <div className="space-y-2">
-          <input
-            id="imageInput"
-            type="file"
-            accept="image/*"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleUpload(file);
-            }}
-            className="w-full text-sm"
-          />
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4 items-start">
+          <div className="space-y-2">
+            <FileUpload
+              onChange={(files) => {
+                const file = files?.[0];
+                if (file) handleUpload(file);
+              }}
+            />
 
-          {loadingUpload && (
-            <p className="text-sm text-zinc-500">Enviando imagem...</p>
-          )}
+            {loadingUpload && (
+              <p className="text-sm text-zinc-500">Enviando imagem...</p>
+            )}
+          </div>
+
+          <div className="w-full h-[180px] rounded-lg overflow-hidden border border-[#BFAE99]/20 bg-zinc-50 flex items-center justify-center">
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="preview"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <span className="text-xs text-zinc-400 px-3 text-center">
+                Pré-visualização da imagem
+              </span>
+            )}
+          </div>
         </div>
       )}
 
@@ -172,7 +185,7 @@ export function ProductRegistrationForm({
         />
       )}
 
-      {imageUrl && (
+      {imageMode === "url" && imageUrl && (
         <div className="w-32 h-32 rounded-lg overflow-hidden border border-[#BFAE99]/20">
           <img
             src={imageUrl}
