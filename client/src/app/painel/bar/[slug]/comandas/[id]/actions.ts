@@ -52,12 +52,25 @@ export async function addTabItem({ slug, tabId, formData }: Readonly<ICreateTab>
     const price = Number(formData.get("price"))
     const quantity = Number(formData.get("quantity"))
 
-    await serverPost(`/tab-item/by-tab/${tabId}`, {
-        name,
-        price,
-        quantity
-    })
-    revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`)
+    try {
+        const response = await serverPost(`/tab-item/by-tab/${tabId}`, {
+            name,
+            price,
+            quantity,
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            return { success: false, error: data.errors?.detail || "Erro ao adicionar item" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        return { success: true, message: "Item adicionado com sucesso" };
+    } catch (err) {
+        console.error("Error adding tab item:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
 }
 
 export async function addTabItems({ slug, tabId, formData }: Readonly<ICreateTab>) {
@@ -102,25 +115,74 @@ export async function addTabItems({ slug, tabId, formData }: Readonly<ICreateTab
         items = [];
     }
 
-    await serverPost(`/tab-item/bulk/by-tab/${tabId}`, { items });
-    revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+    try {
+        const response = await serverPost(`/tab-item/bulk/by-tab/${tabId}`, { items });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            return { success: false, error: data.errors?.detail || "Erro ao adicionar itens" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        return { success: true, message: "Itens adicionados com sucesso" };
+    } catch (err) {
+        console.error("Error adding tab items:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
 }
 
 export async function deleteTabItem({ slug, tabId, itemId }: { slug: string; tabId: string; itemId: string }) {
-    await serverFetch(`/tab-item/${itemId}`, {
-        method: "DELETE"
-    })
-    revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`)
+    try {
+        const response = await serverFetch(`/tab-item/${itemId}`, {
+            method: "DELETE",
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            return { success: false, error: data.errors?.detail || "Erro ao remover item" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        return { success: true, message: "Item removido" };
+    } catch (err) {
+        console.error("Error deleting tab item:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
 }
 
 export async function closeTab({ slug, tabId }: { slug: string; tabId: string }) {
-    await serverPost(`/tab/close/${tabId}`, {})
-    revalidatePath(`/painel/bar/${slug}`)
+    try {
+        const response = await serverPost(`/tab/close/${tabId}`, {});
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            return { success: false, error: data.errors?.detail || "Erro ao fechar comanda" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}`);
+        return { success: true, message: "Comanda fechada com sucesso" };
+    } catch (err) {
+        console.error("Error closing tab:", err);
+
+        return { success: false, error: "Erro inesperado" };
+    }
 }
 
 export async function updateItemQuantity({ slug, tabId, itemId, quantity }: { slug: string; tabId: string; itemId: string; quantity: number }) {
-    await serverPatch(`/tab-item/${itemId}/quantity`, {
-        quantity
-    })
-    revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`)
+    try {
+        const response = await serverPatch(`/tab-item/${itemId}/quantity`, { quantity });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            return { success: false, error: data.errors?.detail || "Erro ao atualizar quantidade" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        return { success: true, message: "Quantidade atualizada" };
+    } catch (err) {
+        console.error("Error updating item quantity:", err);
+
+        return { success: false, error: "Erro inesperado" };
+    }
 }

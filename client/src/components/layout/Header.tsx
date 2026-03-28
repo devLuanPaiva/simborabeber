@@ -1,3 +1,4 @@
+"use server"
 import { IBar, UserRole, UserRolesLabels } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { getUser } from "@/lib/auth/getUser";

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { addTabItem, addTabItems } from "../actions";
+import { appToast } from "@/utils/toast-ui";
 import { IProduct } from "@/data/models";
 import { Plus } from "lucide-react";
 import { formatCurrency } from "@/data/functions";
@@ -12,6 +13,7 @@ interface AddProductsProps {
   slug: string;
   tabId: string;
 }
+
 export function AddProducts({
   products,
   slug,
@@ -47,13 +49,34 @@ export function AddProducts({
       formData.append("name", items[0].name);
       formData.append("price", String(items[0].price));
       formData.append("quantity", String(items[0].quantity));
-      await addTabItem({ slug, tabId, formData });
+      try {
+        const res = await addTabItem({ slug, tabId, formData });
+        if (res?.success) {
+          appToast.success(res.message || "Item adicionado com sucesso");
+          setSelected({});
+        } else {
+          appToast.error(res?.error || "Erro ao adicionar item");
+        }
+      } catch (err) {
+        console.error("Error adding tab item:", err);
+        appToast.error("Erro inesperado");
+      }
     } else {
       formData.append("items", JSON.stringify(items));
-      await addTabItems({ slug, tabId, formData });
-    }
+      try {
+        const res = await addTabItems({ slug, tabId, formData });
+        if (res?.success) {
+          appToast.success(res.message || "Itens adicionados com sucesso");
+          setSelected({});
+        } else {
+          appToast.error(res?.error || "Erro ao adicionar itens");
+        }
+      } catch (err) {
+        console.error("Error adding tab items:", err);
 
-    setSelected({});
+        appToast.error("Erro inesperado");
+      }
+    }
   };
 
   return (

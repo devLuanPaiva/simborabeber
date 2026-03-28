@@ -14,7 +14,7 @@ export function ActionButtons({
   slug,
 }: Readonly<ActionButtonsProps>) {
   return (
-    <div className="flex items-center flex-col sm:flex-row gap-4">
+    <div className="flex items-center gap-4">
       <button
         type="button"
         onClick={async () => toggleProductStatus(id, slug)}
