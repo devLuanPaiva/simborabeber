@@ -14,6 +14,7 @@ export async function uploadImage(file: File) {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("filename", file.name);
+    formData.append("path", "produtos");
     const base_url = process.env.NEXT_PUBLIC_API_URL || "";
 
     const response = await fetch(`${base_url}/api/images/upload`, {
