@@ -10,10 +10,34 @@ function getFormStringValue(formData: FormData, key: string) {
     return typeof value === "string" ? value : "";
 }
 
-export async function uploadImage(file: File): Promise<string> {
+function textToSlug(text: string): string {
+    return text
+        .toLowerCase()
+        .trim()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+}
+
+function generateRandomString(length: number = 6): string {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+}
+
+export async function uploadImage(file: File, productName: string): Promise<string> {
+    const slug = textToSlug(productName);
+    const randomSuffix = generateRandomString(6);
+    const ext = file.name.split(".").pop() || "";
+    const newFileName = `${slug}-${randomSuffix}${ext ? "." + ext : ""}`;
+
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("filename", file.name);
+    formData.append("filename", newFileName);
     formData.append("path", "produtos");
     const base_url = process.env.NEXT_PUBLIC_API_URL || "";
 

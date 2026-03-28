@@ -17,11 +17,12 @@ export function ProductRegistrationForm({
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
   const [imageUrl, setImageUrl] = useState<string>("");
   const [loadingUpload, setLoadingUpload] = useState(false);
+  const [productName, setProductName] = useState<string>("");
 
   async function handleUpload(file: File) {
     try {
       setLoadingUpload(true);
-      const url = await uploadImage(file);
+      const url = await uploadImage(file, productName);
       setImageUrl(url ?? "");
     } catch (err) {
       console.error("Upload error:", err);
@@ -63,6 +64,8 @@ export function ProductRegistrationForm({
         <input
           id="productName"
           name="productName"
+          value={productName}
+          onChange={(e) => setProductName(e.target.value)}
           required
           className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
         />
@@ -125,24 +128,24 @@ export function ProductRegistrationForm({
         <div className="flex gap-2">
           <button
             type="button"
+            disabled={!productName.trim()}
             onClick={() => handleImageModeChange("upload")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer ${
-              imageMode === "upload"
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${imageMode === "upload"
                 ? "bg-[#F2A20C] text-white"
                 : "bg-white text-zinc-600"
-            }`}
+              }`}
           >
             <Upload size={16} /> Upload
           </button>
 
           <button
             type="button"
+            disabled={!productName.trim()}
             onClick={() => handleImageModeChange("url")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer ${
-              imageMode === "url"
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${imageMode === "url"
                 ? "bg-[#F2A20C] text-white"
                 : "bg-white text-zinc-600"
-            }`}
+              }`}
           >
             <LinkIcon size={16} /> URL
           </button>
@@ -152,12 +155,14 @@ export function ProductRegistrationForm({
       {imageMode === "upload" && (
         <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4 items-start">
           <div className="space-y-2">
-            <FileUpload
-              onChange={(files) => {
-                const file = files?.[0];
-                if (file) handleUpload(file);
-              }}
-            />
+            <div className={productName.trim() ? "" : "opacity-50 pointer-events-none"}>
+              <FileUpload
+                onChange={(files) => {
+                  const file = files?.[0];
+                  if (file && productName.trim()) handleUpload(file);
+                }}
+              />
+            </div>
 
             {loadingUpload && (
               <p className="text-sm text-zinc-500">Enviando imagem...</p>
@@ -187,7 +192,8 @@ export function ProductRegistrationForm({
           placeholder="https://..."
           value={imageUrl}
           onChange={(e) => setImageUrl(e.target.value)}
-          className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
+          disabled={!productName.trim()}
+          className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 disabled:opacity-50 disabled:cursor-not-allowed"
         />
       )}
 
