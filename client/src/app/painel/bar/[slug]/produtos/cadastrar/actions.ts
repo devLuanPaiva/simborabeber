@@ -10,7 +10,7 @@ function getFormStringValue(formData: FormData, key: string) {
     return typeof value === "string" ? value : "";
 }
 
-export async function uploadImage(file: File) {
+export async function uploadImage(file: File): Promise<string> {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("filename", file.name);
@@ -31,7 +31,7 @@ export async function uploadImage(file: File) {
     }
 
     const result = await response.json();
-    return result.url;
+    return result.result?.url || result.url || "";
 }
 
 export async function createProduct(formData: FormData, slug: string) {
@@ -63,5 +63,4 @@ export async function createProduct(formData: FormData, slug: string) {
         console.error("Error creating product:", err);
         return { success: false, error: "Erro inesperado" };
     }
-
 }

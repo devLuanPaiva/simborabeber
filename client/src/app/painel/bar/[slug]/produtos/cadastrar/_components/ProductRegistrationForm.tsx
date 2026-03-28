@@ -15,21 +15,27 @@ export function ProductRegistrationForm({
   slug,
 }: Readonly<ProductRegistrationFormProps>) {
   const [imageMode, setImageMode] = useState<"upload" | "url">("upload");
-  const [imageUrl, setImageUrl] = useState("");
+  const [imageUrl, setImageUrl] = useState<string>("");
   const [loadingUpload, setLoadingUpload] = useState(false);
 
   async function handleUpload(file: File) {
     try {
       setLoadingUpload(true);
       const url = await uploadImage(file);
-      setImageUrl(url);
+      setImageUrl(url ?? "");
     } catch (err) {
       console.error("Upload error:", err);
       appToast.error("Erro ao enviar imagem");
+      setImageUrl("");
     } finally {
       setLoadingUpload(false);
     }
   }
+
+  const handleImageModeChange = (mode: "upload" | "url") => {
+    setImageMode(mode);
+    setImageUrl("");
+  };
 
   return (
     <form
@@ -119,7 +125,7 @@ export function ProductRegistrationForm({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => setImageMode("upload")}
+            onClick={() => handleImageModeChange("upload")}
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer ${
               imageMode === "upload"
                 ? "bg-[#F2A20C] text-white"
@@ -131,7 +137,7 @@ export function ProductRegistrationForm({
 
           <button
             type="button"
-            onClick={() => setImageMode("url")}
+            onClick={() => handleImageModeChange("url")}
             className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer ${
               imageMode === "url"
                 ? "bg-[#F2A20C] text-white"
