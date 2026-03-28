@@ -1,36 +1,14 @@
 "use server"
-
+import { createSlug, generateRandomString } from "@/data/functions";
+import { getFormStringValue } from "@/data/helpers";
 import { IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-function getFormStringValue(formData: FormData, key: string) {
-    const value = formData.get(key);
-    return typeof value === "string" ? value : "";
-}
-
-function textToSlug(text: string): string {
-    return text
-        .toLowerCase()
-        .trim()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-}
-
-function generateRandomString(length: number = 6): string {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-    for (let i = 0; i < length; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return result;
-}
 
 export async function uploadImage(file: File, productName: string): Promise<string> {
-    const slug = textToSlug(productName);
+    const slug = createSlug(productName);
     const randomSuffix = generateRandomString(6);
     const ext = file.name.split(".").pop() || "";
     const newFileName = `${slug}-${randomSuffix}${ext ? "." + ext : ""}`;

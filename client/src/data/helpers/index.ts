@@ -1,2 +1,2 @@
 export * from "./getBaseUrl"
-export * from "./getFileExtension"
+export * from "./getFormStringValue"
