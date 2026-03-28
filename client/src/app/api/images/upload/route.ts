@@ -40,6 +40,7 @@ async function handleUpload(formData: FormData, req: Request) {
     try {
         const file = formData.get("file") as File | null;
         const fileNameFromForm = formData.get("filename") as string | null;
+        const path = formData.get("path") as string | null;
 
         if (!process.env.BUCKET_NAME_AWS || !process.env.REGION_AWS) {
             return apiError({
@@ -73,9 +74,11 @@ async function handleUpload(formData: FormData, req: Request) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
+        const key = path ? `${path}/${safeName}` : safeName;
+
         const params = {
             Bucket: process.env.BUCKET_NAME_AWS,
-            Key: safeName,
+            Key: key,
             Body: buffer,
             ContentType: file.type,
         };
