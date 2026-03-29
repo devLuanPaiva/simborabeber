@@ -52,7 +52,7 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* IMAGEM */}
+      
       <motion.div
         initial={{ opacity: 0, x: 50 }}
         animate={{ opacity: 1, x: 0 }}
@@ -62,7 +62,7 @@ export function Hero() {
         <Image
           src={homemImg}
           alt="Sistema de gestão para bares Simbora Beber"
-          className="w-[280px] sm:w-[350px] md:w-[450px] lg:w-[520px] h-auto"
+          className="w-[280px] sm:w-[350px] md:w-[450px] lg:w-[520px] h-auto z-0 "
           priority
         />
       </motion.div>
