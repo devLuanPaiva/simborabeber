@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { Beer } from "lucide-react";
 
 
-
 interface BarsListProps {
     bars: IBar[];
 }
@@ -21,7 +20,7 @@ export function BarsList({ bars }: Readonly<BarsListProps>) {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                 >
-                    <Link href={`/bar/${bar.slug}`}>
+                    <Link href={`/bares/${bar.slug}`}>
                         <div
                             className={cn(
                                 "group overflow-hidden rounded-2xl",
