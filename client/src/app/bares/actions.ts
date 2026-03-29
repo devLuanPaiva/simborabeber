@@ -2,7 +2,7 @@
 import { IBar } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 
-export async function HomeActions() {
+export async function getBares() {
     const base_url = process.env.NEXT_PUBLIC_BASE_URL;
 
     const response = await fetch(`${base_url}/bar`, {

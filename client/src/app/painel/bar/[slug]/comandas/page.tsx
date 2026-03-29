@@ -13,10 +13,7 @@ export default async function TabsPanelBarPage(
   return (
     <main className="min-h-screen">
       <Header slug_bar={slug} />
-      <BackLink
-        slug={`painel/bar/${slug}/produtos`}
-        label="Voltar para Produtos"
-      />
+      <BackLink slug={`painel/bar/${slug}`} label="Voltar" />
       <div className="w-11/12 mx-auto pb-8 max-w-7xl">
         <div className="flex items-start justify-between mb-6">
           <h1 className="text-2xl font-bold text-zinc-800">Comandas</h1>

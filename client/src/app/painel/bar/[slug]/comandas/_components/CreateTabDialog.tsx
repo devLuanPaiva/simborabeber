@@ -11,9 +11,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { createTab } from "../actions";
+import { appToast } from "@/utils/toast-ui";
 
 export function CreateTabDialog() {
   const { slug } = useParams();
+
+  const handleSubmit = async (formData: FormData) => {
+    const result = await createTab(slug as string, formData);
+    if (result.success) {
+      appToast.success("Comanda criada com sucesso!");
+      return;
+    }
+    appToast.error(result.error || "Erro ao criar comanda.");
+  };
 
   return (
     <Dialog>
@@ -30,10 +40,7 @@ export function CreateTabDialog() {
           </DialogTitle>
         </DialogHeader>
 
-        <form
-          action={createTab.bind(null, slug as string)}
-          className="space-y-5"
-        >
+        <form action={handleSubmit} className="space-y-5">
           <div className="space-y-1">
             <label className="text-sm font-medium text-zinc-700">
               Número da mesa

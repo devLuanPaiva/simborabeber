@@ -16,15 +16,38 @@ export async function tabsPanelBarActions(slug: string): Promise<ITab[]> {
 }
 
 export async function createTab(slug: string, formData: FormData) {
-    const tableNumber = Number(formData.get("tableNumber"))
-    const customerName = String(formData.get("customerName"))
+    try {
+        const tableNumber = Number(formData.get("tableNumber"))
+        const customerName = String(formData.get("customerName"))
 
-    await serverPost("/tab", {
-        status: "open",
-        tableNumber,
-        customerName,
-        totalValue: 0
-    })
+        const response = await serverPost("/tab", {
+            status: "open",
+            tableNumber,
+            customerName,
+            totalValue: 0
+        })
 
-    revalidatePath(`/painel/bar/${slug}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+            return {
+                success: false,
+                error: data.errors?.detail || "Erro ao criar comanda"
+            }
+        }
+
+        revalidatePath(`/painel/bar/${slug}`)
+
+        return {
+            success: true,
+            message: "Comanda criada com sucesso"
+        }
+
+    } catch (err) {
+        console.error("Error creating tab:", err);
+        return {
+            success: false,
+            error: "Erro inesperado"
+        }
+    }
 }

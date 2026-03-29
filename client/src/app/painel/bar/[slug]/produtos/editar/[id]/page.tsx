@@ -23,7 +23,7 @@ export default async function PanelBarProductPage(
         slug={`painel/bar/${slug}/produtos`}
         label="Voltar para Produtos"
       />
-      <div className="w-11/12 mx-auto py-8 max-w-2xl space-y-6">
+      <div className="w-11/12 mx-auto pb-8 max-w-2xl space-y-6">
         <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-4 shadow-sm flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="relative w-20 h-20 rounded-lg overflow-hidden bg-[#F2BE5C]/30">
@@ -116,7 +116,7 @@ export default async function PanelBarProductPage(
           </div>
         </form>
 
-        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+        <div className="flex flex-col gap-3 pt-2">
           <button
             form="update-product-form"
             type="submit"

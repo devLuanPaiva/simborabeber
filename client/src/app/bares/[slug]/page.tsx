@@ -1,4 +1,4 @@
-import Menu from "@/components/bars/Menu";
+import Menu from "@/components/shared/Menu";
 import { BarActions } from "./actions";
 
 export default async function BarPage(

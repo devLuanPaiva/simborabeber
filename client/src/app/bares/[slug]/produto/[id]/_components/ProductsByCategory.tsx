@@ -1,3 +1,4 @@
+"use client";
 import { IProduct, ProductCategory, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import Link from "next/link";

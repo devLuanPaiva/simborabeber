@@ -5,10 +5,6 @@ export default function Loading() {
     <main className="min-h-screen bg-[#F2F2F2] animate-pulse">
       <Header slug_bar="..." />
 
-      <div className="mx-auto w-11/12 max-w-7xl flex justify-start py-6">
-        <div className="h-8 w-28 bg-[#F2BE5C]/40 rounded-md" />
-      </div>
-
       <div className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30">
         <div className="flex gap-3 p-3 overflow-x-auto">
           {Array.from({ length: 5 }).map((_, i) => (
@@ -20,7 +16,11 @@ export default function Loading() {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 mt-8 space-y-10">
+      <div className="mx-auto w-11/12 max-w-4xl flex justify-between py-6">
+        <div className="h-8 w-28 bg-[#F2BE5C]/40 rounded-md" />
+        <div className="h-8 w-28 bg-green-600/40 rounded-md" />
+      </div>
+      <div className="w-11/12 max-w-4xl mx-auto mt-8 space-y-10">
         {Array.from({ length: 3 }).map((_, sectionIndex) => (
           <div key={sectionIndex + 1} className="space-y-4">
             <div className="h-6 w-40 bg-[#F28B0C]/40 rounded" />

@@ -50,12 +50,12 @@ export async function updateProduct(id: string, slug: string, formData: FormData
 
     if (Object.keys(payload).length === 0) return;
     await serverPatch(`/product/${id}`, payload);
-    revalidatePath(`/painel/bar/${slug}/produtos/${id}`)
+    revalidatePath(`/painel/bar/${slug}/produtos/editar/${id}`)
 }
 
 export async function toggleProductStatus(id: string, slug: string) {
     await serverPost(`/product/toggle-status/${id}`, {})
-    revalidatePath(`/painel/bar/${slug}/produtos/${id}`)
+    revalidatePath(`/painel/bar/${slug}/produtos/editar/${id}`)
 }
 
 export async function deleteProduct(id: string, slug: string) {

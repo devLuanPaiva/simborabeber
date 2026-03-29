@@ -2,6 +2,7 @@
 
 import { ITabItem, TabStatus } from "@/data/models";
 import { updateItemQuantity, deleteTabItem } from "../actions";
+import { appToast } from "@/utils/toast-ui";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/data/functions";
 
@@ -42,13 +43,22 @@ export function TabItems({
 
               <button
                 disabled={!isOpen}
-                onClick={() =>
-                  deleteTabItem({
-                    slug,
-                    tabId,
-                    itemId: item.id,
-                  })
-                }
+                onClick={async () => {
+                  try {
+                    const res = await deleteTabItem({
+                      slug,
+                      tabId,
+                      itemId: item.id,
+                    });
+                    if (res?.success) {
+                      appToast.success(res.message || "Item removido");
+                    } else {
+                      appToast.error(res?.error || "Erro ao remover item");
+                    }
+                  } catch (err) {
+                    appToast.error("Erro inesperado");
+                  }
+                }}
                 className={`p-2 rounded-lg transition ${
                   isOpen
                     ? "text-red-500 hover:bg-red-50 cursor-pointer"
@@ -63,14 +73,27 @@ export function TabItems({
               <div className="flex items-center justify-between gap-2 bg-zinc-100 rounded-xl p-1 w-full sm:w-fit">
                 <button
                   disabled={!isOpen}
-                  onClick={() =>
-                    updateItemQuantity({
-                      slug,
-                      tabId,
-                      itemId: item.id,
-                      quantity: item.quantity - 1,
-                    })
-                  }
+                  onClick={async () => {
+                    try {
+                      const res = await updateItemQuantity({
+                        slug,
+                        tabId,
+                        itemId: item.id,
+                        quantity: item.quantity - 1,
+                      });
+                      if (res?.success) {
+                        appToast.success(
+                          res.message || "Quantidade atualizada",
+                        );
+                      } else {
+                        appToast.error(
+                          res?.error || "Erro ao atualizar quantidade",
+                        );
+                      }
+                    } catch (err) {
+                      appToast.error("Erro inesperado");
+                    }
+                  }}
                   className={`
                     flex items-center justify-center
                     w-8 h-8 rounded-lg
@@ -91,14 +114,27 @@ export function TabItems({
 
                 <button
                   disabled={!isOpen}
-                  onClick={() =>
-                    updateItemQuantity({
-                      slug,
-                      tabId,
-                      itemId: item.id,
-                      quantity: item.quantity + 1,
-                    })
-                  }
+                  onClick={async () => {
+                    try {
+                      const res = await updateItemQuantity({
+                        slug,
+                        tabId,
+                        itemId: item.id,
+                        quantity: item.quantity + 1,
+                      });
+                      if (res?.success) {
+                        appToast.success(
+                          res.message || "Quantidade atualizada",
+                        );
+                      } else {
+                        appToast.error(
+                          res?.error || "Erro ao atualizar quantidade",
+                        );
+                      }
+                    } catch (err) {
+                      appToast.error("Erro inesperado");
+                    }
+                  }}
                   className={`
                     flex items-center justify-center
                     w-8 h-8 rounded-lg
