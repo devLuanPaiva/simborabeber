@@ -13,7 +13,7 @@ export default function HomePage() {
           <Hero />
         </div>
       </section>
-      <div className="-mt-2 md:-mt-32 relative">
+      <div className="-mt-2 md:-mt-32 relative mx-auto w-11/12 max-w-7xl">
         <Features />
       </div>
     </main>

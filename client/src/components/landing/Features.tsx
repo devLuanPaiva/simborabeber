@@ -29,7 +29,6 @@ const features = [
 
 export function Features() {
     return (
-        <div className="w-11/12 max-w-7xl mx-auto px-4 md:px-10">
             <div className="bg-white rounded-4xl p-4 md:p-10 md:shadow-2xl">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                     {features.map((item, index) => {
@@ -58,7 +57,7 @@ export function Features() {
                     })}
                 </div>
             </div>
-        </div>
+    
 
     );
 }
