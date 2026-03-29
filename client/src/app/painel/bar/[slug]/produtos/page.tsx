@@ -1,4 +1,4 @@
-import Menu from "@/components/bars/Menu";
+import Menu from "@/components/shared/Menu";
 import { Header } from "@/components/layout/Header";
 import { panelBarProductsActions } from "./actions";
 
