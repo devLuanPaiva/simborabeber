@@ -111,7 +111,7 @@ export default function Menu({
                   key={product.id}
                   href={
                     mode === "client"
-                      ? `/bar/${bar?.slug}/produto/${product.id}`
+                      ? `/bares/${bar?.slug}/produto/${product.id}`
                       : `/painel/bar/${slug}/produtos/editar/${product.id}`
                   }
                 >
