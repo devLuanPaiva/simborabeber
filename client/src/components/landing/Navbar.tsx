@@ -4,11 +4,13 @@ import Image from "next/image";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
+import { openWhatsApp } from "@/data/functions";
+import Link from "next/link";
 
 const links = [
   { name: "Como funciona", href: "#como-funciona" },
   { name: "Benefícios", href: "#beneficios" },
-  { name: "Bares", href: "#bares" },
+  { name: "Bares", href: "/bares" },
 ];
 
 export function Navbar() {
@@ -17,7 +19,6 @@ export function Navbar() {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center">
-
         <Image
           src={"/logo-sem-fundo.png"}
           alt="Logo Simbora Beber"
@@ -25,7 +26,6 @@ export function Navbar() {
           height={50}
           priority
         />
-
 
         <nav className="hidden md:flex items-center gap-6">
           {links.map((link) => (
@@ -38,12 +38,12 @@ export function Navbar() {
             </a>
           ))}
 
-          <a
-            href="#contato"
-            className="bg-[#F2A20C] text-white px-5 py-2 rounded-xl font-semibold hover:bg-[#F28B0C] transition"
+          <button
+            onClick={() => openWhatsApp()}
+            className="bg-[#F2A20C] cursor-pointer text-white px-5 py-2 rounded-xl font-semibold hover:bg-[#F28B0C] transition"
           >
             Falar conosco
-          </a>
+          </button>
         </nav>
 
         <button
@@ -54,7 +54,6 @@ export function Navbar() {
         </button>
       </div>
 
-   
       <AnimatePresence>
         {open && (
           <motion.div
@@ -65,17 +64,16 @@ export function Navbar() {
             className="md:hidden mt-4 flex flex-col gap-4 bg-white p-5 rounded-2xl shadow-lg"
           >
             {links.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 onClick={() => setOpen(false)}
                 className="text-[#BFAE99] font-medium hover:text-[#F28B0C] transition"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
 
-            
             <a
               href="#contato"
               onClick={() => setOpen(false)}
