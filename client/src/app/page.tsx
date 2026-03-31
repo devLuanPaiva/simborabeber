@@ -1,3 +1,4 @@
+import { Benefit } from "@/components/landing/Benefit";
 import { Categories } from "@/components/landing/Categories";
 import { Features } from "@/components/landing/Features";
 import { Hero } from "@/components/landing/Hero";
@@ -16,9 +17,12 @@ export default function HomePage() {
       <div className="-mt-32 relative mx-auto w-11/12 max-w-7xl ">
         <Features />
       </div>
-      <section className="-mt-32 pt-48 pb-8 bg-white w-full space-y-14">
+      <section className="-mt-32 pt-48 pb-8 bg-white w-full space-y-24">
         <HowItWorks />
         <Categories />
+      </section>
+      <section className="py-8 w-full h-auto bg-[#fef2e4da] ">
+        <Benefit />
       </section>
     </main>
   );
