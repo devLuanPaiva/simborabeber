@@ -72,6 +72,31 @@ export class UserService {
     }
   }
 
+  async createAdminUser(name: string, email: string, password: string): Promise<Partial<UserEntity>> {
+    const existingUser = await this.userRepository.findByEmail(email)
+
+    if (existingUser) {
+      throw new ConflictException({
+        message: 'Email já está em uso',
+        field: 'email',
+        detail: `O email ${email} já está cadastrado`,
+      })
+    }
+
+    const hashedPassword = bcryptHashSync(password, 10)
+
+    const userPayload: Partial<UserEntity> = {
+      name,
+      email,
+      password: hashedPassword,
+      role: UserRole.ADMIN,
+    }
+
+    const user = await this.userRepository.createUser(userPayload)
+
+    return this.removePasswordAndBar(user)
+  }
+
   async findAll(actor?: JwtPayload): Promise<Partial<UserEntity>[]> {
     const users = await this.userRepository.findAll({ role: actor?.role as UserRole, id: actor?.sub })
 
