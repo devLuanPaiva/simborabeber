@@ -1,4 +1,4 @@
-"use client";
+
 import { IProduct, ProductCategory, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,7 +41,7 @@ export async function ProductsByCategory({ slug, category }: Readonly<ProductsBy
         {products.map((product) => (
           <Link
             key={product.id}
-            href={`/bar/${slug}/produto/${product.id}`}
+            href={`/bares/${slug}/produto/${product.id}`}
             className="min-w-[180px] max-w-[180px] bg-white rounded-xl shadow-sm border border-[#BFAE99]/20 hover:shadow-md transition"
           >
             <div className="relative h-44 w-full bg-gray-100 rounded-t-xl overflow-hidden">
