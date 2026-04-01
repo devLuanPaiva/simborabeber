@@ -16,8 +16,8 @@ import { formatDate } from "@/data/functions";
 
 interface UsersTableListProps {
   users: IUser[];
-  handleToggleStatus: (id: string) => void;
-  handleOpenDialog: (user: IUser) => void;
+  handleToggleStatus?: (id: string) => void;
+  handleOpenDialog?: (user: IUser) => void;
 }
 
 export function UsersTableList({
@@ -61,7 +61,7 @@ export function UsersTableList({
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={user.isActive}
-                      onCheckedChange={() => handleToggleStatus(user.id)}
+                      onCheckedChange={() => handleToggleStatus?.(user.id)}
                     />
                     <span className="text-sm">
                       {user.isActive ? "Ativo" : "Inativo"}
@@ -72,7 +72,7 @@ export function UsersTableList({
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleOpenDialog(user)}
+                    onClick={() => handleOpenDialog?.(user)}
                     className="cursor-pointer"
                   >
                     <Pencil className="h-4 w-4" />

@@ -22,9 +22,9 @@ export default async function PanelBarPage(
     },
     {
       title: "Usuários",
-      description: "Garçons e permissões",
+      description: "Gerencie usuários e permissões",
       icon: Users,
-      href: `/painel/bar/${slug}/usuarios`,
+      href: `/painel/usuarios`,
     },
   ];
 
