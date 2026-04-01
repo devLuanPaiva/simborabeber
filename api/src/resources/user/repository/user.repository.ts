@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import { UserEntity, UserRole } from '../entities/user.entity'
+import { BarEntity } from '../../bar/entities/bar.entity'
 
 @Injectable()
 export class UserRepository {
@@ -60,5 +61,32 @@ export class UserRepository {
 
     async deleteUser(user: UserEntity): Promise<void> {
         await this.repository.remove(user)
+    }
+
+    async toggleUserStatus(id: string): Promise<UserEntity | null> {
+        const user = await this.repository.findOne({ where: { id }, relations: ['bar'] })
+
+        if (!user) return null
+
+        user.isActive = !user.isActive
+
+        await this.repository.save(user)
+
+        if (user.role === UserRole.MANAGER && user.bar) {
+            const barRepo = this.repository.manager.getRepository(BarEntity)
+
+            user.bar.isActive = user.isActive
+            await barRepo.save(user.bar)
+
+            await this.repository
+                .createQueryBuilder()
+                .update(UserEntity)
+                .set({ isActive: user.isActive })
+                .where('role = :role', { role: UserRole.WAITER })
+                .andWhere('bar_id = :barId', { barId: user.bar.id })
+                .execute()
+        }
+
+        return this.repository.findOne({ where: { id }, relations: ['bar'] })
     }
 }

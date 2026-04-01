@@ -124,12 +124,46 @@ export class UserService {
     return this.removePasswordAndBar(updatedUser)
   }
 
+  async toggleUserStatus(id: string): Promise<Partial<UserEntity>> {
+    try {
+      const user = await this.userRepository.findById(id)
+
+      if (!user) {
+        throw new NotFoundException({
+          message: 'Usuário não encontrado',
+          field: 'id',
+          detail: `Não existe usuário com id ${id}`,
+        })
+      }
+
+      const updated = await this.userRepository.toggleUserStatus(id)
+
+      if (!updated) {
+        throw new NotFoundException({
+          message: 'Usuário não encontrado',
+          field: 'id',
+          detail: `Não existe usuário com id ${id}`,
+        })
+      }
+
+      return this.removePasswordAndBar(updated)
+    } catch (error) {
+      if (error instanceof HttpException) throw error
+
+      throw new BadRequestException({
+        message: 'Erro ao alternar status do usuário',
+        detail: 'Falha ao persistir mudança de status no banco de dados',
+      })
+    }
+  }
+
   async remove(id: string): Promise<{ message: string }> {
     try {
       const user = await this.userRepository.findById(id)
 
       if (!user) {
         throw new NotFoundException({
+
           message: 'Usuário não encontrado',
           field: 'id',
           detail: `Não existe usuário com id ${id} para remoção`,

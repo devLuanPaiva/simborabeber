@@ -63,6 +63,17 @@ export class UserController {
     return this.userService.update(id, updateUserDto);
   }
 
+  @Patch(':id/toggle-status')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.MANAGER)
+  @ApiOperation({ summary: "Ativar/Desativar usuário pelo ID" })
+  @ApiResponse({ status: 200, description: "Status do usuário atualizado com sucesso" })
+  @ApiResponse({ status: 404, description: "Usuário não encontrado" })
+  @HttpCode(HttpStatus.OK)
+  toggleStatus(@Param('id') id: string) {
+    return this.userService.toggleUserStatus(id);
+  }
+
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.MANAGER)
