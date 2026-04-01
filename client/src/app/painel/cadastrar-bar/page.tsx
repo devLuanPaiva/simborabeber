@@ -4,6 +4,7 @@ import { useState } from "react";
 import { registerBar, uploadImage } from "./actions";
 import { Upload, Link as LinkIcon } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
+import { appToast } from "@/utils/toast-ui";
 
 export default function BarRegisterPage() {
   const [name, setName] = useState("");
@@ -14,8 +15,12 @@ export default function BarRegisterPage() {
   async function handleUpload(file: File) {
     try {
       setLoadingUpload(true);
-      const url = await uploadImage(file, name);
-      setImageUrl(url);
+      const response  = await uploadImage(file, name);
+      if (response.success) {
+        setImageUrl(response.url);
+      } else {
+        appToast.error(response.error || "Erro ao fazer upload da imagem");
+      }
     } finally {
       setLoadingUpload(false);
     }

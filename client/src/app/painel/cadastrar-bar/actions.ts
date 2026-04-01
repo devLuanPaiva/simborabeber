@@ -7,7 +7,7 @@ import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-export async function uploadImage(file: File, productName: string): Promise<string> {
+export async function uploadImage(file: File, productName: string) {
     const slug = createSlug(productName);
     const randomSuffix = generateRandomString(6);
     const ext = file.name.split(".").pop() || "";
@@ -29,11 +29,15 @@ export async function uploadImage(file: File, productName: string): Promise<stri
 
     if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || "Erro ao enviar a imagem.");
+        return {
+            success: false,
+            error: errorData.errors?.detail || "Erro ao fazer upload da imagem",
+        }
+
     }
 
     const result = await response.json();
-    return result.result?.url || result.url || "";
+    return { success: true, url: result.result?.url || result.url || "" };
 }
 
 
