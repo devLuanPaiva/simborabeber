@@ -29,7 +29,7 @@ export default function BarRegisterPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F2F2F2] flex items-center justify-center px-4">
+    <main className="min-h-screen bg-[#F2F2F2] flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-sm border border-[#BFAE99]/20 p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-zinc-800">Cadastrar Bar</h1>
