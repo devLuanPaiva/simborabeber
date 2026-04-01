@@ -27,6 +27,7 @@ export class TabEntity {
 
     @ManyToOne(() => BarEntity, bar => bar.tabs, {
         nullable: true,
+        onDelete: 'CASCADE',
     })
 
     @JoinColumn({ name: 'bar_id' })
@@ -42,10 +43,11 @@ export class TabEntity {
     @ManyToOne(() => UserEntity, user => user.closedTabs, {
         nullable: true,
     })
+
     @JoinColumn({ name: 'waiter_closed_id' })
     waiterClosed: UserEntity;
 
-    @OneToMany(() => TabItemEntity, tabItem => tabItem.tab)
+    @OneToMany(() => TabItemEntity, tabItem => tabItem.tab, { cascade: true })
     items: TabItemEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

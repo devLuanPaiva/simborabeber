@@ -53,6 +53,7 @@ export class ProductEntity {
 
     @ManyToOne(() => BarEntity, bar => bar.products, {
         nullable: true,
+        onDelete: 'CASCADE',
     })
 
     @JoinColumn({ name: 'bar_id' })

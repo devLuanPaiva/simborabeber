@@ -1,7 +1,7 @@
 import { TabEntity } from "../../tab/entities/tab.entity";
 import { ProductEntity } from "../../product/entities/product.entity";
 import { UserEntity } from "../../user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 
 export enum AccessPlan {
     BASIC = 'basic',
@@ -27,6 +27,13 @@ export class BarEntity {
     })
     slug: string;
 
+    @ManyToOne(() => UserEntity, user => user.ownedBars, {
+        nullable: true,
+        onDelete: 'CASCADE',
+    })
+    @JoinColumn({ name: 'owner_id' })
+    owner: UserEntity;
+
     @Column({
         type: 'varchar',
         length: 255,
@@ -49,13 +56,13 @@ export class BarEntity {
     })
     isActive: boolean;
 
-    @OneToMany(() => UserEntity, user => user.bar)
+    @OneToMany(() => UserEntity, user => user.bar, { cascade: true })
     users: UserEntity[];
 
-    @OneToMany(() => ProductEntity, product => product.bar)
+    @OneToMany(() => ProductEntity, product => product.bar, { cascade: true })
     products: ProductEntity[];
 
-    @OneToMany(() => TabEntity, tab => tab.bar)
+    @OneToMany(() => TabEntity, tab => tab.bar, { cascade: true })
     tabs: TabEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })

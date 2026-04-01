@@ -59,10 +59,14 @@ export class UserEntity {
 
     @ManyToOne(() => BarEntity, bar => bar.users, {
         nullable: true,
+        onDelete: 'CASCADE',
     })
 
     @JoinColumn({ name: 'bar_id' })
     bar: BarEntity;
+
+    @OneToMany(() => BarEntity, bar => bar.owner, { cascade: true })
+    ownedBars: BarEntity[];
 
     @OneToMany(() => TabEntity, tab => tab.waiterOpen)
     openTabs: TabEntity[];
