@@ -5,6 +5,8 @@ import { registerBar, uploadImage } from "./actions";
 import { Upload, Link as LinkIcon } from "lucide-react";
 import { FileUpload } from "@/components/ui/file-upload";
 import { appToast } from "@/utils/toast-ui";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default function BarRegisterPage() {
   const [name, setName] = useState("");
@@ -15,7 +17,7 @@ export default function BarRegisterPage() {
   async function handleUpload(file: File) {
     try {
       setLoadingUpload(true);
-      const response  = await uploadImage(file, name);
+      const response = await uploadImage(file, name);
       if (response.success) {
         setImageUrl(response.url);
       } else {
@@ -43,8 +45,10 @@ export default function BarRegisterPage() {
           className="space-y-5"
         >
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Nome do bar</label>
-            <input
+            <Label className="text-sm text-zinc-600">
+              Nome do bar <span className="text-red-500">*</span>
+            </Label>
+            <Input
               name="name"
               required
               value={name}
@@ -55,8 +59,10 @@ export default function BarRegisterPage() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Endereço</label>
-            <input
+            <Label className="text-sm text-zinc-600">
+              Endereço <span className="text-red-500">*</span>
+            </Label>
+            <Input
               name="address"
               required
               placeholder="Rua, número, bairro..."
@@ -65,8 +71,14 @@ export default function BarRegisterPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-zinc-600">Imagem do bar</label>
-
+            <Label className="text-sm text-zinc-600">
+              Imagem do bar <span className="text-red-500">*</span>
+            </Label>
+            {!name.trim() && (
+              <p className="text-sm text-red-500">
+                Digite o nome do bar para habilitar as opções de imagem
+              </p>
+            )}
             <div className="flex gap-2">
               <button
                 type="button"

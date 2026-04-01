@@ -6,6 +6,8 @@ import { formatCurrency } from "@/data/functions";
 import { BackLink } from "@/components/shared/BackLink";
 import { ActionButtons } from "./_components/ActionButtons";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export default async function PanelBarProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
@@ -63,8 +65,8 @@ export default async function PanelBarProductPage(
           className="bg-white rounded-xl border border-[#BFAE99]/20 p-5 shadow-sm space-y-4"
         >
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Nome</label>
-            <input
+            <Label className="text-sm text-zinc-600">Nome</Label>
+            <Input
               name="name"
               defaultValue={product.name}
               className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
@@ -72,8 +74,8 @@ export default async function PanelBarProductPage(
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Preço</label>
-            <input
+            <Label className="text-sm text-zinc-600">Preço</Label>
+            <Input
               name="price"
               type="number"
               step="0.01"
@@ -83,7 +85,7 @@ export default async function PanelBarProductPage(
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Categoria</label>
+            <Label className="text-sm text-zinc-600">Categoria</Label>
             <select
               name="category"
               defaultValue={product.category}
@@ -98,7 +100,7 @@ export default async function PanelBarProductPage(
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Descrição</label>
+            <Label className="text-sm text-zinc-600">Descrição</Label>
             <textarea
               name="description"
               defaultValue={product.description}
@@ -107,8 +109,8 @@ export default async function PanelBarProductPage(
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Imagem (URL)</label>
-            <input
+            <Label className="text-sm text-zinc-600">Imagem (URL)</Label>
+            <Input
               name="image"
               defaultValue={product.image}
               className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"

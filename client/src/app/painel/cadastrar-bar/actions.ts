@@ -7,8 +7,8 @@ import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-export async function uploadImage(file: File, productName: string) {
-    const slug = createSlug(productName);
+export async function uploadImage(file: File, barName: string) {
+    const slug = createSlug(barName);
     const randomSuffix = generateRandomString(6);
     const ext = file.name.split(".").pop() || "";
     const newFileName = `${slug}-${randomSuffix}${ext ? "." + ext : ""}`;

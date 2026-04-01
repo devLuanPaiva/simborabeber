@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { createTab } from "../actions";
 import { appToast } from "@/utils/toast-ui";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 export function CreateTabDialog() {
   const { slug } = useParams();
@@ -42,11 +44,11 @@ export function CreateTabDialog() {
 
         <form action={handleSubmit} className="space-y-5">
           <div className="space-y-1">
-            <label className="text-sm font-medium text-zinc-700">
-              Número da mesa
-            </label>
+            <Label className="text-sm font-medium text-zinc-700">
+              Número da mesa <span className="text-red-500">*</span>
+            </Label>
 
-            <input
+            <Input
               name="tableNumber"
               type="number"
               required
@@ -57,11 +59,11 @@ export function CreateTabDialog() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm font-medium text-zinc-700">
-              Nome do cliente
-            </label>
+            <Label className="text-sm font-medium text-zinc-700">
+              Nome do cliente <span className="text-red-500">*</span>
+            </Label>
 
-            <input
+            <Input
               name="customerName"
               type="text"
               placeholder="Ex: João"
