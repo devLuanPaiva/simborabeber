@@ -1,4 +1,4 @@
-import ProductDetail from "./_components/ProductDetail";
+import { ProductDetail } from "./_components/ProductDetail";
 import { notFound } from "next/navigation";
 import { ProductsByCategory } from "./_components/ProductsByCategory";
 import { ProductsByCategoryLoading } from "./_components/ProductsByCategoryLoading";

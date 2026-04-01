@@ -11,7 +11,7 @@ interface ProductProps {
   product: IProduct;
 }
 
-export default function ProductDetail({ product }: Readonly<ProductProps>) {
+export function ProductDetail({ product }: Readonly<ProductProps>) {
   const router = useRouter();
 
   return (
