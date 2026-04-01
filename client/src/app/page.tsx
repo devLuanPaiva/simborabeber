@@ -4,6 +4,7 @@ import { Features } from "@/components/landing/Features";
 import { Hero } from "@/components/landing/Hero";
 import { HowItWorks } from "@/components/landing/HowItWorks";
 import { Navbar } from "@/components/landing/Navbar";
+import { WaveCard } from "@/components/ui/weveCard";
 
 export default function HomePage() {
   return (
@@ -24,6 +25,7 @@ export default function HomePage() {
       <section className="py-8 w-full h-auto bg-[#fef2e4da] ">
         <Benefit />
       </section>
+      <WaveCard />
     </main>
   );
 }
