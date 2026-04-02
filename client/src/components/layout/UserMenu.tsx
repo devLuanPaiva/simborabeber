@@ -27,7 +27,7 @@ export default function UserMenu({ user }: Readonly<UserMenuProps>) {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
+      <DropdownMenuTrigger asChild>
         <button className="flex items-center gap-3">
           <Avatar className="w-8 h-8">
             {user?.image ? (
