@@ -5,6 +5,7 @@ export enum ProductCategory {
     NON_ALCOHOLIC = 'non_alcoholic',
     OTHER = 'other',
     SKEWER = 'skewer',
+    SOFT_DRINKS = 'soft_drinks',
 }
 
 export const ProductCategoryLabels: Record<ProductCategory, string> = {
@@ -14,6 +15,7 @@ export const ProductCategoryLabels: Record<ProductCategory, string> = {
     [ProductCategory.NON_ALCOHOLIC]: 'Não Alcoólicas',
     [ProductCategory.OTHER]: 'Outros',
     [ProductCategory.SKEWER]: 'Espetinhos',
+    [ProductCategory.SOFT_DRINKS]: 'Refrigerantes',
 }
 
 export interface IProduct {
