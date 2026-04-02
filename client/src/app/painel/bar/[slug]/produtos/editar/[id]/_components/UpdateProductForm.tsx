@@ -5,11 +5,7 @@ import { updateProduct } from "../actions";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  ProductCategory,
-  ProductCategoryLabels,
-  IProduct,
-} from "@/data/models";
+import { ProductCategoryLabels, IProduct } from "@/data/models";
 import {
   Select,
   SelectTrigger,
@@ -17,7 +13,7 @@ import {
   SelectItem,
   SelectValue,
 } from "@/components/ui/select";
-import React from "react";
+import React, { useState } from "react";
 
 type Props = {
   product: IProduct;
@@ -26,6 +22,7 @@ type Props = {
 };
 
 export function UpdateProductForm({ product, id, slug }: Readonly<Props>) {
+  const [category, setCategory] = useState<string>("");
   return (
     <form
       id="update-product-form"
