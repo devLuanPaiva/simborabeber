@@ -10,11 +10,12 @@ export const AccessPlanLabels: Record<AccessPlan, string> = {
     [AccessPlan.PREMIUM]: 'Premium',
 };
 
-export interface IBar{
+export interface IBar {
     id: string;
     name: string;
     slug: string;
     image?: string;
+    address: string;
     accessPlan: AccessPlan;
     isActive: boolean;
     createdAt: Date;

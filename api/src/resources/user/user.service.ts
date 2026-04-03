@@ -72,6 +72,31 @@ export class UserService {
     }
   }
 
+  async createAdminUser(name: string, email: string, password: string): Promise<Partial<UserEntity>> {
+    const existingUser = await this.userRepository.findByEmail(email)
+
+    if (existingUser) {
+      throw new ConflictException({
+        message: 'Email já está em uso',
+        field: 'email',
+        detail: `O email ${email} já está cadastrado`,
+      })
+    }
+
+    const hashedPassword = bcryptHashSync(password, 10)
+
+    const userPayload: Partial<UserEntity> = {
+      name,
+      email,
+      password: hashedPassword,
+      role: UserRole.ADMIN,
+    }
+
+    const user = await this.userRepository.createUser(userPayload)
+
+    return this.removePasswordAndBar(user)
+  }
+
   async findAll(actor?: JwtPayload): Promise<Partial<UserEntity>[]> {
     const users = await this.userRepository.findAll({ role: actor?.role as UserRole, id: actor?.sub })
 
@@ -124,12 +149,46 @@ export class UserService {
     return this.removePasswordAndBar(updatedUser)
   }
 
+  async toggleUserStatus(id: string): Promise<Partial<UserEntity>> {
+    try {
+      const user = await this.userRepository.findById(id)
+
+      if (!user) {
+        throw new NotFoundException({
+          message: 'Usuário não encontrado',
+          field: 'id',
+          detail: `Não existe usuário com id ${id}`,
+        })
+      }
+
+      const updated = await this.userRepository.toggleUserStatus(id)
+
+      if (!updated) {
+        throw new NotFoundException({
+          message: 'Usuário não encontrado',
+          field: 'id',
+          detail: `Não existe usuário com id ${id}`,
+        })
+      }
+
+      return this.removePasswordAndBar(updated)
+    } catch (error) {
+      if (error instanceof HttpException) throw error
+
+      throw new BadRequestException({
+        message: 'Erro ao alternar status do usuário',
+        detail: 'Falha ao persistir mudança de status no banco de dados',
+      })
+    }
+  }
+
   async remove(id: string): Promise<{ message: string }> {
     try {
       const user = await this.userRepository.findById(id)
 
       if (!user) {
         throw new NotFoundException({
+
           message: 'Usuário não encontrado',
           field: 'id',
           detail: `Não existe usuário com id ${id} para remoção`,

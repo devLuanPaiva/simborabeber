@@ -1,10 +1,11 @@
 import { Header } from "@/components/layout/Header";
-import { panelBarProductActions, updateProduct } from "./actions";
-import { ProductCategory, ProductCategoryLabels } from "@/data/models";
+import { panelBarProductActions } from "./actions";
+import { ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import { formatCurrency } from "@/data/functions";
 import { BackLink } from "@/components/shared/BackLink";
 import { ActionButtons } from "./_components/ActionButtons";
+import { UpdateProductForm } from "./_components/UpdateProductForm";
 import { Badge } from "@/components/ui/badge";
 
 export default async function PanelBarProductPage(
@@ -57,64 +58,7 @@ export default async function PanelBarProductPage(
           </Badge>
         </div>
 
-        <form
-          id="update-product-form"
-          action={updateProduct.bind(null, id, slug)}
-          className="bg-white rounded-xl border border-[#BFAE99]/20 p-5 shadow-sm space-y-4"
-        >
-          <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Nome</label>
-            <input
-              name="name"
-              defaultValue={product.name}
-              className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Preço</label>
-            <input
-              name="price"
-              type="number"
-              step="0.01"
-              defaultValue={product.price}
-              className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Categoria</label>
-            <select
-              name="category"
-              defaultValue={product.category}
-              className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
-            >
-              {Object.values(ProductCategory).map((cat) => (
-                <option key={cat} value={cat}>
-                  {ProductCategoryLabels[cat]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Descrição</label>
-            <textarea
-              name="description"
-              defaultValue={product.description}
-              className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="text-sm text-zinc-600">Imagem (URL)</label>
-            <input
-              name="image"
-              defaultValue={product.image}
-              className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40 outline-none"
-            />
-          </div>
-        </form>
+        <UpdateProductForm product={product} id={id} slug={slug} />
 
         <div className="flex flex-col gap-3 pt-2">
           <button

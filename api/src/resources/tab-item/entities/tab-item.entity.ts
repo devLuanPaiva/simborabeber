@@ -21,6 +21,7 @@ export class TabItemEntity {
 
     @ManyToOne(() => TabEntity, tab => tab.items, {
         nullable: false,
+        onDelete: 'CASCADE',
     })
 
     @JoinColumn({ name: 'tab_id' })

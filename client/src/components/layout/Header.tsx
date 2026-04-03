@@ -1,8 +1,9 @@
-"use server"
+"use server";
 import { IBar, UserRole, UserRolesLabels } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { getUser } from "@/lib/auth/getUser";
-import { UtensilsCrossed, User } from "lucide-react";
+import { UtensilsCrossed } from "lucide-react";
+import UserMenu from "@/components/layout/UserMenu";
 import Image from "next/image";
 
 interface HeaderProps {
@@ -45,16 +46,14 @@ export async function Header({ slug_bar }: Readonly<HeaderProps>) {
             <p className="text-xs text-zinc-500">/{bar?.slug}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="bg-[#F2F2F2] p-2 rounded-full">
-            <User size={18} />
-          </div>
-          <div className="text-right leading-tight">
-            <p className="text-sm font-semibold text-zinc-800">{user?.name}</p>
-            <p className="text-xs text-zinc-500">
-              {UserRolesLabels[user?.role as UserRole]}
-            </p>
-          </div>
+        <div>
+          <UserMenu
+            user={{
+              name: user?.name,
+              image: (user as any)?.image,
+              role: UserRolesLabels[user?.role as UserRole],
+            }}
+          />
         </div>
       </div>
     </header>

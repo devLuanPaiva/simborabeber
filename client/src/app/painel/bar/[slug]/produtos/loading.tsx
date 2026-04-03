@@ -5,7 +5,7 @@ export default function Loading() {
     <main className="min-h-screen bg-[#F2F2F2] animate-pulse">
       <Header slug_bar="..." />
 
-      <div className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30">
+      <div className="sticky top-0 z-50 bg-white border-b border-[#BFAE99]/30  md:flex md:justify-center">
         <div className="flex gap-3 p-3 overflow-x-auto">
           {Array.from({ length: 5 }).map((_, i) => (
             <div

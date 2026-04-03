@@ -6,6 +6,16 @@ import { createProduct, uploadImage } from "../actions";
 import { ProductCategoryLabels } from "@/data/models/IProduct";
 import { appToast } from "@/utils/toast-ui";
 import { FileUpload } from "@/components/ui/file-upload";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 type ProductRegistrationFormProps = {
   slug: string;
@@ -18,16 +28,17 @@ export function ProductRegistrationForm({
   const [imageUrl, setImageUrl] = useState<string>("");
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [productName, setProductName] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
 
   async function handleUpload(file: File) {
     try {
       setLoadingUpload(true);
-      const url = await uploadImage(file, productName);
-      setImageUrl(url ?? "");
-    } catch (err) {
-      console.error("Upload error:", err);
-      appToast.error("Erro ao enviar imagem");
-      setImageUrl("");
+      const response = await uploadImage(file, productName);
+      if (response.success) {
+        setImageUrl(response.url);
+      } else {
+        appToast.error(response.error || "Erro ao fazer upload da imagem");
+      }
     } finally {
       setLoadingUpload(false);
     }
@@ -58,10 +69,10 @@ export function ProductRegistrationForm({
       className="bg-white p-5 rounded-xl border border-[#BFAE99]/20 shadow-sm space-y-5"
     >
       <div className="space-y-1">
-        <label htmlFor="productName" className="text-sm text-zinc-600">
-          Nome
-        </label>
-        <input
+        <Label htmlFor="productName" className="text-sm text-zinc-600">
+          Nome <span className="text-red-500">*</span>
+        </Label>
+        <Input
           id="productName"
           name="productName"
           value={productName}
@@ -73,10 +84,10 @@ export function ProductRegistrationForm({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="space-y-1">
-          <label htmlFor="price" className="text-sm text-zinc-600">
-            Preço
-          </label>
-          <input
+          <Label htmlFor="price" className="text-sm text-zinc-600">
+            Preço <span className="text-red-500">*</span>
+          </Label>
+          <Input
             id="price"
             name="price"
             type="number"
@@ -86,33 +97,34 @@ export function ProductRegistrationForm({
           />
         </div>
         <div className="space-y-1">
-          <label htmlFor="category" className="text-sm text-zinc-600">
-            Categoria
-          </label>
-          <select
-            id="category"
-            name="category"
-            required
-            defaultValue=""
-            className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
-          >
-            <option value="" disabled>
-              Selecione uma categoria
-            </option>
-            {Object.entries(ProductCategoryLabels).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Label htmlFor="category" className="text-sm text-zinc-600">
+            Categoria <span className="text-red-500">*</span>
+          </Label>
+          <div>
+            <Select onValueChange={(val) => setCategory(val)} value={category}>
+              <SelectTrigger className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40">
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+
+              <SelectContent>
+                {Object.entries(ProductCategoryLabels).map(([value, Label]) => (
+                  <SelectItem key={value} value={value}>
+                    {Label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            <input type="hidden" name="category" value={category} required />
+          </div>
         </div>
       </div>
 
       <div className="space-y-1">
-        <label htmlFor="description" className="text-sm text-zinc-600">
-          Descrição
-        </label>
-        <textarea
+        <Label htmlFor="description" className="text-sm text-zinc-600">
+          Descrição <span className="text-red-500">*</span>
+        </Label>
+        <Textarea
           id="description"
           name="description"
           required
@@ -121,19 +133,24 @@ export function ProductRegistrationForm({
       </div>
 
       <div className="space-y-2">
-        <label htmlFor="imageInput" className="text-sm text-zinc-600">
-          Imagem
-        </label>
-
+        <Label htmlFor="imageInput" className="text-sm text-zinc-600">
+          Imagem <span className="text-red-500">*</span>
+        </Label>
+        {!productName.trim() && (
+          <p className="text-sm text-red-500">
+            Digite o nome do produto para habilitar as opções de imagem
+          </p>
+        )}
         <div className="flex gap-2">
           <button
             type="button"
             disabled={!productName.trim()}
             onClick={() => handleImageModeChange("upload")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${imageMode === "upload"
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              imageMode === "upload"
                 ? "bg-[#F2A20C] text-white"
                 : "bg-white text-zinc-600"
-              }`}
+            }`}
           >
             <Upload size={16} /> Upload
           </button>
@@ -142,10 +159,11 @@ export function ProductRegistrationForm({
             type="button"
             disabled={!productName.trim()}
             onClick={() => handleImageModeChange("url")}
-            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${imageMode === "url"
+            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg border cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+              imageMode === "url"
                 ? "bg-[#F2A20C] text-white"
                 : "bg-white text-zinc-600"
-              }`}
+            }`}
           >
             <LinkIcon size={16} /> URL
           </button>
@@ -155,7 +173,11 @@ export function ProductRegistrationForm({
       {imageMode === "upload" && (
         <div className="grid grid-cols-1 md:grid-cols-[1fr_180px] gap-4 items-start">
           <div className="space-y-2">
-            <div className={productName.trim() ? "" : "opacity-50 pointer-events-none"}>
+            <div
+              className={
+                productName.trim() ? "" : "opacity-50 pointer-events-none"
+              }
+            >
               <FileUpload
                 onChange={(files) => {
                   const file = files?.[0];
@@ -186,7 +208,7 @@ export function ProductRegistrationForm({
       )}
 
       {imageMode === "url" && (
-        <input
+        <Input
           id="imageInput"
           type="text"
           placeholder="https://..."
@@ -207,7 +229,7 @@ export function ProductRegistrationForm({
         </div>
       )}
 
-      <input type="hidden" name="imageUrl" value={imageUrl} />
+      <Input type="hidden" name="imageUrl" value={imageUrl} />
 
       <button
         type="submit"
