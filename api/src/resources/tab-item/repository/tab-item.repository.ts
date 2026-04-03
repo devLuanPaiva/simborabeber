@@ -12,6 +12,17 @@ export class TabItemsRepository {
         private readonly repository: Repository<TabItemEntity>,
     ) { }
 
+    private mapTabItemEntity(item: TabItemEntity): TabItemEntity {
+        const result = new TabItemEntity();
+        result.id = item.id;
+        result.name = item.name;
+        result.price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
+        result.quantity = typeof item.quantity === 'string' ? Number.parseInt(item.quantity) : item.quantity;
+        result.createdAt = item.createdAt;
+        result.updatedAt = item.updatedAt;
+        result.waiterAdded = item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined;
+        return result;
+    }
 
     async createItemByTab(tabId: string, itemData: Partial<TabItemEntity>, userId: string): Promise<TabItemEntity> {
         return this.repository.manager.transaction(async manager => {
@@ -32,7 +43,7 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + addedValue;
             await tabRepo.save(tab);
 
-            return saved;
+            return this.mapTabItemEntity(saved);
         });
     }
 
@@ -57,7 +68,7 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + addedValue;
             await tabRepo.save(tab);
 
-            return saved;
+            return saved.map((s) => this.mapTabItemEntity(s));
         });
     }
 
@@ -79,17 +90,7 @@ export class TabItemsRepository {
             .addOrderBy('item.created_at', 'DESC')
             .getRawMany();
 
-        return rows.map((r) => {
-            const item = new TabItemEntity();
-            item.id = r.id;
-            item.name = r.name;
-            item.price = Number.parseFloat(r.price)
-            item.quantity = typeof r.quantity === 'string' ? Number.parseInt(r.quantity) : r.quantity;
-            item.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
-            item.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
-            item.waiterAdded = r.waiterAddedId ? ({ id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity) : undefined;
-            return item;
-        });
+        return rows.map((r) => this.mapTabItemEntity(r));
 
     }
 
@@ -116,7 +117,7 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + diff;
             await tabRepo.save(tab);
 
-            return savedItem;
+            return this.mapTabItemEntity(savedItem);
         });
     }
 
