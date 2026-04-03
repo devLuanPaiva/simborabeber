@@ -10,14 +10,30 @@ export class ProductRepository {
         private readonly repository: Repository<ProductEntity>
     ) { }
 
+    private mapProductEntity(product: ProductEntity): ProductEntity {
+        const result = new ProductEntity();
+        result.id = product.id;
+        result.name = product.name;
+        result.description = product.description;
+        result.image = product.image;
+        result.price = typeof product.price === 'string' ? Number.parseFloat(product.price) : product.price;
+        result.category = product.category;
+        result.isActive = product.isActive;
+        result.createdAt = product.createdAt;
+        result.updatedAt = product.updatedAt;
+        return result;
+    }
+
     async createProduct(product: Partial<ProductEntity>): Promise<ProductEntity> {
         const entity = this.repository.create(product)
-        return this.repository.save(entity)
+        const saved = await this.repository.save(entity)
+        return this.mapProductEntity(saved)
     }
 
     async createProducts(products: Partial<ProductEntity>[]): Promise<ProductEntity[]> {
         const entities = this.repository.create(products)
-        return this.repository.save(entities)
+        const saved = await this.repository.save(entities)
+        return saved.map((s) => this.mapProductEntity(s))
     }
 
     async findAllByBarSlug(slug: string, category?: string): Promise<ProductEntity[]> {
@@ -39,24 +55,12 @@ export class ProductRepository {
             queryBuilder.andWhere('product.category = :category', { category })
         }
 
-        const rows = await queryBuilder
+        const rows: ProductEntity[] = await queryBuilder
             .orderBy("LOWER(unaccent(product.name))", 'ASC')
             .addOrderBy('product.created_at', 'DESC')
             .getRawMany();
 
-        return rows.map((r) => {
-            const p = new ProductEntity();
-            p.id = r.id;
-            p.name = r.name;
-            p.description = r.description;
-            p.image = r.image;
-            p.price = typeof r.price === 'string' ? Number.parseFloat(r.price) : r.price;
-            p.category = r.category;
-            p.isActive = r.isActive;
-            p.createdAt = r.createdAt ? new Date(r.createdAt) : undefined;
-            p.updatedAt = r.updatedAt ? new Date(r.updatedAt) : undefined;
-            return p;
-        })
+        return rows.map((r) => this.mapProductEntity(r))
     }
 
     async findById(id: string): Promise<ProductEntity | null> {
@@ -70,7 +74,8 @@ export class ProductRepository {
         if (!entity) {
             throw new NotFoundException({ message: 'Produto não encontrado', field: 'id', detail: `Produto com id ${id} não encontrado` })
         }
-        return this.repository.save(entity)
+        const updated = await this.repository.save(entity)
+        return this.mapProductEntity(updated)
     }
 
     async deleteProduct(id: string): Promise<void> {
@@ -87,6 +92,7 @@ export class ProductRepository {
             throw new NotFoundException({ message: 'Produto não encontrado', field: 'id', detail: `Produto com id ${id} não encontrado` })
         }
         product.isActive = !product.isActive;
-        return this.repository.save(product)
+        const updated = await this.repository.save(product)
+        return this.mapProductEntity(updated)
     }
 }
