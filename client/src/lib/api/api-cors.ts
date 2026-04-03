@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { apiError } from "./api-error";
 
 const allowedOrigins = new Set([
-    "http://localhost:3000",
+    "https://simborabeber.com.br",
+    "https://www.simborabeber.com.br",
+    
 ]);
 
 export function getCorsHeaders(origin: string | null) {
