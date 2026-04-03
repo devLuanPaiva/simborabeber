@@ -50,7 +50,7 @@ export async function Header({ slug_bar }: Readonly<HeaderProps>) {
           <UserMenu
             user={{
               name: user?.name,
-              image: (user as any)?.image,
+              image: undefined,
               role: UserRolesLabels[user?.role as UserRole],
             }}
           />
