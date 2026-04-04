@@ -9,9 +9,9 @@ export async function TabsList({ slug }: Readonly<{ slug: string }>) {
 
   const isEmpty = tabs.length === 0;
   return (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col items-center w-full">
       {!isEmpty && (
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <section className="w-full grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tabs.map((tab) => (
             <TabCard key={tab.id} tab={tab} slug={slug} />
           ))}
