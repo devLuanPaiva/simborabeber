@@ -23,6 +23,13 @@ async function tryRefreshAccessToken(refreshToken: string): Promise<string | nul
 }
 
 export async function proxy(request: NextRequest) {
+    const host = request.headers.get("host")
+
+    if (host === "painel.simborabeber.com.br") {
+        return NextResponse.redirect(
+            new URL("https://simborabeber.com.br/acessar")
+        )
+    }
 
     const accessToken = request.cookies.get("accessToken")?.value
     const refreshToken = request.cookies.get("refreshToken")?.value
