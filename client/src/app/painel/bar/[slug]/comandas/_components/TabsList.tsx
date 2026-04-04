@@ -1,7 +1,8 @@
-import { ChevronLeft, PackageOpen, Plus } from "lucide-react";
+import { ChevronLeft, PackageOpen} from "lucide-react";
 import { tabsPanelBarActions } from "../actions";
 import { TabCard } from "./TabCard";
 import Link from "next/link";
+import { CreateTabDialog } from "./CreateTabDialog";
 
 export async function TabsList({ slug }: Readonly<{ slug: string }>) {
   const tabs = await tabsPanelBarActions(slug);
@@ -41,13 +42,7 @@ export async function TabsList({ slug }: Readonly<{ slug: string }>) {
               Voltar
             </Link>
 
-            <Link
-              href={`/painel/bar/${slug}/comandas/cadastrar`}
-              className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white px-4 py-2 rounded-lg text-sm font-semibold"
-            >
-              <Plus size={16} />
-              Criar Comanda
-            </Link>
+            <CreateTabDialog />
 
           </div>
         </div>
