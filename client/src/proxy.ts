@@ -27,7 +27,7 @@ export async function proxy(request: NextRequest) {
 
     if (host === "painel.simborabeber.com.br") {
         return NextResponse.redirect(
-            new URL("https://simborabeber.com.br/acessar")
+            new URL("https://www.simborabeber.com.br/acessar")
         )
     }
 
@@ -67,5 +67,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/painel/:path*"]
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
 }
