@@ -1,33 +1,39 @@
-"use server"
 import { IBar, IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 
 export async function BarActions(slug: string) {
-    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
+    try {
 
-    const response_bar = await fetch(`${base_url}/bar/${slug}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 3600,
-        }
-    });
+        const base_url = process.env.NEXT_PUBLIC_BASE_URL;
 
-    const data_bar: ApiResponse<IBar> = await response_bar.json();
+        const response_bar = await fetch(`${base_url}/bar/${slug}`, {
+            cache: "force-cache",
+            next: {
+                revalidate: 3600,
+            }
+        });
 
-    const bar = data_bar.results
+        const data_bar: ApiResponse<IBar> = await response_bar.json();
 
-    const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 3600,
-        }
-    });
+        const bar = data_bar.results
 
-    const data_products: ApiResponse<IProduct[]> = await response_products.json();
+        const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
+            cache: "force-cache",
+            next: {
+                revalidate: 3600,
+            }
+        });
 
-    const products_results = data_products.results;
+        const data_products: ApiResponse<IProduct[]> = await response_products.json();
 
-    const products = products_results.filter(p => p.isActive)
+        const products_results = data_products.results;
 
-    return { bar, products };
+        const products = products_results.filter(p => p.isActive)
+
+        return { bar, products };
+    }
+    catch (error) {
+        console.error("Erro ao buscar dados do bar:", error);
+        return { bar: null, products: [] };
+    }
 }
