@@ -9,11 +9,12 @@ import { BarModule } from './resources/bar/bar.module';
 import { ProductModule } from './resources/product/product.module';
 import { TabModule } from './resources/tab/tab.module';
 import { TabItemModule } from './resources/tab-item/tab-item.module';
+import { ReportsModule } from './resources/reports/reports.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule],
+  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule, ReportsModule],
   controllers: [AppController],
   providers: [AppService],
 })
