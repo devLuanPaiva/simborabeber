@@ -3,7 +3,7 @@ import { getBares } from "./actions";
 import { BarsList } from "./_components/BaresList";
 
 export default async function BaresPage() {
-     const bars = await  getBares();
+  const bars = await getBares();
 
   return (
     <main className="min-h-screen  p-8">

@@ -1,5 +1,6 @@
 import Menu from "@/components/shared/Menu";
 import { BarActions } from "./actions";
+import { IBar } from "@/data/models";
 
 export default async function BarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -10,7 +11,7 @@ export default async function BarPage(
 
   return (
     <main className="min-h-screen">
-      <Menu bar={bar} products={products} mode="client" />
+      <Menu bar={bar as IBar} products={products} mode="client" />
     </main>
   );
 }
