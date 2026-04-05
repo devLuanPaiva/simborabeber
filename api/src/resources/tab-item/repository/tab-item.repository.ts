@@ -12,7 +12,7 @@ export class TabItemsRepository {
         private readonly repository: Repository<TabItemEntity>,
     ) { }
 
-    private mapTabItemEntity(item: TabItemEntity): TabItemEntity {
+    private mapTabItemEntity(item: TabItemEntity, waiterAdded?: UserEntity): TabItemEntity {
         const result = new TabItemEntity();
         result.id = item.id;
         result.name = item.name;
@@ -20,7 +20,7 @@ export class TabItemsRepository {
         result.quantity = typeof item.quantity === 'string' ? Number.parseInt(item.quantity) : item.quantity;
         result.createdAt = item.createdAt;
         result.updatedAt = item.updatedAt;
-        result.waiterAdded = item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined;
+        result.waiterAdded = waiterAdded || (item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined);
         return result;
     }
 
@@ -90,7 +90,7 @@ export class TabItemsRepository {
             .addOrderBy('item.created_at', 'DESC')
             .getRawMany();
 
-        return rows.map((r) => this.mapTabItemEntity(r));
+        return rows.map((r) => this.mapTabItemEntity(r, r.waiterAddedId ? { id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity : undefined));
 
     }
 
