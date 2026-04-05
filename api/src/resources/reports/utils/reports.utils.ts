@@ -1,4 +1,5 @@
 import { TabEntity, TabStatus } from "src/resources/tab/entities/tab.entity";
+import { DayOfWeekSalesDto } from "../dto/weekly-sales-comparison.dto";
 
 export const filterClosedTabs = (tabs: TabEntity[]): TabEntity[] => {
     return tabs.filter((tab) => tab.status === TabStatus.CLOSED);
@@ -52,4 +53,54 @@ export const getStartOfDay = (date: Date): Date => {
     const brazilDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
     brazilDate.setUTCHours(0, 0, 0, 0);
     return brazilDate;
+}
+
+
+export const getWeekDayNumber = (date: Date): number => {
+    const brazilDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    return brazilDate.getUTCDay();
+}
+
+
+export const getWeekDayName = (dayNumber: number): string => {
+    const daysInPortuguese: Record<number, string> = {
+        0: 'Domingo',
+        1: 'Segunda-feira',
+        2: 'Terça-feira',
+        3: 'Quarta-feira',
+        4: 'Quinta-feira',
+        5: 'Sexta-feira',
+        6: 'Sábado',
+    };
+    return daysInPortuguese[dayNumber] || '';
+}
+
+
+export const filterTabsByDayOfWeek = (closedTabs: TabEntity[], dayNumber: number): TabEntity[] => {
+    return closedTabs.filter((tab) => {
+        if (!tab.closedAt) {
+            return false;
+        }
+        return getWeekDayNumber(new Date(tab.closedAt)) === dayNumber;
+    });
+}
+
+
+export const calculateWeeklySalesData = (closedTabs: TabEntity[]): DayOfWeekSalesDto[] => {
+    const weeklySalesData: DayOfWeekSalesDto[] = [];
+
+    for (let dayNumber = 0; dayNumber < 7; dayNumber++) {
+        const dayTabs = filterTabsByDayOfWeek(closedTabs, dayNumber);
+        const dayRevenue = calculateTotalRevenue(dayTabs);
+        const dayTabsCount = dayTabs.length;
+
+        weeklySalesData.push({
+            dayOfWeek: getWeekDayName(dayNumber),
+            dayNumber,
+            totalRevenue: dayRevenue,
+            closedTabsCount: dayTabsCount,
+        });
+    }
+
+    return weeklySalesData;
 }

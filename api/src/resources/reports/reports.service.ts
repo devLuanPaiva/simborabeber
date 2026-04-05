@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TabRepository } from '../tab/repository/tab.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs } from './utils/reports.utils';
+import { WeeklySalesComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData } from './utils/reports.utils';
 
 @Injectable()
 export class ReportsService {
@@ -41,4 +42,23 @@ export class ReportsService {
         };
     }
 
+ 
+    async calculateWeeklySalesComparison(slug: string): Promise<WeeklySalesComparisonDto> {
+        const bar = await this.barRepository.findBySlug(slug);
+
+        if (!bar) {
+            throw new NotFoundException({
+                message: 'Bar não encontrado',
+                details: `Nenhum bar foi encontrado com o slug "${slug}".`
+            });
+        }
+
+        const tabs = await this.tabRepository.findThemAllByBarSlug(slug);
+        const closedTabs = filterClosedTabs(tabs);
+        const weeklySalesData = calculateWeeklySalesData(closedTabs);
+
+        return {
+            days: weeklySalesData,
+        };
+    }
 }
