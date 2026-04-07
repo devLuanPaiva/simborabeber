@@ -1,4 +1,5 @@
 import { IUser } from "./IUser";
+import { ProductCategory } from "./IProduct";
 
 export enum TabStatus {
     OPEN = 'open',
@@ -32,4 +33,5 @@ export interface ITabItem {
     waiterAdded: Partial<IUser>;
     createdAt: Date;
     updatedAt: Date;
+    category: ProductCategory;
 }
