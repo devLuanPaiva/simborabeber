@@ -104,3 +104,56 @@ export const calculateWeeklySalesData = (closedTabs: TabEntity[]): DayOfWeekSale
 
     return weeklySalesData;
 }
+
+
+export const getWeekOfMonthNumber = (date: Date): number => {
+    const brazilDate = new Date(date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const dayOfMonth = brazilDate.getUTCDate();
+    return Math.ceil(dayOfMonth / 7);
+}
+
+
+export const filterTabsByWeekOfMonth = (closedTabs: TabEntity[], weekNumber: number, year: number, month: number): TabEntity[] => {
+    return closedTabs.filter((tab) => {
+        if (!tab.closedAt) {
+            return false;
+        }
+
+        const closedDate = new Date(tab.closedAt);
+        const brazilDate = new Date(closedDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+        const closedYear = brazilDate.getUTCFullYear();
+        const closedMonth = brazilDate.getUTCMonth();
+
+        if (closedYear !== year || closedMonth !== month) {
+            return false;
+        }
+
+        return getWeekOfMonthNumber(new Date(tab.closedAt)) === weekNumber;
+    });
+}
+
+
+export const calculateMonthlyWeeklySalesData = (closedTabs: TabEntity[], year: number, month: number) => {
+    const monthlyData = [] as Array<{
+        weekLabel: string;
+        weekNumber: number;
+        totalRevenue: number;
+        closedTabsCount: number;
+    }>;
+
+    // weeks 1..5 (ceil(day/7) yields max 5)
+    for (let week = 1; week <= 5; week++) {
+        const weekTabs = filterTabsByWeekOfMonth(closedTabs, week, year, month);
+        const weekRevenue = calculateTotalRevenue(weekTabs);
+        const weekTabsCount = weekTabs.length;
+
+        monthlyData.push({
+            weekLabel: `Semana ${week}`,
+            weekNumber: week,
+            totalRevenue: weekRevenue,
+            closedTabsCount: weekTabsCount,
+        });
+    }
+
+    return monthlyData;
+}

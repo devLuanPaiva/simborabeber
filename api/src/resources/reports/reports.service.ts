@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TabRepository } from '../tab/repository/tab.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { WeeklySalesComparisonDto } from './dto/weekly-sales-comparison.dto';
-import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData } from './utils/reports.utils';
+import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData } from './utils/reports.utils';
+import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto } from './dto/weekly-sales-comparison.dto';
 
 @Injectable()
 export class ReportsService {
@@ -42,7 +42,7 @@ export class ReportsService {
         };
     }
 
- 
+
     async calculateWeeklySalesComparison(slug: string): Promise<WeeklySalesComparisonDto> {
         const bar = await this.barRepository.findBySlug(slug);
 
@@ -59,6 +59,32 @@ export class ReportsService {
 
         return {
             days: weeklySalesData,
+        };
+    }
+
+
+    async calculateMonthlyWeeklyComparison(slug: string): Promise<MonthlyWeeklyComparisonDto> {
+        const bar = await this.barRepository.findBySlug(slug);
+
+        if (!bar) {
+            throw new NotFoundException({
+                message: 'Bar não encontrado',
+                details: `Nenhum bar foi encontrado com o slug "${slug}".`
+            });
+        }
+
+        const tabs = await this.tabRepository.findThemAllByBarSlug(slug);
+        const closedTabs = filterClosedTabs(tabs);
+
+        const now = new Date();
+        const brazilNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+        const year = brazilNow.getUTCFullYear();
+        const month = brazilNow.getUTCMonth();
+
+        const monthlyWeeklyData = calculateMonthlyWeeklySalesData(closedTabs, year, month);
+
+        return {
+            weeks: monthlyWeeklyData,
         };
     }
 }
