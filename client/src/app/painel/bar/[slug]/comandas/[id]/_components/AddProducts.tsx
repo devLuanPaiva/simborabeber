@@ -40,6 +40,7 @@ export function AddProducts({
         name: product?.name || "Produto Desconecido",
         price: product?.price || 0,
         quantity,
+        category: product?.category || "other",
       };
     });
 
@@ -49,6 +50,7 @@ export function AddProducts({
       formData.append("name", items[0].name);
       formData.append("price", String(items[0].price));
       formData.append("quantity", String(items[0].quantity));
+      formData.append("category", items[0].category);
       try {
         const res = await addTabItem({ slug, tabId, formData });
         if (res?.success) {
@@ -89,7 +91,7 @@ export function AddProducts({
         className="w-full p-2 border rounded-md"
       />
 
-      <div className="space-y-2 max-h-[550px] overflow-y-auto divide-y-4 divide-slate-200">
+      <div className="space-y-2 max-h-137.5 overflow-y-auto divide-y-4 divide-slate-200">
         {filtered.map((product: IProduct) => (
           <div
             key={product.id}

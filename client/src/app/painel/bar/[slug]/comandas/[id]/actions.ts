@@ -1,5 +1,5 @@
 "use server"
-import { IProduct, ITab, ITabItem } from "@/data/models";
+import { IProduct, ITab, ITabItem, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPatch } from "@/lib/api/serverPatch";
@@ -51,12 +51,15 @@ export async function addTabItem({ slug, tabId, formData }: Readonly<ICreateTab>
     const name = String(formData.get("name"))
     const price = Number(formData.get("price"))
     const quantity = Number(formData.get("quantity"))
+    const category = String(formData.get("category"))
 
     try {
         const response = await serverPost(`/tab-item/by-tab/${tabId}`, {
             name,
             price,
             quantity,
+            category
+
         });
 
         const data = await response.json().catch(() => ({}));
@@ -103,12 +106,13 @@ export async function addTabItems({ slug, tabId, formData }: Readonly<ICreateTab
 
                 const rawQuantity = obj.quantity;
                 const quantity = rawQuantity
+                const category: ProductCategory = typeof obj.category === "string" && Object.values(ProductCategory).includes(obj.category as ProductCategory) ? obj.category as ProductCategory : ProductCategory.OTHER;
 
                 if (!name) continue;
                 if (!Number.isFinite(price)) continue;
                 if (!Number.isFinite(quantity)) continue;
 
-                items.push({ name, price, quantity } as ITabItem);
+                items.push({ name, price, quantity, category } as ITabItem);
             }
         }
     } catch {
