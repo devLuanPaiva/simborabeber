@@ -1,5 +1,6 @@
 import { TabEntity, TabStatus } from "src/resources/tab/entities/tab.entity";
 import { DayOfWeekSalesDto } from "../dto/weekly-sales-comparison.dto";
+import { ProductCategory } from "src/resources/product/entities/product.entity";
 
 export const filterClosedTabs = (tabs: TabEntity[]): TabEntity[] => {
     return tabs.filter((tab) => tab.status === TabStatus.CLOSED);
@@ -207,4 +208,58 @@ export const calculateLastNMonthsSalesData = (closedTabs: TabEntity[], reference
     }
 
     return monthsData;
+}
+
+
+export type CategoryComparisonItem = {
+    category: ProductCategory;
+    totalRevenue: number;
+    totalCount: number;
+    percentage: number;
+}
+
+export const calculateCategoryComparison = (closedTabs: TabEntity[]): CategoryComparisonItem[] => {
+    const categories = Object.values(ProductCategory) as ProductCategory[];
+
+    const map: Record<string, { revenue: number; count: number }> = {};
+    categories.forEach((c) => {
+        map[c] = { revenue: 0, count: 0 };
+    });
+
+    let totalRevenue = 0;
+
+    closedTabs.forEach((tab) => {
+        if (!tab.items || tab.items.length === 0) {
+            return;
+        }
+
+        tab.items.forEach((item) => {
+            const price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
+            const qty = typeof item.quantity === 'string' ? Number.parseInt(item.quantity, 10) : item.quantity;
+            const value = price * qty;
+            const category: ProductCategory = item.category ?? ProductCategory.OTHER;
+
+            if (!map[category]) {
+                map[category] = { revenue: 0, count: 0 };
+            }
+
+            map[category].revenue += value;
+            map[category].count += qty;
+            totalRevenue += value;
+        });
+    });
+
+    const result: CategoryComparisonItem[] = categories.map((c) => {
+        const data = map[c] || { revenue: 0, count: 0 };
+        const percentage = totalRevenue > 0 ? Number(((data.revenue / totalRevenue) * 100).toFixed(2)) : 0;
+
+        return {
+            category: c,
+            totalRevenue: Number(data.revenue.toFixed(2)),
+            totalCount: data.count,
+            percentage,
+        };
+    });
+
+    return result;
 }

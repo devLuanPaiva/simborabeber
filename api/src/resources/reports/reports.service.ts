@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TabRepository } from '../tab/repository/tab.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData } from './utils/reports.utils';
-import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData, calculateCategoryComparison } from './utils/reports.utils';
+import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto, CategoryComparisonDto } from './dto/weekly-sales-comparison.dto';
 
 @Injectable()
 export class ReportsService {
@@ -109,6 +109,27 @@ export class ReportsService {
 
         return {
             months: monthsData,
+        };
+    }
+
+
+    async calculateCategoryComparison(slug: string): Promise<CategoryComparisonDto> {
+        const bar = await this.barRepository.findBySlug(slug);
+
+        if (!bar) {
+            throw new NotFoundException({
+                message: 'Bar não encontrado',
+                details: `Nenhum bar foi encontrado com o slug "${slug}".`
+            });
+        }
+
+        const tabs = await this.tabRepository.findThemAllByBarSlug(slug);
+        const closedTabs = filterClosedTabs(tabs);
+
+        const categories = calculateCategoryComparison(closedTabs);
+
+        return {
+            categories,
         };
     }
 }

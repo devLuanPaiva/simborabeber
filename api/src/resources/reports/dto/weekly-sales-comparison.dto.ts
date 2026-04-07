@@ -44,3 +44,20 @@ export class MonthSalesDto {
 export class LastMonthsComparisonDto {
     months: MonthSalesDto[];
 }
+
+
+import { ProductCategory } from "src/resources/product/entities/product.entity";
+
+export class CategoryComparisonItemDto {
+    category: ProductCategory;
+
+    totalRevenue: number;
+
+    totalCount: number;
+
+    percentage: number;
+}
+
+export class CategoryComparisonDto {
+    categories: CategoryComparisonItemDto[];
+}
