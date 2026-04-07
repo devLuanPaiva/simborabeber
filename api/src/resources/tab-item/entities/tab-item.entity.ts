@@ -1,3 +1,4 @@
+import { ProductCategory } from "../../product/entities/product.entity";
 import { TabEntity } from "../../tab/entities/tab.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
@@ -18,6 +19,13 @@ export class TabItemEntity {
 
     @Column({ type: 'integer' })
     quantity: number;
+
+    @Column({
+        type: 'enum',
+        default: ProductCategory.OTHER,
+        enum: ProductCategory,
+    })
+    category: ProductCategory;
 
     @ManyToOne(() => TabEntity, tab => tab.items, {
         nullable: false,
