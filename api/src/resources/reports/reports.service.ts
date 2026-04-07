@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { TabRepository } from '../tab/repository/tab.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData } from './utils/reports.utils';
-import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData } from './utils/reports.utils';
+import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
 
 @Injectable()
 export class ReportsService {
@@ -85,6 +85,30 @@ export class ReportsService {
 
         return {
             weeks: monthlyWeeklyData,
+        };
+    }
+
+
+    async calculateLastSixMonthsComparison(slug: string): Promise<LastMonthsComparisonDto> {
+        const bar = await this.barRepository.findBySlug(slug);
+
+        if (!bar) {
+            throw new NotFoundException({
+                message: 'Bar não encontrado',
+                details: `Nenhum bar foi encontrado com o slug "${slug}".`
+            });
+        }
+
+        const tabs = await this.tabRepository.findThemAllByBarSlug(slug);
+        const closedTabs = filterClosedTabs(tabs);
+
+        const now = new Date();
+        const brazilNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+
+        const monthsData = calculateLastNMonthsSalesData(closedTabs, brazilNow, 6);
+
+        return {
+            months: monthsData,
         };
     }
 }

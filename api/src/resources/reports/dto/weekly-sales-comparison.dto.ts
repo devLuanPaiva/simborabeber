@@ -28,3 +28,19 @@ export class WeekOfMonthSalesDto {
 export class MonthlyWeeklyComparisonDto {
     weeks: WeekOfMonthSalesDto[];
 }
+
+export class MonthSalesDto {
+    monthLabel: string;
+
+    year: number;
+
+    month: number;
+
+    totalRevenue: number;
+
+    closedTabsCount: number;
+}
+
+export class LastMonthsComparisonDto {
+    months: MonthSalesDto[];
+}

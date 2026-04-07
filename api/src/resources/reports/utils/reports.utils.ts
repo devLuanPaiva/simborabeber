@@ -141,7 +141,6 @@ export const calculateMonthlyWeeklySalesData = (closedTabs: TabEntity[], year: n
         closedTabsCount: number;
     }>;
 
-    // weeks 1..5 (ceil(day/7) yields max 5)
     for (let week = 1; week <= 5; week++) {
         const weekTabs = filterTabsByWeekOfMonth(closedTabs, week, year, month);
         const weekRevenue = calculateTotalRevenue(weekTabs);
@@ -156,4 +155,56 @@ export const calculateMonthlyWeeklySalesData = (closedTabs: TabEntity[], year: n
     }
 
     return monthlyData;
+}
+
+
+export const filterTabsByMonth = (closedTabs: TabEntity[], year: number, month: number): TabEntity[] => {
+    return closedTabs.filter((tab) => {
+        if (!tab.closedAt) {
+            return false;
+        }
+
+        const closedDate = new Date(tab.closedAt);
+        const brazilDate = new Date(closedDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+        const closedYear = brazilDate.getUTCFullYear();
+        const closedMonth = brazilDate.getUTCMonth();
+
+        return closedYear === year && closedMonth === month;
+    });
+}
+
+
+export const calculateLastNMonthsSalesData = (closedTabs: TabEntity[], referenceDate: Date, months = 6) => {
+    const monthsData: Array<{
+        monthLabel: string;
+        year: number;
+        month: number;
+        totalRevenue: number;
+        closedTabsCount: number;
+    }> = [];
+
+    const refBrazil = new Date(referenceDate.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    const refYear = refBrazil.getUTCFullYear();
+    const refMonth = refBrazil.getUTCMonth();
+
+    const monthNames = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+    for (let i = months - 1; i >= 0; i--) {
+        const d = new Date(Date.UTC(refYear, refMonth - i, 1));
+        const y = d.getUTCFullYear();
+        const m = d.getUTCMonth();
+
+        const monthTabs = filterTabsByMonth(closedTabs, y, m);
+        const monthRevenue = calculateTotalRevenue(monthTabs);
+
+        monthsData.push({
+            monthLabel: `${monthNames[m]} ${y}`,
+            year: y,
+            month: m,
+            totalRevenue: monthRevenue,
+            closedTabsCount: monthTabs.length,
+        });
+    }
+
+    return monthsData;
 }
