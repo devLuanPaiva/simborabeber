@@ -1,6 +1,7 @@
 import { Type } from "class-transformer"
 import { ApiProperty } from "@nestjs/swagger"
-import { ArrayMinSize, IsArray, IsNotEmpty, IsString, ValidateNested } from "class-validator"
+import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsString, ValidateNested } from "class-validator"
+import { ProductCategory } from "../../product/entities/product.entity"
 
 export class CreateTabItemDto {
     @IsNotEmpty({ message: 'Nome do item é obrigatório' })
@@ -15,9 +16,12 @@ export class CreateTabItemDto {
     @IsNotEmpty({ message: 'Quantidade do item é obrigatória' })
     @ApiProperty({ example: 10, description: 'Quantidade do item' })
     quantity: number
+
+    @IsNotEmpty({ message: 'Categoria é obrigatória' })
+    @IsEnum(ProductCategory, { message: 'Categoria deve ser uma das seguintes: beers, drinks, snacks, non_alcoholic, other' })
+    @ApiProperty({ example: ProductCategory.DRINKS, description: 'Categoria do produto', enum: ProductCategory })
+    category: ProductCategory
 }
-
-
 
 export class CreateManyTabItemsDto {
     @IsArray({ message: 'Items deve ser um array' })
