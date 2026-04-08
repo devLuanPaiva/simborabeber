@@ -1,15 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { TabRepository } from '../tab/repository/tab.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
+import { TabItemsRepository } from '../tab-item/repository/tab-item.repository';
+import { ProductCategory } from '../product/entities/product.entity';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData, calculateCategoryComparison } from './utils/reports.utils';
-import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto, CategoryComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData, CategoryComparisonItem } from './utils/reports.utils';
+import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
 
 @Injectable()
 export class ReportsService {
     constructor(
         private readonly tabRepository: TabRepository,
         private readonly barRepository: BarRepository,
+        private readonly tabItemsRepository: TabItemsRepository,
     ) { }
 
 
@@ -112,8 +115,7 @@ export class ReportsService {
         };
     }
 
-
-    async calculateCategoryComparison(slug: string): Promise<CategoryComparisonDto> {
+    async calculateCategoriesComparison(slug: string): Promise<{ categories: CategoryComparisonItem[] }> {
         const bar = await this.barRepository.findBySlug(slug);
 
         if (!bar) {
@@ -123,13 +125,26 @@ export class ReportsService {
             });
         }
 
-        const tabs = await this.tabRepository.findThemAllByBarSlug(slug);
-        const closedTabs = filterClosedTabs(tabs);
+        const items = await this.tabItemsRepository.findItemsByBarSlug(slug);
 
-        const categories = calculateCategoryComparison(closedTabs);
+        const totalRevenue = items.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity)), 0);
 
-        return {
-            categories,
-        };
+        const categories: CategoryComparisonItem[] = Object.values(ProductCategory).map((cat) => {
+            const catItems = items.filter(i => i.category === cat);
+            const catRevenue = catItems.reduce((s, it) => s + (Number(it.price) * Number(it.quantity)), 0);
+            const catCount = catItems.reduce((s, it) => s + Number(it.quantity), 0);
+
+            const percentage = totalRevenue === 0 ? 0 : Number(((catRevenue / totalRevenue) * 100).toFixed(2));
+
+            return {
+                category: cat as ProductCategory,
+                totalRevenue: Number(catRevenue.toFixed(2)),
+                totalCount: catCount,
+                percentage,
+            } as CategoryComparisonItem;
+        });
+
+        return { categories };
     }
 }
+

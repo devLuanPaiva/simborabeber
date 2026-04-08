@@ -1,8 +1,9 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { ReportsService } from './reports.service';
+import { CategoryComparisonItem } from './utils/reports.utils';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { WeeklySalesComparisonDto, MonthlyWeeklyComparisonDto, LastMonthsComparisonDto, CategoryComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { WeeklySalesComparisonDto, MonthlyWeeklyComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { Roles } from '../../decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
@@ -64,16 +65,18 @@ export class ReportsController {
     return this.reportsService.calculateLastSixMonthsComparison(slug);
   }
 
-  @Get('category-comparison')
+  @Get('categories-comparison')
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
   @Roles(UserRole.MANAGER)
-  @ApiOperation({ summary: "Obter comparativo de vendas por categoria do bar" })
+  @ApiOperation({ summary: "Obter comparação por categorias do bar" })
   @ApiResponse({ status: 200, description: "Comparativo retornado com sucesso" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
-  async getCategoryComparison(@Req() req): Promise<CategoryComparisonDto> {
+  async getCategoriesComparison(@Req() req): Promise<{ categories: CategoryComparisonItem[] }> {
     const slug: string = req.user?.slug;
-    return this.reportsService.calculateCategoryComparison(slug);
+    return this.reportsService.calculateCategoriesComparison(slug);
   }
+
+
 }
