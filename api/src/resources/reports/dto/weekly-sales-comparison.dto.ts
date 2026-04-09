@@ -9,10 +9,6 @@ export class DayOfWeekSalesDto {
     closedTabsCount: number;
 }
 
-export class WeeklySalesComparisonDto {
-
-    days: DayOfWeekSalesDto[];
-}
 
 
 export class WeekOfMonthSalesDto {
@@ -25,9 +21,6 @@ export class WeekOfMonthSalesDto {
     closedTabsCount: number;
 }
 
-export class MonthlyWeeklyComparisonDto {
-    weeks: WeekOfMonthSalesDto[];
-}
 
 export class MonthSalesDto {
     monthLabel: string;
@@ -41,7 +34,5 @@ export class MonthSalesDto {
     closedTabsCount: number;
 }
 
-export class LastMonthsComparisonDto {
-    months: MonthSalesDto[];
-}
+
 

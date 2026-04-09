@@ -3,10 +3,10 @@ import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagg
 import { ReportsService } from './reports.service';
 import { CategoryComparisonItem } from './utils/reports.utils';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
-import { WeeklySalesComparisonDto, MonthlyWeeklyComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { Roles } from '../../decorators/roles.decorator';
 import { UserRole } from '../user/entities/user.entity';
+import { DayOfWeekSalesDto, MonthSalesDto, WeekOfMonthSalesDto } from './dto/weekly-sales-comparison.dto';
 
 @Controller('reports')
 @ApiTags('reports')
@@ -34,7 +34,7 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: "Comparativo retornado com sucesso" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
-  async getWeeklySalesComparison(@Req() req): Promise<WeeklySalesComparisonDto> {
+  async getWeeklySalesComparison(@Req() req): Promise<DayOfWeekSalesDto[]> {
     const slug: string = req.user?.slug;
     return this.reportsService.calculateWeeklySalesComparison(slug);
   }
@@ -47,7 +47,7 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: "Comparativo retornado com sucesso" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
-  async getMonthlyWeeklyComparison(@Req() req): Promise<MonthlyWeeklyComparisonDto> {
+  async getMonthlyWeeklyComparison(@Req() req): Promise<WeekOfMonthSalesDto[]> {
     const slug: string = req.user?.slug;
     return this.reportsService.calculateMonthlyWeeklyComparison(slug);
   }
@@ -60,7 +60,7 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: "Comparativo retornado com sucesso" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
-  async getLastSixMonthsComparison(@Req() req): Promise<LastMonthsComparisonDto> {
+  async getLastSixMonthsComparison(@Req() req): Promise<MonthSalesDto[]> {
     const slug: string = req.user?.slug;
     return this.reportsService.calculateLastSixMonthsComparison(slug);
   }
@@ -73,7 +73,7 @@ export class ReportsController {
   @ApiResponse({ status: 200, description: "Comparativo retornado com sucesso" })
   @ApiResponse({ status: 401, description: "Não autorizado" })
   @ApiResponse({ status: 404, description: "Bar não encontrado" })
-  async getCategoriesComparison(@Req() req): Promise<{ categories: CategoryComparisonItem[] }> {
+  async getCategoriesComparison(@Req() req): Promise<CategoryComparisonItem[]> {
     const slug: string = req.user?.slug;
     return this.reportsService.calculateCategoriesComparison(slug);
   }

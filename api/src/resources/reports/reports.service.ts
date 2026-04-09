@@ -5,7 +5,7 @@ import { TabItemsRepository } from '../tab-item/repository/tab-item.repository';
 import { ProductCategory } from '../product/entities/product.entity';
 import { SalesIndicatorsDto } from './dto/sales-indicators.dto';
 import { filterClosedTabs, calculateAverageTicketValue, calculateTodayRevenue, calculateTotalRevenue, filterOpenTabs, calculateWeeklySalesData, calculateMonthlyWeeklySalesData, calculateLastNMonthsSalesData, CategoryComparisonItem } from './utils/reports.utils';
-import { MonthlyWeeklyComparisonDto, WeeklySalesComparisonDto, LastMonthsComparisonDto } from './dto/weekly-sales-comparison.dto';
+import { DayOfWeekSalesDto, MonthSalesDto, WeekOfMonthSalesDto } from './dto/weekly-sales-comparison.dto';
 
 @Injectable()
 export class ReportsService {
@@ -46,7 +46,7 @@ export class ReportsService {
     }
 
 
-    async calculateWeeklySalesComparison(slug: string): Promise<WeeklySalesComparisonDto> {
+    async calculateWeeklySalesComparison(slug: string): Promise<DayOfWeekSalesDto[]> {
         const bar = await this.barRepository.findBySlug(slug);
 
         if (!bar) {
@@ -60,13 +60,11 @@ export class ReportsService {
         const closedTabs = filterClosedTabs(tabs);
         const weeklySalesData = calculateWeeklySalesData(closedTabs);
 
-        return {
-            days: weeklySalesData,
-        };
+        return weeklySalesData;
     }
 
 
-    async calculateMonthlyWeeklyComparison(slug: string): Promise<MonthlyWeeklyComparisonDto> {
+    async calculateMonthlyWeeklyComparison(slug: string): Promise<WeekOfMonthSalesDto[]> {
         const bar = await this.barRepository.findBySlug(slug);
 
         if (!bar) {
@@ -86,13 +84,11 @@ export class ReportsService {
 
         const monthlyWeeklyData = calculateMonthlyWeeklySalesData(closedTabs, year, month);
 
-        return {
-            weeks: monthlyWeeklyData,
-        };
+        return monthlyWeeklyData;
     }
 
 
-    async calculateLastSixMonthsComparison(slug: string): Promise<LastMonthsComparisonDto> {
+    async calculateLastSixMonthsComparison(slug: string): Promise<MonthSalesDto[]> {
         const bar = await this.barRepository.findBySlug(slug);
 
         if (!bar) {
@@ -110,12 +106,10 @@ export class ReportsService {
 
         const monthsData = calculateLastNMonthsSalesData(closedTabs, brazilNow, 6);
 
-        return {
-            months: monthsData,
-        };
+        return monthsData
     }
 
-    async calculateCategoriesComparison(slug: string): Promise<{ categories: CategoryComparisonItem[] }> {
+    async calculateCategoriesComparison(slug: string): Promise<CategoryComparisonItem[]> {
         const bar = await this.barRepository.findBySlug(slug);
 
         if (!bar) {
@@ -144,7 +138,7 @@ export class ReportsService {
             } as CategoryComparisonItem;
         });
 
-        return { categories };
+        return categories.sort((a, b) => b.totalRevenue - a.totalRevenue);
     }
 }
 
