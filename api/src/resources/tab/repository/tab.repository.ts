@@ -11,7 +11,7 @@ export class TabRepository {
         private readonly repository: Repository<TabEntity>,
     ) { }
 
-    private mapTabEntity(tab: TabEntity): TabEntity {
+    private mapTabEntity(tab: TabEntity, waiterOpen?: UserEntity, waiterClosed?: UserEntity): TabEntity {
         const result = new TabEntity();
         result.id = tab.id;
         result.status = tab.status;
@@ -21,8 +21,8 @@ export class TabRepository {
         result.createdAt = tab.createdAt;
         result.updatedAt = tab.updatedAt;
         result.closedAt = tab.closedAt;
-        result.waiterOpen = tab.waiterOpen ? { id: tab.waiterOpen.id, name: tab.waiterOpen.name } as UserEntity : undefined;
-        result.waiterClosed = tab.waiterClosed ? { id: tab.waiterClosed.id, name: tab.waiterClosed.name } as UserEntity : undefined;
+        result.waiterOpen = waiterOpen || (tab.waiterOpen ? { id: tab.waiterOpen.id, name: tab.waiterOpen.name } as UserEntity : undefined);
+        result.waiterClosed = waiterClosed || (tab.waiterClosed ? { id: tab.waiterClosed.id, name: tab.waiterClosed.name } as UserEntity : undefined);
         return result;
     }
 
@@ -69,7 +69,7 @@ export class TabRepository {
             .setParameter('open', TabStatus.OPEN)
             .getRawMany();
 
-        return rows.map((r) => this.mapTabEntity(r));
+        return rows.map((r) => this.mapTabEntity(r, r.waiterOpenId ? { id: r.waiterOpenId, name: r.waiterOpenName } as UserEntity : undefined, r.waiterClosedId ? { id: r.waiterClosedId, name: r.waiterClosedName } as UserEntity : undefined));
     }
 
     async findById(id: string): Promise<TabEntity | null> {
@@ -95,7 +95,7 @@ export class TabRepository {
 
         if (!response) return null;
 
-        const tab = this.mapTabEntity(response);
+        const tab = this.mapTabEntity(response, response.waiterOpenId ? { id: response.waiterOpenId, name: response.waiterOpenName } as UserEntity : undefined, response.waiterClosedId ? { id: response.waiterClosedId, name: response.waiterClosedName } as UserEntity : undefined);
         return tab;
 
     }
@@ -106,7 +106,7 @@ export class TabRepository {
             relations: ['bar'],
         })
     }
-    
+
     async updateTab(tab: Partial<TabEntity>): Promise<TabEntity> {
         const saved = await this.repository.save(tab);
         return this.mapTabEntity(saved);

@@ -50,12 +50,12 @@ export class TabEntity {
     @OneToMany(() => TabItemEntity, tabItem => tabItem.tab, { cascade: true })
     items: TabItemEntity[];
 
-    @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
+    @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;
 
-    @UpdateDateColumn({ name: 'updated_at', type: 'timestamptz' })
+    @UpdateDateColumn({ name: 'updated_at', type: 'timestamp' })
     updatedAt: Date;
 
-    @Column({ name: 'closed_at', type: 'timestamptz', nullable: true })
+    @Column({ name: 'closed_at', type: 'timestamp', nullable: true })
     closedAt?: Date;
 }

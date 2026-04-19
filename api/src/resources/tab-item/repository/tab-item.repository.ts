@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TabItemEntity } from "../entities/tab-item.entity";
+import { TabEntity, TabStatus } from "../../tab/entities/tab.entity";
 import { Repository } from "typeorm";
-import { TabEntity } from "../../tab/entities/tab.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 
 @Injectable()
@@ -12,15 +12,16 @@ export class TabItemsRepository {
         private readonly repository: Repository<TabItemEntity>,
     ) { }
 
-    private mapTabItemEntity(item: TabItemEntity): TabItemEntity {
+    private mapTabItemEntity(item: TabItemEntity, waiterAdded?: UserEntity): TabItemEntity {
         const result = new TabItemEntity();
         result.id = item.id;
         result.name = item.name;
         result.price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
         result.quantity = typeof item.quantity === 'string' ? Number.parseInt(item.quantity) : item.quantity;
+        result.category = item.category;
         result.createdAt = item.createdAt;
         result.updatedAt = item.updatedAt;
-        result.waiterAdded = item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined;
+        result.waiterAdded = waiterAdded || (item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined);
         return result;
     }
 
@@ -80,6 +81,7 @@ export class TabItemsRepository {
                 'item.id as id',
                 'item.name as name',
                 'item.price as price',
+                'item.category as category',
                 'item.quantity as quantity',
                 'item.created_at as createdAt',
                 'item.updated_at as updatedAt',
@@ -90,8 +92,32 @@ export class TabItemsRepository {
             .addOrderBy('item.created_at', 'DESC')
             .getRawMany();
 
-        return rows.map((r) => this.mapTabItemEntity(r));
+        return rows.map((r) => this.mapTabItemEntity(r, r.waiterAddedId ? { id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity : undefined));
 
+    }
+
+    async findItemsByBarSlug(barSlug: string): Promise<TabItemEntity[]> {
+        const rows = await this.repository.createQueryBuilder('item')
+            .innerJoin('item.tab', 'tab')
+            .innerJoin('tab.bar', 'bar', 'bar.slug = :slug', { slug: barSlug })
+            .leftJoin('item.waiterAdded', 'waiterAdded')
+            .select([
+                'item.id as id',
+                'item.name as name',
+                'item.price as price',
+                'item.quantity as quantity',
+                'item.category as category',
+                'item.created_at as createdAt',
+                'item.updated_at as updatedAt',
+                'waiterAdded.id as "waiterAddedId"',
+                'waiterAdded.name as "waiterAddedName"',
+            ])
+            .where('tab.status = :closed', { closed: TabStatus.CLOSED })
+            .orderBy("LOWER(unaccent(item.name))", 'ASC')
+            .addOrderBy('item.created_at', 'DESC')
+            .getRawMany();
+
+        return rows.map((r) => this.mapTabItemEntity(r as unknown as TabItemEntity, r.waiterAddedId ? { id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity : undefined));
     }
 
     async findByIdWithTab(id: string): Promise<TabItemEntity | null> {

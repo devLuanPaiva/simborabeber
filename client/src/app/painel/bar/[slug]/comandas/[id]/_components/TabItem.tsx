@@ -25,7 +25,7 @@ export function TabItems({
     <section className="space-y-3">
       <h3 className="font-bold text-zinc-800 text-lg">Itens da Comanda</h3>
 
-      <div className="max-h-[550px] overflow-y-auto grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4">
+      <div className="max-h-137.5 overflow-y-auto grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4">
         {items.map((item: ITabItem) => (
           <div
             key={item.id}
@@ -108,7 +108,7 @@ export function TabItems({
                   <Minus size={16} />
                 </button>
 
-                <span className="min-w-[24px] text-center font-semibold text-sm text-zinc-800">
+                <span className="min-w-6 text-center font-semibold text-sm text-zinc-800">
                   {item.quantity}
                 </span>
 

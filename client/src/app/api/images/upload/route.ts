@@ -85,7 +85,7 @@ async function handleUpload(formData: FormData, req: Request) {
 
         await s3.send(new PutObjectCommand(params));
 
-        const url = `https://${process.env.BUCKET_NAME_AWS}.s3.${process.env.REGION_AWS}.amazonaws.com/${params.Key}`;
+        const url = `${process.env.NEXT_PUBLIC_CDN_URL}/${params.Key}`;
         return withCors(req, formatApiResponse({ url }, req));
     } catch (error) {
         console.error("Upload error:", error);

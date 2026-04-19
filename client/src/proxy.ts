@@ -23,6 +23,13 @@ async function tryRefreshAccessToken(refreshToken: string): Promise<string | nul
 }
 
 export async function proxy(request: NextRequest) {
+    const host = request.headers.get("host")
+
+    if (host === "painel.simborabeber.com.br") {
+        return NextResponse.redirect(
+            new URL("https://www.simborabeber.com.br/acessar")
+        )
+    }
 
     const accessToken = request.cookies.get("accessToken")?.value
     const refreshToken = request.cookies.get("refreshToken")?.value
@@ -60,5 +67,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ["/painel/:path*"]
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"]
 }
