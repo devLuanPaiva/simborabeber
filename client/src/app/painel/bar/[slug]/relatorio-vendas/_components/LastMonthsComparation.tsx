@@ -11,12 +11,10 @@ export async function LastMonthsComparation() {
         console.error("Erro ao obter dados de comparação dos últimos meses:", data.errors);
         return null;
     }
-    
+
     const monthsData = data.results;
 
-    return (
-        <div className="md:col-span-2">
-            <LastMonthsChart data={monthsData} />
-        </div>
-    );
+    return <LastMonthsChart data={monthsData} />
+
+
 }

@@ -24,12 +24,14 @@ export default async function SalesReportPage(
       </div>
 
       <section className="mx-auto w-11/12 max-w-7xl grid md:grid-cols-3 gap-6 mb-10">
-        <Suspense fallback={<ChartsLoading />}>
-          <LastMonthsComparation />
-        </Suspense>
-          <Suspense  fallback={<ChartsLoading />}>
-            <CategoriesComparation />
+        <div className="md:col-span-2">
+          <Suspense fallback={<ChartsLoading />}>
+            <LastMonthsComparation />
           </Suspense>
+        </div>
+        <Suspense fallback={<ChartsLoading />}>
+          <CategoriesComparation />
+        </Suspense>
       </section>
       <section className="mx-auto w-11/12 max-w-7xl grid md:grid-cols-2 gap-6 mb-10">
         <Suspense fallback={<ChartsLoading />}>
