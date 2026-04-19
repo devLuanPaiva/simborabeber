@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import { IndicatorsLoading } from "./_components/IndicatorsLoading";
 import { Indicators } from "./_components/Indicators";
 import { BackLink } from "@/components/shared/BackLink";
+import { WeeklySalesComparation } from "./_components/WeeklySalesComparation";
+import { WeeklySalesComparationLoading } from "./_components/WeeklySalesComparationLoading";
 
 export default async function SalesReportPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -17,6 +19,11 @@ export default async function SalesReportPage(
           <Indicators />
         </Suspense>
       </div>
+      <section className="mx-auto w-11/12 max-w-7xl grid md:grid-cols-2 gap-6 mb-10">
+        <Suspense fallback={<WeeklySalesComparationLoading />}>
+          <WeeklySalesComparation />
+        </Suspense>
+      </section>
     </main>
   );
 }
