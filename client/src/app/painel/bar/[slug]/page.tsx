@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import Link from "next/link";
-import { ClipboardList, Beer, Users } from "lucide-react";
+import { ClipboardList, Beer, Users, BarChart } from "lucide-react";
 
 export default async function PanelBarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -21,6 +21,12 @@ export default async function PanelBarPage(
       href: `/painel/bar/${slug}/produtos`,
     },
     {
+      title: "Relatórios",
+      description: "Visualize dados e métricas",
+      icon: BarChart,
+      href: `/painel/bar/${slug}/relatorio-vendas`,
+    },
+    {
       title: "Usuários",
       description: "Gerencie usuários e permissões",
       icon: Users,
@@ -38,7 +44,7 @@ export default async function PanelBarPage(
           <p className="text-zinc-500">Acesse os módulos do sistema</p>
         </div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {modules.map((module) => {
             const Icon = module.icon;
 
