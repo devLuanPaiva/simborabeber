@@ -1,6 +1,6 @@
 import { Loader2 } from "lucide-react";
 
-export function WeeklySalesComparationLoading() {
+export function ChartsLoading() {
   return (
     <div className="bg-white border border-[#BFAE99]/20 rounded-xl p-6 shadow-sm flex flex-col items-center justify-center h-75">
 
