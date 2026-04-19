@@ -36,6 +36,7 @@ export async function Header({ slug_bar }: Readonly<HeaderProps>) {
                 alt={bar.name}
                 fill
                 className="object-cover"
+                loading="eager"
               />
             ) : (
               <UtensilsCrossed size={20} />
