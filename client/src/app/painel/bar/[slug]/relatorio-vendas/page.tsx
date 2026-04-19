@@ -4,7 +4,10 @@ import { IndicatorsLoading } from "./_components/IndicatorsLoading";
 import { Indicators } from "./_components/Indicators";
 import { BackLink } from "@/components/shared/BackLink";
 import { WeeklySalesComparation } from "./_components/WeeklySalesComparation";
-import { WeeklySalesComparationLoading } from "./_components/WeeklySalesComparationLoading";
+import { ChartsLoading } from "./_components/ChartsLoading";
+import { MonthlyWeeklySalesComparation } from "./_components/MonthlyWeeklySalesComparation";
+import { LastMonthsComparation } from "./_components/LastMonthsComparation";
+import { CategoriesComparation } from "./_components/CategoriesComparation";
 
 export default async function SalesReportPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -19,9 +22,21 @@ export default async function SalesReportPage(
           <Indicators />
         </Suspense>
       </div>
+
+      <section className="mx-auto w-11/12 max-w-7xl grid md:grid-cols-3 gap-6 mb-10">
+        <Suspense fallback={<ChartsLoading />}>
+          <LastMonthsComparation />
+        </Suspense>
+          <Suspense  fallback={<ChartsLoading />}>
+            <CategoriesComparation />
+          </Suspense>
+      </section>
       <section className="mx-auto w-11/12 max-w-7xl grid md:grid-cols-2 gap-6 mb-10">
-        <Suspense fallback={<WeeklySalesComparationLoading />}>
+        <Suspense fallback={<ChartsLoading />}>
           <WeeklySalesComparation />
+        </Suspense>
+        <Suspense fallback={<ChartsLoading />}>
+          <MonthlyWeeklySalesComparation />
         </Suspense>
       </section>
     </main>
