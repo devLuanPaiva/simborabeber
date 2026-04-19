@@ -34,8 +34,10 @@ export async function Header({ slug_bar }: Readonly<HeaderProps>) {
               <Image
                 src={bar.image}
                 alt={bar.name}
-                fill
-                className="object-cover"
+                height={100}
+                width={100}
+                className="object-cover w-full h-full"
+                loading="eager"
               />
             ) : (
               <UtensilsCrossed size={20} />

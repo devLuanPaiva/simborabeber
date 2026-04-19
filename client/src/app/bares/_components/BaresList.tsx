@@ -36,6 +36,7 @@ export function BarsList({ bars }: Readonly<BarsListProps>) {
                                         alt={bar.name}
                                         fill
                                         className="object-cover group-hover:scale-110 transition duration-500"
+                                        loading="eager"
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center h-full">
