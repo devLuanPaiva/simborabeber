@@ -32,7 +32,7 @@ export interface IMonthsSalesData {
     closedTabsCount: number
 }
 
-export interface ICategoryComparisonItem {
+export interface ICategoryComparisonData {
     category: ProductCategory,
     totalRevenue: number,
     totalCount: number,
