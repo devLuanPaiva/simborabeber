@@ -33,10 +33,19 @@ export class TabRepository {
     }
 
     async closeTab(tabId: string, waiterClosed: UserEntity): Promise<TabEntity> {
-        const tab = await this.repository.findOne({ where: { id: tabId } });
+        const tab = await this.repository.findOne({
+            where: { id: tabId },
+            relations: ['items'],
+        });
         if (!tab) {
             throw new NotFoundException({ message: "Comanda não encontrada", details: "Nenhuma comanda encontrada com o ID fornecido." });
         }
+
+        if (!tab.items || tab.items.length === 0) {
+            await this.deleteTab(tabId);
+            return this.mapTabEntity(tab);
+        }
+
         tab.status = TabStatus.CLOSED
         tab.closedAt = new Date();
         tab.waiterClosed = waiterClosed;
