@@ -5,6 +5,8 @@ import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPatch } from "@/lib/api/serverPatch";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
+import { redirect } from "next/navigation";
 
 export async function panelTabActions(slug: string, id: string) {
 
@@ -68,7 +70,7 @@ export async function addTabItem({ slug, tabId, formData }: Readonly<ICreateTab>
             return { success: false, error: data.errors?.detail || "Erro ao adicionar item" };
         }
 
-        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        revalidatePath(`/painel/bar/${slug}/comandas/${tabId}`);
         return { success: true, message: "Item adicionado com sucesso" };
     } catch (err) {
         console.error("Error adding tab item:", err);
@@ -127,7 +129,7 @@ export async function addTabItems({ slug, tabId, formData }: Readonly<ICreateTab
             return { success: false, error: data.errors?.detail || "Erro ao adicionar itens" };
         }
 
-        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        revalidatePath(`/painel/bar/${slug}/comandas/${tabId}`);
         return { success: true, message: "Itens adicionados com sucesso" };
     } catch (err) {
         console.error("Error adding tab items:", err);
@@ -147,7 +149,7 @@ export async function deleteTabItem({ slug, tabId, itemId }: { slug: string; tab
             return { success: false, error: data.errors?.detail || "Erro ao remover item" };
         }
 
-        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        revalidatePath(`/painel/bar/${slug}/comandas/${tabId}`);
         return { success: true, message: "Item removido" };
     } catch (err) {
         console.error("Error deleting tab item:", err);
@@ -155,7 +157,8 @@ export async function deleteTabItem({ slug, tabId, itemId }: { slug: string; tab
     }
 }
 
-export async function closeTab({ slug, tabId }: { slug: string; tabId: string }) {
+
+export async function closeTab({ slug, tabId, itemsCount }: { slug: string; tabId: string; itemsCount: number }) {
     try {
         const response = await serverPost(`/tab/close/${tabId}`, {});
         const data = await response.json().catch(() => ({}));
@@ -164,11 +167,20 @@ export async function closeTab({ slug, tabId }: { slug: string; tabId: string })
             return { success: false, error: data.errors?.detail || "Erro ao fechar comanda" };
         }
 
-        revalidatePath(`/painel/bar/${slug}`);
-        return { success: true, message: "Comanda fechada com sucesso" };
-    } catch (err) {
-        console.error("Error closing tab:", err);
+        if (itemsCount === 0) {
+            redirect(`/painel/bar/${slug}/comandas`);
+        }
 
+        revalidatePath(`/painel/bar/${slug}/comandas/${tabId}`);
+
+        return { success: true, message: "Comanda fechada com sucesso" };
+
+    } catch (err) {
+        if (isRedirectError(err)) {
+            throw err; 
+        }
+
+        console.error("Error closing tab:", err);
         return { success: false, error: "Erro inesperado" };
     }
 }
@@ -182,7 +194,7 @@ export async function updateItemQuantity({ slug, tabId, itemId, quantity }: { sl
             return { success: false, error: data.errors?.detail || "Erro ao atualizar quantidade" };
         }
 
-        revalidatePath(`/painel/bar/${slug}/comanda/${tabId}`);
+        revalidatePath(`/painel/bar/${slug}/comandas/${tabId}`);
         return { success: true, message: "Quantidade atualizada" };
     } catch (err) {
         console.error("Error updating item quantity:", err);
