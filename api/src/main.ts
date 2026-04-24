@@ -25,22 +25,24 @@ async function bootstrap() {
 			},
 		}),
 	)
-	const config = new DocumentBuilder()
-		.setTitle("Cardápio API")
-		.setDescription("API para gerenciamento do cardápio")
-		.setVersion("1.0")
-		.addBearerAuth({
-			type: "http",
-			scheme: "bearer",
-			bearerFormat: "JWT",
-			name: "Authorization",
-			description: "Informe o token JWT",
-			in: "header",
-		})
-		.build()
-
-	const document = SwaggerModule.createDocument(app, config)
-	SwaggerModule.setup("api", app, document)
+	if(process.env.NODE_ENV === "production") {
+		const config = new DocumentBuilder()
+			.setTitle("Cardápio API")
+			.setDescription("API para gerenciamento do cardápio")
+			.setVersion("1.0")
+			.addBearerAuth({
+				type: "http",
+				scheme: "bearer",
+				bearerFormat: "JWT",
+				name: "Authorization",
+				description: "Informe o token JWT",
+				in: "header",
+			})
+			.build()
+	
+		const document = SwaggerModule.createDocument(app, config)
+		SwaggerModule.setup("api", app, document)
+	}
 
 	await app.listen(process.env.PORT ?? 3001)
 }

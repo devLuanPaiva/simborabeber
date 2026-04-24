@@ -91,7 +91,7 @@ export default async function PanelTabPage(
           </div>
         </section>
         {tab.status === TabStatus.OPEN && (
-          <CloseTabButton slug={slug} tabId={id} />
+          <CloseTabButton slug={slug} tabId={id} itemsCount={tab_items.length} />
         )}
         <TabItems
           slug={slug}

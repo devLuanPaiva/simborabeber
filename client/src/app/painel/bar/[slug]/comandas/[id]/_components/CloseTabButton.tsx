@@ -1,4 +1,4 @@
-"use client";
+
 
 import { closeTab } from "../actions";
 import { appToast } from "@/utils/toast-ui";
@@ -6,12 +6,13 @@ import { appToast } from "@/utils/toast-ui";
 interface CloseTabButtonProps {
   slug: string;
   tabId: string;
+  itemsCount?: number;
 }
 
-export function CloseTabButton({ slug, tabId }: Readonly<CloseTabButtonProps>) {
+export function CloseTabButton({ slug, tabId, itemsCount }: Readonly<CloseTabButtonProps>) {
   const handleClose = async () => {
     try {
-      const res = await closeTab({ slug, tabId });
+      const res = await closeTab({ slug, tabId, itemsCount: itemsCount ?? 0 });
       if (res?.success) {
         appToast.success(res.message || "Comanda fechada com sucesso");
       } else {

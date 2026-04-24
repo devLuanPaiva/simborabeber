@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Bebas_Neue, Roboto, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ScrollUp } from "@/components/layout/ScrollUp";
+import { Analytics } from "@/data/services/analytics";
 
 const bebasNueve = Bebas_Neue({
   subsets: ["latin"],
@@ -146,6 +147,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <Analytics />
+      </head>
       <body
         className={`${bebasNueve.variable} ${roboto.variable} ${montSerrat.variable} bg-[#F2F2F2]`}
         cz-shortcut-listen="false"
