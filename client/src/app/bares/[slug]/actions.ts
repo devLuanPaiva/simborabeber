@@ -1,39 +1,65 @@
 import { IBar, IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 
-export async function BarActions(slug: string) {
+let cachedBars: Map<string, IBar> = new Map();
+let cachedProductsByBar: Map<string, IProduct[]> = new Map();
+
+export async function getBarBySlug(slug: string) {
+    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
+
     try {
-
-        const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-
-        const response_bar = await fetch(`${base_url}/bar/${slug}`, {
-            cache: "force-cache",
-            next: {
-                revalidate: 3600,
-            }
+        const response = await fetch(`${base_url}/bar/${slug}`, {
+            cache: "no-store",
         });
 
-        const data_bar: ApiResponse<IBar> = await response_bar.json();
+        if (!response.ok) {
+            console.error(`Erro ao buscar bar ${slug}: ${response.status}`);
+            return cachedBars.get(slug) ?? null;
+        }
 
-        const bar = data_bar.results
+        const data: ApiResponse<IBar> = await response.json();
+        const bar = data?.results;
 
-        const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
-            cache: "force-cache",
-            next: {
-                revalidate: 3600,
-            }
-        });
 
-        const data_products: ApiResponse<IProduct[]> = await response_products.json();
+        if (bar) {
+            cachedBars.set(slug, bar);
+        }
 
-        const products_results = data_products.results;
-
-        const products = products_results.filter(p => p.isActive)
-
-        return { bar, products };
-    }
-    catch (error) {
+        return bar;
+    } catch (error) {
         console.error("Erro ao buscar dados do bar:", error);
-        return { bar: null, products: [] };
+
+        return cachedBars.get(slug) ?? null;
+    }
+}
+
+export async function getProductsByBarSlug(slug: string) {
+    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
+
+    try {
+        const response = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            console.error(`Erro ao buscar produtos do bar ${slug}: ${response.status}`);
+            return cachedProductsByBar.get(slug) ?? [];
+        }
+
+        const data: ApiResponse<IProduct[]> = await response.json();
+
+        const products =
+            data?.results?.filter((p) => p.isActive) ?? [];
+
+
+        if (products.length > 0) {
+            cachedProductsByBar.set(slug, products);
+        }
+
+        return products;
+    } catch (error) {
+        console.error("Erro ao buscar produtos do bar:", error);
+
+        return cachedProductsByBar.get(slug) ?? [];
     }
 }
