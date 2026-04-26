@@ -1,11 +1,11 @@
 import { ChevronLeft, PackageOpen} from "lucide-react";
-import { tabsPanelBarActions } from "../actions";
 import { TabCard } from "./TabCard";
 import Link from "next/link";
 import { CreateTabDialog } from "./CreateTabDialog";
+import { getTabsByBarSlug } from "../actions";
 
 export async function TabsList({ slug }: Readonly<{ slug: string }>) {
-  const tabs = await tabsPanelBarActions(slug);
+  const tabs = await getTabsByBarSlug(slug);
 
   const isEmpty = tabs.length === 0;
   return (

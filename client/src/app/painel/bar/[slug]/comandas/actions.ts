@@ -5,15 +5,37 @@ import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-export async function tabsPanelBarActions(slug: string): Promise<ITab[]> {
-    const response_tabs = await serverFetch(`/tab/by-bar/${slug}`, {
-        cache: "no-cache",
-    });
 
-    const data_tabs: ApiResponse<ITab[]> = await response_tabs.json();
+let cachedTabsByBar: Map<string, ITab[]> = new Map();
 
-    return data_tabs.results ?? [];
+export async function getTabsByBarSlug(slug: string): Promise<ITab[]> {
+    try {
+        const response = await serverFetch(`/tab/by-bar/${slug}`, {
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            console.error(`Erro ao buscar comandas do bar ${slug}: ${response.status}`);
+            return cachedTabsByBar.get(slug) ?? [];
+        }
+
+        const data: ApiResponse<ITab[]> = await response.json();
+
+        const tabs = data?.results ?? [];
+
+        if (tabs.length > 0) {
+            cachedTabsByBar.set(slug, tabs);
+        }
+
+        return tabs;
+
+    } catch (error) {
+        console.error("Erro ao buscar comandas:", error);
+
+        return cachedTabsByBar.get(slug) ?? [];
+    }
 }
+
 
 export async function createTab(slug: string, formData: FormData) {
     try {
