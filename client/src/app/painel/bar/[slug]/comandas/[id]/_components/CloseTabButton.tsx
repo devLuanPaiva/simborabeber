@@ -1,5 +1,5 @@
 
-
+"use client"
 import { closeTab } from "../actions";
 import { appToast } from "@/utils/toast-ui";
 
