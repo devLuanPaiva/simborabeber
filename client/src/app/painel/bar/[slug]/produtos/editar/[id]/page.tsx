@@ -1,5 +1,4 @@
 import { Header } from "@/components/layout/Header";
-import { panelBarProductActions } from "./actions";
 import { ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import { formatCurrency } from "@/data/functions";
@@ -7,13 +6,14 @@ import { BackLink } from "@/components/shared/BackLink";
 import { ActionButtons } from "./_components/ActionButtons";
 import { UpdateProductForm } from "./_components/UpdateProductForm";
 import { Badge } from "@/components/ui/badge";
+import { getProductById } from "@/actions";
 
 export default async function PanelBarProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
 ) {
   const { slug, id } = await props.params;
 
-  const product = await panelBarProductActions(id);
+  const product = await getProductById(id);
 
   if (!product) return <div>Produto não encontrado</div>;
 

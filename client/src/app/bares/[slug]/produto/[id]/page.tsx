@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ProductsByCategory } from "./_components/ProductsByCategory";
 import { ProductsByCategoryLoading } from "./_components/ProductsByCategoryLoading";
 import { Suspense } from "react";
-import { getProductById} from "./actions";
+import { getProductById } from "@/actions";
 
 export default async function ProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,

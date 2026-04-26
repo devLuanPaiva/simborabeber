@@ -1,6 +1,6 @@
 import Menu from "@/components/shared/Menu";
 import { IBar } from "@/data/models";
-import { getBarBySlug, getProductsByBarSlug } from "./actions";
+import { getBarBySlug, getProductsByBarSlug } from "@/actions";
 
 export default async function BarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,

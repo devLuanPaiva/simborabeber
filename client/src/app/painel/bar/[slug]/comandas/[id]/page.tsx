@@ -6,13 +6,15 @@ import { panelTabActions } from "./actions";
 import { formatCurrency, formatDate } from "@/data/functions";
 import { TabStatus } from "@/data/models";
 import { BackLink } from "@/components/shared/BackLink";
+import { getProductsByBarSlug } from "@/actions";
 
 export default async function PanelTabPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
 ) {
   const { slug, id } = await props.params;
 
-  const { products, tab, tab_items } = await panelTabActions(slug, id);
+  const { tab, tab_items } = await panelTabActions(id);
+  const products = await getProductsByBarSlug(slug);
 
   const total = tab_items.reduce(
     (acc, item) => acc + item.price * item.quantity,
