@@ -1,10 +1,10 @@
 "use server";
-import { IBar, UserRole, UserRolesLabels } from "@/data/models";
-import { ApiResponse } from "@/data/types";
+import { UserRole, UserRolesLabels } from "@/data/models";
 import { getUser } from "@/lib/auth/getUser";
 import { UtensilsCrossed } from "lucide-react";
 import UserMenu from "@/components/layout/UserMenu";
 import Image from "next/image";
+import { getBarBySlug } from "@/actions";
 
 interface HeaderProps {
   slug_bar: string;
@@ -12,18 +12,7 @@ interface HeaderProps {
 
 export async function Header({ slug_bar }: Readonly<HeaderProps>) {
   const user = await getUser();
-
-  const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-
-  const response_bar = await fetch(`${base_url}/bar/${slug_bar}`, {
-    cache: "force-cache",
-    next: {
-      revalidate: 60,
-    },
-  });
-
-  const data_bar: ApiResponse<IBar> = await response_bar.json();
-  const bar = data_bar.results;
+  const bar = await getBarBySlug(slug_bar);
 
   return (
     <header className="w-full bg-white border-b border-[#BFAE99]/20  py-4 ">

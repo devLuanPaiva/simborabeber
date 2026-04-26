@@ -65,7 +65,7 @@ export function Footer() {
 
                     <div className="w-auto  flex items-center justify-center gap-2">
                         <Link
-                            href="https://devluanpaiva.com.br"
+                            href="https://www.instagram.com/devluanpaiva"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center gap-2 text-xs"

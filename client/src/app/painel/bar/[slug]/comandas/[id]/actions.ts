@@ -1,5 +1,5 @@
 "use server"
-import { IProduct, ITab, ITabItem, ProductCategory } from "@/data/models";
+import { ITab, ITabItem, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPatch } from "@/lib/api/serverPatch";
@@ -8,38 +8,63 @@ import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
-export async function panelTabActions(slug: string, id: string) {
+let cachedTabsById: Map<string, ITab> = new Map();
+let cachedTabItemsByTabId: Map<string, ITabItem[]> = new Map();
 
-    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-    const response_tab = await serverFetch(`/tab/${id}`, {
-        cache: "no-cache",
-    });
-    const data_tab: ApiResponse<ITab> = await response_tab.json();
+export async function getTabById(id: string) {
+    try {
+        const response = await serverFetch(`/tab/${id}`, {
+            cache: "no-store",
+        });
 
-    const tab = data_tab.results
-
-    const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 3600,
+        if (!response.ok) {
+            console.error(`Erro ao buscar tab ${id}: ${response.status}`);
+            return cachedTabsById.get(id) ?? null;
         }
-    });
 
-    const data_products: ApiResponse<IProduct[]> = await response_products.json();
+        const data: ApiResponse<ITab> = await response.json();
+        const tab = data?.results;
 
-    const products = data_products.results;
 
-    const response_tab_items = await serverFetch(`/tab-item/by-tab/${id}`, {
-        cache: "no-cache",
-    });
-    const data_tab_items: ApiResponse<ITabItem[]> = await response_tab_items.json();
+        if (tab) {
+            cachedTabsById.set(id, tab);
+        }
 
-    const tab_items = data_tab_items.results;
+        return tab ?? null;
 
-    return {
-        tab,
-        products,
-        tab_items
+    } catch (error) {
+        console.error("Erro ao buscar tab:", error);
+
+        return cachedTabsById.get(id) ?? null;
+    }
+}
+
+export async function getTabItemsByTabId(id: string) {
+    try {
+        const response = await serverFetch(`/tab-item/by-tab/${id}`, {
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            console.error(`Erro ao buscar itens da tab ${id}: ${response.status}`);
+            return cachedTabItemsByTabId.get(id) ?? [];
+        }
+
+        const data: ApiResponse<ITabItem[]> = await response.json();
+
+        const items = data?.results ?? [];
+
+
+        if (items.length > 0) {
+            cachedTabItemsByTabId.set(id, items);
+        }
+
+        return items;
+
+    } catch (error) {
+        console.error("Erro ao buscar itens da tab:", error);
+
+        return cachedTabItemsByTabId.get(id) ?? [];
     }
 }
 
@@ -177,7 +202,7 @@ export async function closeTab({ slug, tabId, itemsCount }: { slug: string; tabI
 
     } catch (err) {
         if (isRedirectError(err)) {
-            throw err; 
+            throw err;
         }
 
         console.error("Error closing tab:", err);

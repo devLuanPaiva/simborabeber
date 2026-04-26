@@ -2,17 +2,20 @@ import { Header } from "@/components/layout/Header";
 import { AddProducts } from "./_components/AddProducts";
 import { CloseTabButton } from "./_components/CloseTabButton";
 import { TabItems } from "./_components/TabItem";
-import { panelTabActions } from "./actions";
 import { formatCurrency, formatDate } from "@/data/functions";
 import { TabStatus } from "@/data/models";
 import { BackLink } from "@/components/shared/BackLink";
+import { getProductsByBarSlug } from "@/actions";
+import { getTabById, getTabItemsByTabId } from "./actions";
 
 export default async function PanelTabPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
 ) {
   const { slug, id } = await props.params;
 
-  const { products, tab, tab_items } = await panelTabActions(slug, id);
+  const tab = await getTabById(id);
+  const tab_items = await getTabItemsByTabId(id);
+  const products = await getProductsByBarSlug(slug);
 
   const total = tab_items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -31,13 +34,12 @@ export default async function PanelTabPage(
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <span
-                className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                  tab.status === TabStatus.OPEN
+                className={`text-xs font-semibold px-3 py-1 rounded-full ${tab?.status === TabStatus.OPEN
                     ? "bg-green-100 text-green-700"
                     : "bg-zinc-200 text-zinc-600"
-                }`}
+                  }`}
               >
-                {tab.status === TabStatus.OPEN ? "Aberta" : "Fechada"}
+                {tab?.status === TabStatus.OPEN ? "Aberta" : "Fechada"}
               </span>
             </div>
 
@@ -53,13 +55,13 @@ export default async function PanelTabPage(
             <div>
               <p className="text-xs text-zinc-500">Mesa</p>
               <p className="font-bold text-zinc-800 text-lg">
-                {tab.tableNumber ?? "-"}
+                {tab?.tableNumber ?? "-"}
               </p>
             </div>
             <div>
               <p className="text-xs text-zinc-500">Cliente</p>
               <p className="font-semibold text-zinc-800">
-                {tab.customerName ?? "Não informado"}
+                {tab?.customerName ?? "Não informado"}
               </p>
             </div>
           </div>
@@ -68,38 +70,38 @@ export default async function PanelTabPage(
             <div className="bg-[#F2F2F2] rounded-lg p-3">
               <p className="text-xs text-zinc-500">Aberta por</p>
               <p className="font-semibold text-zinc-800">
-                {tab.waiterOpen?.name ?? "—"}
+                {tab?.waiterOpen?.name ?? "—"}
               </p>
             </div>
 
             <div className="bg-[#F2F2F2] rounded-lg p-3">
               <p className="text-xs text-zinc-500">Fechada por</p>
               <p className="font-semibold text-zinc-800">
-                {tab.waiterClosed?.name ?? "—"}
+                {tab?.waiterClosed?.name ?? "—"}
               </p>
             </div>
           </div>
 
           <div className="flex justify-between text-xs text-zinc-500">
-            <span>Abertura: {formatDate(tab.createdAt)}</span>
+            <span>Abertura: {formatDate(tab?.createdAt)}</span>
 
-            {tab.closedAt && (
+            {tab?.closedAt && (
               <span className="text-right">
-                Fechamento: {formatDate(tab.closedAt)}
+                Fechamento: {formatDate(tab?.closedAt)}
               </span>
             )}
           </div>
         </section>
-        {tab.status === TabStatus.OPEN && (
+        {tab?.status === TabStatus.OPEN && (
           <CloseTabButton slug={slug} tabId={id} itemsCount={tab_items.length} />
         )}
         <TabItems
           slug={slug}
           tabId={id}
           items={tab_items}
-          tabStatus={tab.status}
+          tabStatus={tab?.status || TabStatus.CLOSED}
         />
-        {tab.status === TabStatus.OPEN && (
+        {tab?.status === TabStatus.OPEN && (
           <AddProducts slug={slug} tabId={id} products={products} />
         )}
       </div>
