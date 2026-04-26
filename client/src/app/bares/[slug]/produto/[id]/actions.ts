@@ -3,18 +3,34 @@
 import { IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 
-export async function ProductActions(slug: string, id: string) {
+let cachedProductsById: Map<string, IProduct> = new Map();
+
+export async function getProductById(id: string) {
     const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-    const response = await fetch(`${base_url}/product/${id}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 60,
+
+    try {
+        const response = await fetch(`${base_url}/product/${id}`, {
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            console.error(`Erro ao buscar produto ${id}: ${response.status}`);
+            return cachedProductsById.get(id) ?? null;
         }
-    });
 
-    const data: ApiResponse<IProduct> = await response.json();
+        const data: ApiResponse<IProduct> = await response.json();
+        const product = data?.results;
 
-    const product = data.results;
 
-    return product ?? null;
+        if (product) {
+            cachedProductsById.set(id, product);
+        }
+
+        return product ?? null;
+
+    } catch (error) {
+        console.error("Erro ao buscar produto:", error);
+
+        return cachedProductsById.get(id) ?? null;
+    }
 }

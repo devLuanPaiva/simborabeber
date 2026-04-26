@@ -3,16 +3,16 @@ import { notFound } from "next/navigation";
 import { ProductsByCategory } from "./_components/ProductsByCategory";
 import { ProductsByCategoryLoading } from "./_components/ProductsByCategoryLoading";
 import { Suspense } from "react";
-import { ProductActions } from "./actions";
+import { getProductById} from "./actions";
 
 export default async function ProductPage(
   props: Readonly<{ params: Promise<{ slug: string; id: string }> }>,
 ) {
   const { slug, id } = await props.params;
 
-  const product = await ProductActions(slug, id);
+  const product = await getProductById(id);
 
-  if (!product || !product.isActive) {
+  if (!product?.isActive) {
     return notFound();
   }
 
