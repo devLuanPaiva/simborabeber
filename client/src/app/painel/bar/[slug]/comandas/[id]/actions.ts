@@ -1,5 +1,5 @@
 "use server"
-import { IProduct, ITab, ITabItem, ProductCategory } from "@/data/models";
+import {  ITab, ITabItem, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPatch } from "@/lib/api/serverPatch";
@@ -8,9 +8,8 @@ import { revalidatePath } from "next/cache";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { redirect } from "next/navigation";
 
-export async function panelTabActions(slug: string, id: string) {
+export async function panelTabActions( id: string) {
 
-    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
     const response_tab = await serverFetch(`/tab/${id}`, {
         cache: "no-cache",
     });
@@ -18,16 +17,6 @@ export async function panelTabActions(slug: string, id: string) {
 
     const tab = data_tab.results
 
-    const response_products = await fetch(`${base_url}/product/by-bar?slug=${slug}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 3600,
-        }
-    });
-
-    const data_products: ApiResponse<IProduct[]> = await response_products.json();
-
-    const products = data_products.results;
 
     const response_tab_items = await serverFetch(`/tab-item/by-tab/${id}`, {
         cache: "no-cache",
@@ -38,7 +27,6 @@ export async function panelTabActions(slug: string, id: string) {
 
     return {
         tab,
-        products,
         tab_items
     }
 }

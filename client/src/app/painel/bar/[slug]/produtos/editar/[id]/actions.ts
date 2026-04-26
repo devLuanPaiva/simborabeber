@@ -6,21 +6,6 @@ import { serverPatch } from "@/lib/api/serverPatch";
 import { serverPost } from "@/lib/api/serverPost";
 import { revalidatePath } from "next/cache";
 
-export async function panelBarProductActions(id: string) {
-    const base_url = process.env.NEXT_PUBLIC_BASE_URL;
-    const response = await fetch(`${base_url}/product/${id}`, {
-        cache: "force-cache",
-        next: {
-            revalidate: 60,
-        }
-    });
-
-    const data: ApiResponse<IProduct> = await response.json();
-
-    const product = data.results;
-
-    return product ?? null;
-}
 
 export async function updateProduct(id: string, slug: string, formData: FormData) {
 
