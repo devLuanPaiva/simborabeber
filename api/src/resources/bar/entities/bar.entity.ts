@@ -1,6 +1,7 @@
 import { TabEntity } from "../../tab/entities/tab.entity";
 import { ProductEntity } from "../../product/entities/product.entity";
 import { UserEntity } from "../../user/entities/user.entity";
+import { OrderEntity } from "../../order/entities/order.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 
 export enum AccessPlan {
@@ -64,6 +65,9 @@ export class BarEntity {
 
     @OneToMany(() => TabEntity, tab => tab.bar, { cascade: true })
     tabs: TabEntity[];
+
+    @OneToMany(() => OrderEntity, order => order.bar, { cascade: true })
+    orders: OrderEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;

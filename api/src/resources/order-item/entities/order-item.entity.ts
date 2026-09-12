@@ -1,10 +1,9 @@
 import { ProductCategory } from "../../product/entities/product-category.enum";
-import { TabEntity } from "../../tab/entities/tab.entity";
-import { UserEntity } from "../../user/entities/user.entity";
+import { OrderEntity } from "../../order/entities/order.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
-@Entity({ name: 'tab_items', schema: 'public' })
-export class TabItemEntity {
+@Entity({ name: 'order_items', schema: 'public' })
+export class OrderItemEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
@@ -20,6 +19,9 @@ export class TabItemEntity {
     @Column({ type: 'integer' })
     quantity: number;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    notes?: string;
+
     @Column({
         type: 'enum',
         default: ProductCategory.OTHER,
@@ -27,20 +29,13 @@ export class TabItemEntity {
     })
     category: ProductCategory;
 
-    @ManyToOne(() => TabEntity, tab => tab.items, {
+    @ManyToOne(() => OrderEntity, order => order.items, {
         nullable: false,
         onDelete: 'CASCADE',
     })
 
-    @JoinColumn({ name: 'tab_id' })
-    tab: TabEntity
-
-    @ManyToOne(() => UserEntity, user => user.addedTabItems, {
-        nullable: false,
-    })
-
-    @JoinColumn({ name: 'waiter_added_id' })
-    waiterAdded: UserEntity;
+    @JoinColumn({ name: 'order_id' })
+    order: OrderEntity
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;
