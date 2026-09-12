@@ -69,6 +69,13 @@ export class ProductRepository {
         })
     }
 
+    async findByIdForBar(id: string, barId: string): Promise<ProductEntity | null> {
+        const product = await this.repository.findOne({
+            where: { id, bar: { id: barId } },
+        })
+        return product ? this.mapProductEntity(product) : null
+    }
+
     async updateProduct(id: string, product: Partial<ProductEntity>): Promise<ProductEntity> {
         const entity = await this.repository.preload({ id, ...product })
         if (!entity) {

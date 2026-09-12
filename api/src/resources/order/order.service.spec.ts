@@ -1,16 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderRepository } from './repository/order.repository';
 import { UserRepository } from '../user/repository/user.repository';
+import { BarRepository } from '../bar/repository/bar.repository';
+import { ProductRepository } from '../product/repository/product.repository';
 import { OrderGateway } from './order.gateway';
 import { OrderEntity, OrderStatus, OrderType, PaymentMethod, PaymentStatus } from './entities/order.entity';
 import { UserEntity } from '../user/entities/user.entity';
+import { BarEntity } from '../bar/entities/bar.entity';
+import { ProductEntity, ProductCategory } from '../product/entities/product.entity';
 
 describe('OrderService', () => {
   let service: OrderService;
   let orderRepository: jest.Mocked<OrderRepository>;
   let userRepository: jest.Mocked<UserRepository>;
+  let barRepository: jest.Mocked<BarRepository>;
+  let productRepository: jest.Mocked<ProductRepository>;
   let orderGateway: jest.Mocked<OrderGateway>;
 
   const buildOrder = (overrides: Partial<OrderEntity> = {}): OrderEntity => ({
@@ -36,6 +42,7 @@ describe('OrderService', () => {
         {
           provide: OrderRepository,
           useValue: {
+            createOrder: jest.fn(),
             findThemAllByBarSlug: jest.fn(),
             findById: jest.fn(),
             findByIdWithBar: jest.fn(),
@@ -50,9 +57,22 @@ describe('OrderService', () => {
           },
         },
         {
+          provide: BarRepository,
+          useValue: {
+            findBySlug: jest.fn(),
+          },
+        },
+        {
+          provide: ProductRepository,
+          useValue: {
+            findByIdForBar: jest.fn(),
+          },
+        },
+        {
           provide: OrderGateway,
           useValue: {
             notifyOrderStatusUpdated: jest.fn(),
+            notifyOrderCreated: jest.fn(),
           },
         },
       ],
@@ -61,6 +81,8 @@ describe('OrderService', () => {
     service = module.get<OrderService>(OrderService);
     orderRepository = module.get(OrderRepository);
     userRepository = module.get(UserRepository);
+    barRepository = module.get(BarRepository);
+    productRepository = module.get(ProductRepository);
     orderGateway = module.get(OrderGateway);
   });
 
@@ -118,6 +140,118 @@ describe('OrderService', () => {
       orderRepository.findById.mockResolvedValue(null);
 
       await expect(service.updateStatus('missing', OrderStatus.PREPARING, 'user-1')).rejects.toBeInstanceOf(NotFoundException);
+    });
+  });
+
+  describe('createPublicOrder', () => {
+    const buildBar = (overrides: Partial<BarEntity> = {}): BarEntity => ({
+      id: 'bar-1',
+      name: 'Bar do João',
+      slug: 'bar-do-joao',
+      isActive: true,
+      deliveryEnabled: true,
+      deliveryFee: 5,
+      minOrderValue: 20,
+      ...overrides,
+    } as BarEntity);
+
+    const buildProduct = (overrides: Partial<ProductEntity> = {}): ProductEntity => ({
+      id: 'product-1',
+      name: 'Coca-cola',
+      price: 10,
+      category: ProductCategory.SOFT_DRINKS,
+      isActive: true,
+      ...overrides,
+    } as ProductEntity);
+
+    const baseDto = (overrides: Record<string, unknown> = {}) => ({
+      type: OrderType.DELIVERY,
+      customerName: 'João',
+      customerPhone: '11999999999',
+      deliveryAddress: 'Rua das Flores, 123',
+      paymentMethod: PaymentMethod.PIX,
+      items: [{ productId: 'product-1', quantity: 3 }],
+      ...overrides,
+    });
+
+    it('throws NotFoundException when the bar does not exist or is inactive', async () => {
+      barRepository.findBySlug.mockResolvedValue(null);
+
+      await expect(service.createPublicOrder('bar-do-joao', baseDto() as any)).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('throws ForbiddenException when the bar has not enabled delivery', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({ deliveryEnabled: false }));
+
+      await expect(service.createPublicOrder('bar-do-joao', baseDto() as any)).rejects.toBeInstanceOf(ForbiddenException);
+    });
+
+    it('rejects a product that does not belong to this bar (or is inactive)', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar());
+      productRepository.findByIdForBar.mockResolvedValue(null);
+
+      await expect(service.createPublicOrder('bar-do-joao', baseDto() as any)).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('rejects a DELIVERY order below the bar minimum order value', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 100 }));
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));
+
+      await expect(
+        service.createPublicOrder('bar-do-joao', baseDto({ items: [{ productId: 'product-1', quantity: 1 }] }) as any),
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('never trusts price/name from the request - always resolves them from the product catalog', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar());
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ name: 'Coca-cola', price: 10 }));
+      orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+      await service.createPublicOrder('bar-do-joao', baseDto({ items: [{ productId: 'product-1', quantity: 3, price: 0.01, name: 'hacked' }] }) as any);
+
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          items: [expect.objectContaining({ name: 'Coca-cola', price: 10, quantity: 3 })],
+        }),
+      );
+    });
+
+    it('computes totalValue as items subtotal plus the bar delivery fee for DELIVERY orders', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({ deliveryFee: 7 }));
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));
+      orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+      await service.createPublicOrder('bar-do-joao', baseDto({ items: [{ productId: 'product-1', quantity: 3 }] }) as any);
+
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ deliveryFee: 7, totalValue: 37 }),
+      );
+    });
+
+    it('charges no delivery fee and skips the minimum order check for PICKUP orders', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 100, deliveryFee: 7 }));
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));
+      orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+      await service.createPublicOrder(
+        'bar-do-joao',
+        baseDto({ type: OrderType.PICKUP, deliveryAddress: undefined, items: [{ productId: 'product-1', quantity: 1 }] }) as any,
+      );
+
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ deliveryFee: 0, totalValue: 10, deliveryAddress: undefined }),
+      );
+    });
+
+    it('notifies the gateway after successfully creating the order', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar());
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct());
+      const created = buildOrder({ id: 'order-new' });
+      orderRepository.createOrder.mockResolvedValue(created);
+
+      await service.createPublicOrder('bar-do-joao', baseDto() as any);
+
+      expect(orderGateway.notifyOrderCreated).toHaveBeenCalledWith(created);
     });
   });
 

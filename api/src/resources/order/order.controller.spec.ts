@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ThrottlerGuard } from '@nestjs/throttler';
 import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
-import { OrderStatus } from './entities/order.entity';
+import { OrderStatus, OrderType, PaymentMethod } from './entities/order.entity';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 
@@ -16,6 +17,7 @@ describe('OrderController', () => {
         {
           provide: OrderService,
           useValue: {
+            createPublicOrder: jest.fn(),
             findThemAllByBarSlug: jest.fn(),
             findOne: jest.fn(),
             updateStatus: jest.fn(),
@@ -28,6 +30,8 @@ describe('OrderController', () => {
       .useValue({ canActivate: () => true })
       .overrideGuard(RolesGuard)
       .useValue({ canActivate: () => true })
+      .overrideGuard(ThrottlerGuard)
+      .useValue({ canActivate: () => true })
       .compile();
 
     controller = module.get<OrderController>(OrderController);
@@ -36,6 +40,20 @@ describe('OrderController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  it('createByBarSlug forwards the bar slug and the order payload', () => {
+    const dto = {
+      type: OrderType.PICKUP,
+      customerName: 'João',
+      customerPhone: '11999999999',
+      paymentMethod: PaymentMethod.CASH,
+      items: [{ productId: 'product-1', quantity: 1 }],
+    };
+
+    controller.createByBarSlug('bar-do-joao', dto as any);
+
+    expect(service.createPublicOrder).toHaveBeenCalledWith('bar-do-joao', dto);
   });
 
   it('findThemAllByBarSlug forwards the bar slug and optional status filter', () => {

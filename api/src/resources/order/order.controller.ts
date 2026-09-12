@@ -1,6 +1,8 @@
-import { Controller, Get, Patch, Delete, Body, Param, Query, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, Req, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import { OrderService } from './order.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { CreatePublicOrderDto } from './dto/create-public-order.dto';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
@@ -12,6 +14,20 @@ import { OrderStatus } from './entities/order.entity';
 @ApiTags('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) { }
+
+  @Post('by-bar/:slug')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Criar um pedido de delivery/retirada (cliente final, sem login)' })
+  @ApiBody({ type: CreatePublicOrderDto })
+  @ApiResponse({ status: 201, description: 'Pedido criado com sucesso' })
+  @ApiResponse({ status: 400, description: 'Requisição inválida ou pedido mínimo não atingido' })
+  @ApiResponse({ status: 403, description: 'Bar não aceita delivery' })
+  @ApiResponse({ status: 404, description: 'Bar não encontrado' })
+  @HttpCode(HttpStatus.CREATED)
+  createByBarSlug(@Param('slug') slug: string, @Body() dto: CreatePublicOrderDto) {
+    return this.orderService.createPublicOrder(slug, dto);
+  }
 
   @Get('by-bar/:slug')
   @ApiBearerAuth()
