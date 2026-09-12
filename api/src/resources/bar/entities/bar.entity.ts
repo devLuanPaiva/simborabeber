@@ -57,6 +57,54 @@ export class BarEntity {
     })
     isActive: boolean;
 
+    @Column({
+        type: 'boolean',
+        default: true,
+        name: 'comandas_enabled'
+    })
+    comandasEnabled: boolean;
+
+    @Column({
+        type: 'boolean',
+        default: false,
+        name: 'delivery_enabled'
+    })
+    deliveryEnabled: boolean;
+
+    @Column({
+        type: 'decimal',
+        precision: 10,
+        scale: 2,
+        default: 0,
+        name: 'delivery_fee'
+    })
+    deliveryFee: number;
+
+    @Column({
+        type: 'decimal',
+        precision: 10,
+        scale: 2,
+        default: 0,
+        name: 'min_order_value'
+    })
+    minOrderValue: number;
+
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true,
+        name: 'delivery_origin_address'
+    })
+    deliveryOriginAddress?: string;
+
+    @Column({
+        type: 'varchar',
+        length: 255,
+        nullable: true,
+        name: 'opening_hours'
+    })
+    openingHours?: string;
+
     @OneToMany(() => UserEntity, user => user.bar, { cascade: true })
     users: UserEntity[];
 
