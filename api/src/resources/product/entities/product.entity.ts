@@ -1,15 +1,8 @@
 import { BarEntity } from "../../bar/entities/bar.entity";
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { ProductCategory } from "./product-category.enum";
 
-export enum ProductCategory {
-    BEERS = 'beers',
-    DRINKS = 'drinks',
-    SNACKS = 'snacks',
-    NON_ALCOHOLIC = 'non_alcoholic',
-    OTHER = 'other',
-    SKEWER = 'skewer',
-    SOFT_DRINKS = 'soft_drinks',
-}
+export { ProductCategory };
 
 @Entity({ name: 'products', schema: 'public' })
 export class ProductEntity {

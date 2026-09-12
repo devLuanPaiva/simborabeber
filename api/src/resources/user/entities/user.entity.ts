@@ -1,6 +1,7 @@
 import { TabEntity } from '../../tab/entities/tab.entity';
 import { BarEntity } from '../../bar/entities/bar.entity';
 import { TabItemEntity } from '../../tab-item/entities/tab-item.entity';
+import { OrderEntity } from '../../order/entities/order.entity';
 import {
     Entity,
     PrimaryGeneratedColumn,
@@ -76,6 +77,9 @@ export class UserEntity {
 
     @OneToMany(() => TabItemEntity, tabItem => tabItem.waiterAdded)
     addedTabItems: TabItemEntity[];
+
+    @OneToMany(() => OrderEntity, order => order.attendedBy)
+    attendedOrders: OrderEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;
