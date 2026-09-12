@@ -11,11 +11,12 @@ import { TabModule } from './resources/tab/tab.module';
 import { TabItemModule } from './resources/tab-item/tab-item.module';
 import { ReportsModule } from './resources/reports/reports.module';
 import { OrderModule } from './resources/order/order.module';
+import { OrderItemModule } from './resources/order-item/order-item.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule, ReportsModule, OrderModule],
+  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule, ReportsModule, OrderModule, OrderItemModule],
   controllers: [AppController],
   providers: [AppService],
 })
