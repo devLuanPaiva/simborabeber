@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator"
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator"
 import { AccessPlan } from "../entities/bar.entity"
 
 export class CreateBarDto {
@@ -25,6 +25,35 @@ export class CreateBarDto {
     @ApiProperty({ example: AccessPlan.BASIC, enum: AccessPlan, required: false })
     accessPlan?: AccessPlan
 
+    @IsOptional()
+    @IsBoolean({ message: 'comandasEnabled deve ser um booleano' })
+    @ApiProperty({ example: true, description: 'Se o módulo de comandas está habilitado', required: false })
+    comandasEnabled?: boolean
 
+    @IsOptional()
+    @IsBoolean({ message: 'deliveryEnabled deve ser um booleano' })
+    @ApiProperty({ example: false, description: 'Se o módulo de delivery está habilitado', required: false })
+    deliveryEnabled?: boolean
 
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Taxa de entrega deve ser um número com até 2 casas decimais' })
+    @Min(0, { message: 'Taxa de entrega não pode ser negativa' })
+    @ApiProperty({ example: 5, description: 'Taxa de entrega cobrada no delivery', required: false })
+    deliveryFee?: number
+
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Pedido mínimo deve ser um número com até 2 casas decimais' })
+    @Min(0, { message: 'Pedido mínimo não pode ser negativo' })
+    @ApiProperty({ example: 20, description: 'Valor mínimo de pedido para delivery', required: false })
+    minOrderValue?: number
+
+    @IsOptional()
+    @IsString({ message: 'Endereço de origem deve ser uma string' })
+    @ApiProperty({ example: 'Rua das Flores, 123', description: 'Endereço de origem para cálculo/exibição do delivery', required: false })
+    deliveryOriginAddress?: string
+
+    @IsOptional()
+    @IsString({ message: 'Horário de funcionamento deve ser uma string' })
+    @ApiProperty({ example: 'Ter-Dom, 18h-23h30', description: 'Horário de funcionamento (texto livre)', required: false })
+    openingHours?: string
 }
