@@ -3,6 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { OrderRepository } from './repository/order.repository';
 import { UserRepository } from '../user/repository/user.repository';
+import { OrderGateway } from './order.gateway';
 import { OrderEntity, OrderStatus, OrderType, PaymentMethod, PaymentStatus } from './entities/order.entity';
 import { UserEntity } from '../user/entities/user.entity';
 
@@ -10,6 +11,7 @@ describe('OrderService', () => {
   let service: OrderService;
   let orderRepository: jest.Mocked<OrderRepository>;
   let userRepository: jest.Mocked<UserRepository>;
+  let orderGateway: jest.Mocked<OrderGateway>;
 
   const buildOrder = (overrides: Partial<OrderEntity> = {}): OrderEntity => ({
     id: 'order-1',
@@ -47,12 +49,19 @@ describe('OrderService', () => {
             findById: jest.fn(),
           },
         },
+        {
+          provide: OrderGateway,
+          useValue: {
+            notifyOrderStatusUpdated: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<OrderService>(OrderService);
     orderRepository = module.get(OrderRepository);
     userRepository = module.get(UserRepository);
+    orderGateway = module.get(OrderGateway);
   });
 
   it('should be defined', () => {
@@ -64,13 +73,15 @@ describe('OrderService', () => {
       const waiter = { id: 'user-1', name: 'Maria' } as UserEntity;
       orderRepository.findById.mockResolvedValue(buildOrder({ status: OrderStatus.RECEIVED }));
       userRepository.findById.mockResolvedValue(waiter);
-      orderRepository.updateOrder.mockResolvedValue(buildOrder({ status: OrderStatus.PREPARING, attendedBy: waiter }));
+      const updated = buildOrder({ status: OrderStatus.PREPARING, attendedBy: waiter });
+      orderRepository.updateOrder.mockResolvedValue(updated);
 
       await service.updateStatus('order-1', OrderStatus.PREPARING, 'user-1');
 
       expect(orderRepository.updateOrder).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'order-1', status: OrderStatus.PREPARING, attendedBy: waiter }),
       );
+      expect(orderGateway.notifyOrderStatusUpdated).toHaveBeenCalledWith(updated);
     });
 
     it('rejects jumping straight from RECEIVED to COMPLETED', async () => {

@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { OrderRepository } from './repository/order.repository';
 import { UserRepository } from '../user/repository/user.repository';
+import { OrderGateway } from './order.gateway';
 import { OrderEntity, OrderStatus, OrderType } from './entities/order.entity';
 
 type NextStatusResolver = (order: OrderEntity) => OrderStatus[];
@@ -21,6 +22,7 @@ export class OrderService {
   constructor(
     private readonly orderRepository: OrderRepository,
     private readonly userRepository: UserRepository,
+    private readonly orderGateway: OrderGateway,
   ) { }
 
   async findThemAllByBarSlug(slug: string, status?: OrderStatus) {
@@ -62,6 +64,7 @@ export class OrderService {
     if (status === OrderStatus.CANCELLED) patch.cancelledAt = new Date();
 
     const updated = await this.orderRepository.updateOrder(patch);
+    await this.orderGateway.notifyOrderStatusUpdated(updated);
     return this.shapeOrder(updated);
   }
 
