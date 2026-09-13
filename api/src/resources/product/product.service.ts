@@ -7,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BarEntity } from '../bar/entities/bar.entity';
 import { ProductEntity } from './entities/product.entity';
+import { ProductVariantEntity } from '../product-variant/entities/product-variant.entity';
 
 @Injectable()
 export class ProductService {
@@ -28,9 +29,11 @@ export class ProductService {
       throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
     }
 
+    const { variants, ...rest } = createProductDto;
     const productData: Partial<ProductEntity> = {
-      ...createProductDto,
+      ...rest,
       bar: user.bar,
+      variants: variants as ProductVariantEntity[] | undefined,
     }
 
     return this.productRepository.createProduct(productData)
@@ -46,9 +49,10 @@ export class ProductService {
       throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
     }
 
-    const productsData: Partial<ProductEntity>[] = createManyProductsDto.products.map((product) => ({
+    const productsData: Partial<ProductEntity>[] = createManyProductsDto.products.map(({ variants, ...product }) => ({
       ...product,
       bar: user.bar,
+      variants: variants as ProductVariantEntity[] | undefined,
     }))
 
     return this.productRepository.createProducts(productsData)

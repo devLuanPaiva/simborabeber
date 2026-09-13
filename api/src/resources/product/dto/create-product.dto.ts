@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsString, ValidateNested } from "class-validator"
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator"
 import { ProductCategory } from "../entities/product.entity"
+import { CreateProductVariantDto } from "../../product-variant/dto/create-product-variant.dto"
 
 export class CreateProductDto {
     @IsNotEmpty({ message: 'Nome é obrigatório' })
@@ -28,6 +29,14 @@ export class CreateProductDto {
     @IsString({ message: 'URL da imagem deve ser uma string' })
     @ApiProperty({ example: 'https://...', description: 'URL da imagem do produto' })
     image: string
+
+    @IsOptional()
+    @IsArray({ message: 'Variações deve ser um array' })
+    @ArrayMaxSize(6, { message: 'Informe no máximo 6 variações' })
+    @ValidateNested({ each: true })
+    @Type(() => CreateProductVariantDto)
+    @ApiProperty({ type: [CreateProductVariantDto], description: 'Variações de tamanho do produto (opcional)', required: false })
+    variants?: CreateProductVariantDto[]
 
 }
 
