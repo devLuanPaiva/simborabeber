@@ -1,6 +1,6 @@
 import { Header } from "@/components/layout/Header";
 import Link from "next/link";
-import { ClipboardList, Beer, Users, BarChart } from "lucide-react";
+import { ClipboardList, Beer, Users, BarChart, Bike } from "lucide-react";
 
 export default async function PanelBarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
@@ -19,6 +19,12 @@ export default async function PanelBarPage(
       description: "Cardápio e itens do bar",
       icon: Beer,
       href: `/painel/bar/${slug}/produtos`,
+    },
+    {
+      title: "Pedidos",
+      description: "Fila de pedidos de delivery e retirada",
+      icon: Bike,
+      href: `/painel/bar/${slug}/pedidos`,
     },
     {
       title: "Relatórios",
