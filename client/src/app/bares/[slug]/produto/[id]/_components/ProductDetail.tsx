@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { formatCurrency } from "@/data/functions";
 import { useCart } from "@/data/cart/CartContext";
-import { toast } from "sonner";
+import { appToast } from "@/utils/toast-ui";
 
 interface ProductProps {
   product: IProduct;
@@ -29,7 +29,7 @@ export function ProductDetail({ product, canOrder }: Readonly<ProductProps>) {
       category: product.category,
       image: product.image,
     });
-    toast.success(`${product.name} adicionado ao carrinho`);
+    appToast.success(`${product.name} adicionado ao carrinho`);
     setQuantity(1);
   };
 
