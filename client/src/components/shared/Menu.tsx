@@ -8,10 +8,11 @@ import {
 } from "@/data/models";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { formatCurrency } from "@/data/functions";
 import { ProductImage } from "@/components/shared/ProductImage";
+import { QuickAddButton } from "@/components/shared/QuickAddButton";
 import { Badge } from "../ui/badge";
 import { ChevronLeft, Plus, PackageOpen } from "lucide-react";
 
@@ -45,10 +46,14 @@ export default function Menu({
 
   const categories = Object.keys(productsByCategory) as ProductCategory[];
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    el?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
+  const [activeCategory, setActiveCategory] = useState<ProductCategory | undefined>(categories[0]);
+
+  useEffect(() => {
+    if (!activeCategory || !categories.includes(activeCategory)) {
+      setActiveCategory(categories[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories]);
 
   return (
     <div className="pb-20">
@@ -74,8 +79,12 @@ export default function Menu({
             {categories.map((cat) => (
               <button
                 key={cat}
-                onClick={() => scrollTo(cat)}
-                className="whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium bg-[#F2BE5C] text-white hover:bg-[#F28B0C] transition"
+                onClick={() => setActiveCategory(cat)}
+                className={`whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition ${
+                  cat === activeCategory
+                    ? "bg-[#F28B0C] text-white"
+                    : "bg-[#F2BE5C] text-white hover:bg-[#F28B0C]"
+                }`}
               >
                 {ProductCategoryLabels[cat]}
               </button>
@@ -151,16 +160,22 @@ export default function Menu({
         </div>
       )}
 
-      {!isEmpty && (
-        <div className="w-11/12 max-w-4xl mx-auto mt-8 space-y-10">
-          {categories.map((category) => (
-            <section key={category} id={category}>
-              <h2 className="text-2xl font-bold text-[#F28B0C] mb-4">
-                {ProductCategoryLabels[category]}
-              </h2>
+      {!isEmpty && activeCategory && (
+        <div className="w-11/12 max-w-4xl mx-auto mt-8">
+          <section>
+            <h2 className="text-2xl font-bold text-[#F28B0C] mb-4">
+              {ProductCategoryLabels[activeCategory]}
+            </h2>
 
-              <div className="grid gap-4">
-                {productsByCategory[category].map((product, index) => (
+            <div className="grid gap-4">
+              {productsByCategory[activeCategory].map((product, index) => {
+                const activeVariants = (product.variants ?? [])
+                  .filter((v) => v.isActive)
+                  .sort((a, b) => a.sortOrder - b.sortOrder);
+                const displayPrice =
+                  activeVariants.length > 0 ? Number(activeVariants[0].price) : Number(product.price ?? 0);
+
+                return (
                   <Link
                     key={product.id}
                     href={
@@ -173,7 +188,7 @@ export default function Menu({
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.04 }}
-                      className="flex gap-4 bg-white rounded-xl shadow-sm hover:shadow-md transition p-3 border border-[#BFAE99]/20"
+                      className="flex items-center gap-4 bg-white rounded-xl shadow-sm hover:shadow-md transition p-3 border border-[#BFAE99]/20"
                     >
                       <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-zinc-100">
                         <ProductImage src={product.image} alt={product.name} />
@@ -204,15 +219,20 @@ export default function Menu({
                         </div>
 
                         <span className="font-bold text-[#F2A20C] mt-2">
-                          {formatCurrency(product.price)}
+                          {activeVariants.length > 0 && (
+                            <span className="text-xs font-normal text-zinc-400">a partir de </span>
+                          )}
+                          {formatCurrency(displayPrice)}
                         </span>
                       </div>
+
+                      {mode === "client" && bar?.deliveryEnabled && <QuickAddButton product={product} />}
                     </motion.div>
                   </Link>
-                ))}
-              </div>
-            </section>
-          ))}
+                );
+              })}
+            </div>
+          </section>
         </div>
       )}
     </div>
