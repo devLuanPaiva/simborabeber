@@ -3,16 +3,35 @@
 import { IProduct, ProductCategoryLabels } from "@/data/models";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { ArrowLeft, Beer } from "lucide-react";
+import { ArrowLeft, Beer, Minus, Plus, ShoppingCart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { formatCurrency } from "@/data/functions";
+import { useCart } from "@/data/cart/CartContext";
+import { toast } from "sonner";
 
 interface ProductProps {
   product: IProduct;
+  canOrder: boolean;
 }
 
-export function ProductDetail({ product }: Readonly<ProductProps>) {
+export function ProductDetail({ product, canOrder }: Readonly<ProductProps>) {
   const router = useRouter();
+  const { addItem } = useCart();
+  const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = () => {
+    addItem({
+      productId: product.id,
+      name: product.name,
+      price: Number(product.price),
+      quantity,
+      category: product.category,
+      image: product.image,
+    });
+    toast.success(`${product.name} adicionado ao carrinho`);
+    setQuantity(1);
+  };
 
   return (
     <div className="max-w-3xl mx-auto pb-10">
@@ -56,6 +75,39 @@ export function ProductDetail({ product }: Readonly<ProductProps>) {
         <p className="text-gray-600 mt-4 leading-relaxed">
           {product.description}
         </p>
+
+        {canOrder && (
+          <div className="flex items-center gap-4 mt-6">
+            <div className="flex items-center border border-[#BFAE99]/40 rounded-full">
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                className="p-2 text-zinc-600 hover:text-[#F28B0C]"
+                aria-label="Diminuir quantidade"
+              >
+                <Minus size={18} />
+              </button>
+              <span className="w-8 text-center font-semibold">{quantity}</span>
+              <button
+                type="button"
+                onClick={() => setQuantity((q) => q + 1)}
+                className="p-2 text-zinc-600 hover:text-[#F28B0C]"
+                aria-label="Aumentar quantidade"
+              >
+                <Plus size={18} />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="flex-1 flex items-center justify-center gap-2 bg-[#F2A20C] hover:bg-[#F28B0C] text-white font-semibold py-3 rounded-full transition"
+            >
+              <ShoppingCart size={18} />
+              Adicionar ao carrinho
+            </button>
+          </div>
+        )}
       </motion.div>
     </div>
   );
