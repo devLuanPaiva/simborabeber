@@ -18,6 +18,12 @@ export interface IBar {
     address: string;
     accessPlan: AccessPlan;
     isActive: boolean;
+    comandasEnabled: boolean;
+    deliveryEnabled: boolean;
+    deliveryFee: number;
+    minOrderValue: number;
+    deliveryOriginAddress?: string;
+    openingHours?: string;
     createdAt: Date;
     updatedAt: Date;
 }
