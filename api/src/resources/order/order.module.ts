@@ -11,6 +11,8 @@ import { AuthModule } from '../auth/auth.module';
 import { BarModule } from '../bar/bar.module';
 import { UserModule } from '../user/user.module';
 import { ProductModule } from '../product/product.module';
+import { ProductVariantModule } from '../product-variant/product-variant.module';
+import { ProductAddonModule } from '../product-addon/product-addon.module';
 
 @Module({
   controllers: [OrderController],
@@ -21,6 +23,8 @@ import { ProductModule } from '../product/product.module';
     forwardRef(() => BarModule),
     forwardRef(() => UserModule),
     forwardRef(() => ProductModule),
+    forwardRef(() => ProductVariantModule),
+    forwardRef(() => ProductAddonModule),
   ],
   providers: [OrderService, OrderRepository, OrderGateway],
   exports: [OrderService, OrderRepository, OrderGateway, TypeOrmModule]

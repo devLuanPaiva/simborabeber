@@ -26,6 +26,8 @@ export class OrderRepository {
         const query = this.repository.createQueryBuilder('order')
             .innerJoin('order.bar', 'bar', 'bar.slug = :slug', { slug: barSlug })
             .leftJoinAndSelect('order.items', 'items')
+            .leftJoinAndSelect('items.components', 'itemComponents')
+            .leftJoinAndSelect('items.addons', 'itemAddons')
             .leftJoin('order.attendedBy', 'attendedBy')
             .addSelect(['attendedBy.id', 'attendedBy.name'])
             .orderBy('order.createdAt', 'DESC');
@@ -40,7 +42,7 @@ export class OrderRepository {
     async findById(id: string): Promise<OrderEntity | null> {
         return this.repository.findOne({
             where: { id },
-            relations: ['items', 'attendedBy', 'bar'],
+            relations: ['items', 'items.components', 'items.addons', 'attendedBy', 'bar'],
         });
     }
 

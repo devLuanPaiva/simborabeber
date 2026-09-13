@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, MaxLength } from "class-validator";
+import { ArrayMaxSize, IsArray, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min, MaxLength } from "class-validator";
 
 export class CreatePublicOrderItemDto {
     @IsNotEmpty({ message: 'Produto é obrigatório' })
@@ -18,4 +18,21 @@ export class CreatePublicOrderItemDto {
     @MaxLength(255, { message: 'Observação deve ter no máximo 255 caracteres' })
     @ApiProperty({ example: 'Sem cebola', description: 'Observação do item', required: false })
     notes?: string
+
+    @IsOptional()
+    @IsUUID('4', { message: 'Variação inválida' })
+    @ApiProperty({ example: '8f14e45f-ceea-467e-9b1d-0e6c9c1a1b2d', description: 'ID da variação (tamanho) escolhida, quando o produto tiver variações', required: false })
+    variantId?: string
+
+    @IsOptional()
+    @IsUUID('4', { message: 'Produto do segundo sabor inválido' })
+    @ApiProperty({ example: '8f14e45f-ceea-467e-9b1d-0e6c9c1a1b2e', description: 'ID do segundo sabor (produto), para itens meio a meio (opcional)', required: false })
+    extraProductId?: string
+
+    @IsOptional()
+    @IsArray({ message: 'Adicionais deve ser um array' })
+    @ArrayMaxSize(10, { message: 'Informe no máximo 10 adicionais' })
+    @IsUUID('4', { each: true, message: 'Adicional inválido' })
+    @ApiProperty({ example: ['8f14e45f-ceea-467e-9b1d-0e6c9c1a1b2f'], description: 'IDs dos adicionais escolhidos (opcional)', required: false })
+    addonIds?: string[]
 }

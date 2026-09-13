@@ -5,11 +5,15 @@ import { OrderRepository } from './repository/order.repository';
 import { UserRepository } from '../user/repository/user.repository';
 import { BarRepository } from '../bar/repository/bar.repository';
 import { ProductRepository } from '../product/repository/product.repository';
+import { ProductVariantRepository } from '../product-variant/repository/product-variant.repository';
+import { ProductAddonRepository } from '../product-addon/repository/product-addon.repository';
 import { OrderGateway } from './order.gateway';
 import { OrderEntity, OrderStatus, OrderType, PaymentMethod, PaymentStatus } from './entities/order.entity';
 import { UserEntity } from '../user/entities/user.entity';
 import { BarEntity } from '../bar/entities/bar.entity';
 import { ProductEntity, ProductCategory } from '../product/entities/product.entity';
+import { ProductVariantEntity } from '../product-variant/entities/product-variant.entity';
+import { ProductAddonEntity } from '../product-addon/entities/product-addon.entity';
 
 describe('OrderService', () => {
   let service: OrderService;
@@ -17,6 +21,8 @@ describe('OrderService', () => {
   let userRepository: jest.Mocked<UserRepository>;
   let barRepository: jest.Mocked<BarRepository>;
   let productRepository: jest.Mocked<ProductRepository>;
+  let productVariantRepository: jest.Mocked<ProductVariantRepository>;
+  let productAddonRepository: jest.Mocked<ProductAddonRepository>;
   let orderGateway: jest.Mocked<OrderGateway>;
 
   const buildOrder = (overrides: Partial<OrderEntity> = {}): OrderEntity => ({
@@ -69,6 +75,18 @@ describe('OrderService', () => {
           },
         },
         {
+          provide: ProductVariantRepository,
+          useValue: {
+            findAllByProductId: jest.fn(),
+          },
+        },
+        {
+          provide: ProductAddonRepository,
+          useValue: {
+            findAllByIdsForBar: jest.fn(),
+          },
+        },
+        {
           provide: OrderGateway,
           useValue: {
             notifyOrderStatusUpdated: jest.fn(),
@@ -83,7 +101,12 @@ describe('OrderService', () => {
     userRepository = module.get(UserRepository);
     barRepository = module.get(BarRepository);
     productRepository = module.get(ProductRepository);
+    productVariantRepository = module.get(ProductVariantRepository);
+    productAddonRepository = module.get(ProductAddonRepository);
     orderGateway = module.get(OrderGateway);
+
+    // Most tests exercise flat (non-pizza) products, which have no variants.
+    productVariantRepository.findAllByProductId.mockResolvedValue([]);
   });
 
   it('should be defined', () => {
@@ -252,6 +275,192 @@ describe('OrderService', () => {
       await service.createPublicOrder('bar-do-joao', baseDto() as any);
 
       expect(orderGateway.notifyOrderCreated).toHaveBeenCalledWith(created);
+    });
+
+    describe('pizza sizes, flavor combos and add-ons', () => {
+      const buildVariant = (overrides: Partial<ProductVariantEntity> = {}): ProductVariantEntity => ({
+        id: 'variant-g',
+        label: 'G',
+        price: 45.9,
+        sortOrder: 0,
+        maxFlavors: 2,
+        isActive: true,
+        ...overrides,
+      } as ProductVariantEntity);
+
+      const buildAddon = (overrides: Partial<ProductAddonEntity> = {}): ProductAddonEntity => ({
+        id: 'addon-1',
+        name: 'Borda Catupiry',
+        price: 8,
+        category: null,
+        isActive: true,
+        ...overrides,
+      } as ProductAddonEntity);
+
+      const pizzaDto = (overrides: Record<string, unknown> = {}) =>
+        baseDto({ items: [{ productId: 'product-1', quantity: 1, ...overrides }] });
+
+      it('requires a variantId when the product has active variants', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant()]);
+
+        await expect(service.createPublicOrder('bar-do-joao', pizzaDto() as any)).rejects.toBeInstanceOf(BadRequestException);
+        expect(orderRepository.createOrder).not.toHaveBeenCalled();
+      });
+
+      it('rejects a variantId that does not belong to (or is inactive for) this product', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant({ id: 'variant-g', isActive: false })]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g' }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('rejects a variantId for a product that has no variants at all', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct());
+        productVariantRepository.findAllByProductId.mockResolvedValue([]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g' }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('prices the item using the selected variant, ignoring the flat product.price', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 0 }));
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ name: 'Calabresa', price: 999, category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant({ price: 45.9 })]);
+        orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+        await service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g' }) as any);
+
+        expect(orderRepository.createOrder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            items: [expect.objectContaining({ name: 'Calabresa (G)', price: 45.9, quantity: 1 })],
+          }),
+        );
+      });
+
+      it('keeps the price unchanged when a second flavor is combined (size-based pricing, not flavor-based)', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 0 }));
+        productRepository.findByIdForBar
+          .mockResolvedValueOnce(buildProduct({ id: 'product-1', name: 'Calabresa', category: ProductCategory.PIZZA }))
+          .mockResolvedValueOnce(buildProduct({ id: 'product-2', name: 'Marguerita', category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g', price: 45.9, maxFlavors: 2 })])
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g-2', price: 65.9, maxFlavors: 2 })]);
+        orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+        await service.createPublicOrder(
+          'bar-do-joao',
+          pizzaDto({ variantId: 'variant-g', extraProductId: 'product-2' }) as any,
+        );
+
+        expect(orderRepository.createOrder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            items: [expect.objectContaining({
+              name: 'Calabresa / Marguerita (G)',
+              price: 45.9,
+              components: [
+                expect.objectContaining({ productName: 'Calabresa', variantLabel: 'G', price: 45.9 }),
+                expect.objectContaining({ productName: 'Marguerita', variantLabel: 'G', price: 0 }),
+              ],
+            })],
+          }),
+        );
+      });
+
+      it('rejects a second flavor when the chosen size does not allow combining', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant({ maxFlavors: 1 })]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', extraProductId: 'product-2' }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('rejects combining a product with itself as the second flavor', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant()]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', extraProductId: 'product-1' }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('rejects a second flavor that is not available in the chosen size', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar
+          .mockResolvedValueOnce(buildProduct({ id: 'product-1', category: ProductCategory.PIZZA }))
+          .mockResolvedValueOnce(buildProduct({ id: 'product-2', name: 'Marguerita', category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g', label: 'G' })])
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-m-2', label: 'M' })]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', extraProductId: 'product-2' }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('adds add-on prices on top of the variant price', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 0 }));
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant({ price: 45.9 })]);
+        productAddonRepository.findAllByIdsForBar.mockResolvedValue([buildAddon({ price: 8 })]);
+        orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+        await service.createPublicOrder(
+          'bar-do-joao',
+          pizzaDto({ variantId: 'variant-g', addonIds: ['addon-1'] }) as any,
+        );
+
+        expect(orderRepository.createOrder).toHaveBeenCalledWith(
+          expect.objectContaining({
+            items: [expect.objectContaining({
+              price: 53.9,
+              addons: [expect.objectContaining({ name: 'Borda Catupiry', price: 8 })],
+            })],
+          }),
+        );
+      });
+
+      it('rejects an add-on id that does not belong to this bar', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant()]);
+        productAddonRepository.findAllByIdsForBar.mockResolvedValue([]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', addonIds: ['missing-addon'] }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('rejects an inactive add-on', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant()]);
+        productAddonRepository.findAllByIdsForBar.mockResolvedValue([buildAddon({ isActive: false })]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', addonIds: ['addon-1'] }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
+
+      it('rejects an add-on restricted to a category that does not match the product', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar());
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant()]);
+        productAddonRepository.findAllByIdsForBar.mockResolvedValue([buildAddon({ category: ProductCategory.DRINKS })]);
+
+        await expect(
+          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', addonIds: ['addon-1'] }) as any),
+        ).rejects.toBeInstanceOf(BadRequestException);
+      });
     });
   });
 
