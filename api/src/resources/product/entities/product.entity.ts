@@ -37,8 +37,8 @@ export class ProductEntity {
     })
     isActive: boolean;
 
-    @Column('decimal', { precision: 10, scale: 2 })
-    price: number;
+    @Column('decimal', { precision: 10, scale: 2, nullable: true })
+    price?: number;
 
     @Column({
         type: 'enum',

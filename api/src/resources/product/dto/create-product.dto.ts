@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger"
 import { Type } from "class-transformer"
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, ValidateNested } from "class-validator"
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator"
 import { ProductCategory } from "../entities/product.entity"
 import { CreateProductVariantDto } from "../../product-variant/dto/create-product-variant.dto"
 
@@ -10,10 +10,11 @@ export class CreateProductDto {
     @ApiProperty({ example: 'Coca-cola', description: 'Nome do produto' })
     name: string
 
-    @IsNotEmpty({ message: 'Preço é obrigatório' })
-    @IsNumber({ maxDecimalPlaces: 2 })
-    @ApiProperty({ example: 10.5, description: 'Preço do produto' })
-    price: number
+    @IsOptional()
+    @IsNumber({ maxDecimalPlaces: 2 }, { message: 'Preço deve ser um número válido' })
+    @Min(0, { message: 'Preço não pode ser negativo' })
+    @ApiProperty({ example: 10.5, description: 'Preço do produto (opcional quando há variações de tamanho)', required: false })
+    price?: number
 
     @IsNotEmpty({ message: 'Descrição é obrigatória' })
     @IsString({ message: 'Descrição deve ser uma string' })

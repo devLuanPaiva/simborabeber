@@ -16,13 +16,18 @@ export class ProductRepository {
         result.name = product.name;
         result.description = product.description;
         result.image = product.image;
-        result.price = typeof product.price === 'string' ? Number.parseFloat(product.price) : product.price;
+        result.price = this.parsePrice(product.price);
         result.category = product.category;
         result.isActive = product.isActive;
         result.createdAt = product.createdAt;
         result.updatedAt = product.updatedAt;
         result.variants = product.variants;
         return result;
+    }
+
+    private parsePrice(price: ProductEntity['price']): number | undefined {
+        if (price === null || price === undefined) return undefined;
+        return typeof price === 'string' ? Number.parseFloat(price) : price;
     }
 
     async createProduct(product: Partial<ProductEntity>): Promise<ProductEntity> {

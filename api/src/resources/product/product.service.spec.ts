@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductRepository } from './repository/product.repository';
 import { UserRepository } from '../user/repository/user.repository';
@@ -86,7 +86,7 @@ describe('ProductService', () => {
     it('passes nested variants straight through to the repository for cascade insert', async () => {
       const bar = { id: 'bar-1' } as BarEntity;
       userRepository.findUserByIdWithBar.mockResolvedValue({ id: 'user-1', bar } as UserEntity);
-      const dtoWithVariants = { ...dto, variants: [{ label: 'G', price: 45.9 }, { label: 'GG', price: 65.9 }] };
+      const dtoWithVariants = { ...dto, variants: [{ label: 'G', price: 45.9, numberOfSlices: 8 }, { label: 'GG', price: 65.9, numberOfSlices: 12 }] };
       productRepository.createProduct.mockResolvedValue({ id: 'product-1' } as ProductEntity);
 
       await service.create(dtoWithVariants, 'user-1');
@@ -94,6 +94,27 @@ describe('ProductService', () => {
       expect(productRepository.createProduct).toHaveBeenCalledWith(
         expect.objectContaining({ variants: dtoWithVariants.variants }),
       );
+    });
+
+    it('allows creating a product without a base price when it has at least one size variant', async () => {
+      const bar = { id: 'bar-1' } as BarEntity;
+      userRepository.findUserByIdWithBar.mockResolvedValue({ id: 'user-1', bar } as UserEntity);
+      const { price: _price, ...dtoWithoutPrice } = dto;
+      const dtoWithVariants = { ...dtoWithoutPrice, variants: [{ label: 'G', price: 45.9, numberOfSlices: 8 }] };
+      productRepository.createProduct.mockResolvedValue({ id: 'product-1' } as ProductEntity);
+
+      await service.create(dtoWithVariants as any, 'user-1');
+
+      expect(productRepository.createProduct).toHaveBeenCalled();
+    });
+
+    it('throws BadRequestException when there is no price and no size variant', async () => {
+      const bar = { id: 'bar-1' } as BarEntity;
+      userRepository.findUserByIdWithBar.mockResolvedValue({ id: 'user-1', bar } as UserEntity);
+      const { price: _price, ...dtoWithoutPrice } = dto;
+
+      await expect(service.create(dtoWithoutPrice as any, 'user-1')).rejects.toBeInstanceOf(BadRequestException);
+      expect(productRepository.createProduct).not.toHaveBeenCalled();
     });
   });
 

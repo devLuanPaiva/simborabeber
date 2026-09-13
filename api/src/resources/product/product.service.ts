@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { CreateManyProductsDto, CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductRepository } from './repository/product.repository';
@@ -30,6 +30,8 @@ export class ProductService {
     }
 
     const { variants, ...rest } = createProductDto;
+    this.assertHasPriceOrVariants(rest.price, variants);
+
     const productData: Partial<ProductEntity> = {
       ...rest,
       bar: user.bar,
@@ -49,13 +51,26 @@ export class ProductService {
       throw new ForbiddenException({ message: 'Usuário não possui bar associado', field: 'bar', detail: `O usuário não possui um bar associado e não pode criar produtos` })
     }
 
-    const productsData: Partial<ProductEntity>[] = createManyProductsDto.products.map(({ variants, ...product }) => ({
-      ...product,
-      bar: user.bar,
-      variants: variants as ProductVariantEntity[] | undefined,
-    }))
+    const productsData: Partial<ProductEntity>[] = createManyProductsDto.products.map(({ variants, ...product }) => {
+      this.assertHasPriceOrVariants(product.price, variants);
+      return {
+        ...product,
+        bar: user.bar,
+        variants: variants as ProductVariantEntity[] | undefined,
+      };
+    })
 
     return this.productRepository.createProducts(productsData)
+  }
+
+  private assertHasPriceOrVariants(price: number | undefined, variants: unknown[] | undefined): void {
+    if ((price === undefined || price === null) && (!variants || variants.length === 0)) {
+      throw new BadRequestException({
+        message: 'Preço é obrigatório',
+        field: 'price',
+        detail: 'Informe um preço ou ao menos uma variação de tamanho com preço',
+      });
+    }
   }
 
   async findAllTheBarProducts(slug: string, category?: string) {
