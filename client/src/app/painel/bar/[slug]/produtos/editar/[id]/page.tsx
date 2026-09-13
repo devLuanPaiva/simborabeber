@@ -5,6 +5,7 @@ import { formatCurrency } from "@/data/functions";
 import { BackLink } from "@/components/shared/BackLink";
 import { ActionButtons } from "./_components/ActionButtons";
 import { UpdateProductForm } from "./_components/UpdateProductForm";
+import { ProductVariantsManager } from "./_components/ProductVariantsManager";
 import { Badge } from "@/components/ui/badge";
 import { getProductById } from "@/actions";
 
@@ -59,6 +60,8 @@ export default async function PanelBarProductPage(
         </div>
 
         <UpdateProductForm product={product} id={id} slug={slug} />
+
+        <ProductVariantsManager productId={id} slug={slug} variants={product.variants ?? []} />
 
         <div className="flex flex-col gap-3 pt-2">
           <button

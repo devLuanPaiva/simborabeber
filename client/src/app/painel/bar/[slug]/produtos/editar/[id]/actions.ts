@@ -1,5 +1,5 @@
 "use server"
-import { IProduct, ProductCategory } from "@/data/models";
+import { IProduct, IProductVariant, ProductCategory } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverDelete } from "@/lib/api/serverDelete";
 import { serverPatch } from "@/lib/api/serverPatch";
@@ -83,6 +83,82 @@ export async function deleteProduct(id: string, slug: string) {
         return { success: true, message: body?.message || "Produto removido" };
     } catch (err) {
         console.error("Error deleting product:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
+}
+
+export async function createProductVariant(productId: string, slug: string, formData: FormData) {
+    const label = String(formData.get("label") ?? "").trim();
+    const price = Number(formData.get("price"));
+    const maxFlavors = Number(formData.get("maxFlavors")) || 1;
+
+    if (!label || Number.isNaN(price)) {
+        return { success: false, error: "Preencha tamanho e preço corretamente" };
+    }
+
+    try {
+        const response = await serverPost(`/product-variant/by-product/${productId}`, { label, price, maxFlavors });
+        const body: ApiResponse<IProductVariant> = await response.json().catch(() => ({} as ApiResponse<IProductVariant>));
+
+        if (!response.ok) {
+            return { success: false, error: body.errors?.detail || "Erro ao criar variação" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/produtos/editar/${productId}`);
+        return { success: true, message: "Variação criada com sucesso" };
+    } catch (err) {
+        console.error("Error creating product variant:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
+}
+
+export async function updateProductVariant(variantId: string, productId: string, slug: string, formData: FormData) {
+    const payload: Partial<IProductVariant> = {};
+
+    const labelVal = formData.get("label");
+    if (typeof labelVal === "string" && labelVal.trim() !== "") payload.label = labelVal.trim();
+
+    const priceVal = formData.get("price");
+    if (priceVal !== null && String(priceVal).trim() !== "") {
+        const n = Number(priceVal);
+        if (!Number.isNaN(n)) payload.price = n;
+    }
+
+    const maxFlavorsVal = formData.get("maxFlavors");
+    if (maxFlavorsVal !== null && String(maxFlavorsVal).trim() !== "") {
+        const n = Number(maxFlavorsVal);
+        if (!Number.isNaN(n)) payload.maxFlavors = n;
+    }
+
+    try {
+        const response = await serverPatch(`/product-variant/${variantId}`, payload);
+        const body: ApiResponse<IProductVariant> = await response.json().catch(() => ({} as ApiResponse<IProductVariant>));
+
+        if (!response.ok) {
+            return { success: false, error: body.errors?.detail || "Erro ao atualizar variação" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/produtos/editar/${productId}`);
+        return { success: true, message: "Variação atualizada com sucesso" };
+    } catch (err) {
+        console.error("Error updating product variant:", err);
+        return { success: false, error: "Erro inesperado" };
+    }
+}
+
+export async function deleteProductVariant(variantId: string, productId: string, slug: string) {
+    try {
+        const response = await serverDelete(`/product-variant/${variantId}`);
+        const body = await response.json().catch(() => ({} as ApiResponse<unknown>));
+
+        if (!response.ok) {
+            return { success: false, error: body?.errors?.detail || "Erro ao remover variação" };
+        }
+
+        revalidatePath(`/painel/bar/${slug}/produtos/editar/${productId}`);
+        return { success: true, message: body?.message || "Variação removida" };
+    } catch (err) {
+        console.error("Error deleting product variant:", err);
         return { success: false, error: "Erro inesperado" };
     }
 }

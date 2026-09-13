@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Link as LinkIcon } from "lucide-react";
+import { Upload, Link as LinkIcon, Plus, Trash2 } from "lucide-react";
 import { createProduct, uploadImage } from "../actions";
 import { ProductCategoryLabels } from "@/data/models/IProduct";
 import { appToast } from "@/utils/toast-ui";
@@ -17,6 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type VariantDraft = {
+  label: string;
+  price: string;
+  maxFlavors: string;
+};
+
 type ProductRegistrationFormProps = {
   slug: string;
 };
@@ -29,6 +35,23 @@ export function ProductRegistrationForm({
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [productName, setProductName] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [showVariants, setShowVariants] = useState(false);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
+
+  const addVariant = () => setVariants((v) => [...v, { label: "", price: "", maxFlavors: "1" }]);
+  const removeVariant = (index: number) => setVariants((v) => v.filter((_, i) => i !== index));
+  const updateVariant = (index: number, patch: Partial<VariantDraft>) =>
+    setVariants((v) => v.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+
+  const variantsPayload = JSON.stringify(
+    variants
+      .filter((v) => v.label.trim() && v.price.trim())
+      .map((v) => ({
+        label: v.label.trim(),
+        price: Number(v.price),
+        maxFlavors: Number(v.maxFlavors) || 1,
+      })),
+  );
 
   async function handleUpload(file: File) {
     try {
@@ -58,6 +81,8 @@ export function ProductRegistrationForm({
             appToast.success(res.message || "Produto criado com sucesso");
             setImageUrl("");
             setImageMode("upload");
+            setVariants([]);
+            setShowVariants(false);
           } else {
             appToast.error(res?.error || "Erro ao criar produto");
           }
@@ -230,6 +255,79 @@ export function ProductRegistrationForm({
       )}
 
       <Input type="hidden" name="imageUrl" value={imageUrl} />
+
+      <div className="space-y-3 border-t border-[#BFAE99]/20 pt-4">
+        <button
+          type="button"
+          onClick={() => setShowVariants((v) => !v)}
+          className="text-sm font-medium text-[#F28B0C] hover:underline cursor-pointer"
+        >
+          {showVariants ? "Ocultar tamanhos/variações" : "+ Adicionar tamanhos/variações (opcional)"}
+        </button>
+
+        {showVariants && (
+          <div className="space-y-3">
+            <p className="text-xs text-zinc-400">
+              Use para produtos com tamanhos e preços diferentes, como pizzas (P, M, G, GG).
+              Se o produto não tiver variações, deixe em branco e o preço acima será usado.
+            </p>
+
+            {variants.map((variant, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Tamanho</Label>
+                  <Input
+                    value={variant.label}
+                    onChange={(e) => updateVariant(index, { label: e.target.value })}
+                    placeholder="G"
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Preço</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={variant.price}
+                    onChange={(e) => updateVariant(index, { price: e.target.value })}
+                    placeholder="45.90"
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Máx. sabores</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={2}
+                    value={variant.maxFlavors}
+                    onChange={(e) => updateVariant(index, { maxFlavors: e.target.value })}
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(index)}
+                  aria-label="Remover tamanho"
+                  className="p-2 text-zinc-400 hover:text-red-500 cursor-pointer"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-1 text-sm font-medium text-zinc-700 border border-[#BFAE99]/40 rounded-lg px-3 py-1.5 hover:bg-[#F2F2F2] cursor-pointer"
+            >
+              <Plus size={16} /> Adicionar tamanho
+            </button>
+          </div>
+        )}
+      </div>
+
+      <Input type="hidden" name="variants" value={variantsPayload} />
 
       <button
         type="submit"

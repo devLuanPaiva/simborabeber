@@ -54,6 +54,17 @@ export async function createProduct(formData: FormData, slug: string) {
     const description = getFormStringValue(formData, "description");
     const category = getFormStringValue(formData, "category");
     const imageUrl = getFormStringValue(formData, "imageUrl");
+    const variantsRaw = getFormStringValue(formData, "variants");
+
+    let variants: IProduct["variants"];
+    if (variantsRaw) {
+        try {
+            const parsed = JSON.parse(variantsRaw);
+            if (Array.isArray(parsed) && parsed.length > 0) variants = parsed;
+        } catch {
+            // invalid JSON is treated the same as "no variants"
+        }
+    }
 
     const product: Partial<IProduct> = {
         name: productName,
@@ -61,6 +72,7 @@ export async function createProduct(formData: FormData, slug: string) {
         description,
         category: category as IProduct["category"],
         image: imageUrl,
+        ...(variants ? { variants } : {}),
     }
 
     try {
