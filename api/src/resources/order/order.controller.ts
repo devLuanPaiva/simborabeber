@@ -53,6 +53,15 @@ export class OrderController {
     return this.orderService.findOne(id);
   }
 
+  @Get(':id/public')
+  @ApiOperation({ summary: 'Consultar o status de um pedido (cliente final, sem login)' })
+  @ApiResponse({ status: 200, description: 'Status do pedido' })
+  @ApiResponse({ status: 404, description: 'Pedido não encontrado' })
+  @HttpCode(HttpStatus.OK)
+  findOnePublic(@Param('id') id: string) {
+    return this.orderService.findOnePublicView(id);
+  }
+
   @Patch(':id/status')
   @ApiBearerAuth()
   @UseGuards(AuthGuard, RolesGuard)

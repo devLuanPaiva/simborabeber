@@ -101,6 +101,41 @@ export class OrderService {
     return this.shapeOrder(order);
   }
 
+  async findOnePublicView(id: string) {
+    const order = await this.orderRepository.findById(id);
+    if (!order) {
+      throw new NotFoundException({ message: 'Pedido não encontrado', field: 'id', detail: `Pedido com id ${id} não foi encontrado` });
+    }
+
+    const items = (order.items ?? []).map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      notes: item.notes,
+      category: item.category,
+    }));
+
+    return {
+      id: order.id,
+      type: order.type,
+      status: order.status,
+      customerName: order.customerName,
+      deliveryAddress: order.deliveryAddress,
+      deliveryFee: order.deliveryFee,
+      paymentMethod: order.paymentMethod,
+      paymentStatus: order.paymentStatus,
+      notes: order.notes,
+      totalValue: order.totalValue,
+      items,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+      readyAt: order.readyAt,
+      completedAt: order.completedAt,
+      cancelledAt: order.cancelledAt,
+    };
+  }
+
   async updateStatus(id: string, status: OrderStatus, userId: string) {
     const order = await this.orderRepository.findById(id);
     if (!order) {
