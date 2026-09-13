@@ -45,6 +45,12 @@ export enum PaymentStatus {
     PAID = 'paid',
 }
 
+export interface ICartItemAddon {
+    id: string;
+    name: string;
+    price: number;
+}
+
 export interface ICartItem {
     productId: string;
     name: string;
@@ -53,6 +59,23 @@ export interface ICartItem {
     notes?: string;
     category: ProductCategory;
     image?: string;
+    variantId?: string;
+    variantLabel?: string;
+    extraProductId?: string;
+    extraProductName?: string;
+    addonIds?: string[];
+    addonsSnapshot?: ICartItemAddon[];
+}
+
+export interface IOrderItemComponent {
+    productName: string;
+    variantLabel?: string | null;
+    price: number;
+}
+
+export interface IOrderItemAddon {
+    name: string;
+    price: number;
 }
 
 export interface IOrderItem {
@@ -62,6 +85,8 @@ export interface IOrderItem {
     quantity: number;
     notes?: string;
     category: ProductCategory;
+    components?: IOrderItemComponent[];
+    addons?: IOrderItemAddon[];
 }
 
 export interface IOrder {

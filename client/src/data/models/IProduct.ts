@@ -20,6 +20,15 @@ export const ProductCategoryLabels: Record<ProductCategory, string> = {
     [ProductCategory.PIZZA]: 'Pizzas',
 }
 
+export interface IProductVariant {
+    id: string;
+    label: string;
+    price: number;
+    sortOrder: number;
+    maxFlavors: number;
+    isActive: boolean;
+}
+
 export interface IProduct {
     id: string;
     name: string;
@@ -28,6 +37,7 @@ export interface IProduct {
     isActive: boolean;
     price: number;
     category: ProductCategory;
+    variants?: IProductVariant[];
     createdAt: Date;
     updatedAt: Date;
 }

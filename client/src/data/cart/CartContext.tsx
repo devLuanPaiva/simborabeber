@@ -9,9 +9,9 @@ interface CartContextValue {
     subtotal: number;
     itemCount: number;
     addItem: (item: ICartItem) => void;
-    removeItem: (productId: string) => void;
-    setQuantity: (productId: string, quantity: number) => void;
-    setNotes: (productId: string, notes: string) => void;
+    removeItem: (key: string) => void;
+    setQuantity: (key: string, quantity: number) => void;
+    setNotes: (key: string, notes: string) => void;
     clear: () => void;
 }
 
@@ -55,13 +55,13 @@ export function CartProvider({ barSlug, children }: Readonly<{ barSlug: string; 
     }, [barSlug, state.items]);
 
     const addItem = useCallback((item: ICartItem) => dispatch({ type: "ADD_ITEM", item }), []);
-    const removeItem = useCallback((productId: string) => dispatch({ type: "REMOVE_ITEM", productId }), []);
+    const removeItem = useCallback((key: string) => dispatch({ type: "REMOVE_ITEM", key }), []);
     const setQuantity = useCallback(
-        (productId: string, quantity: number) => dispatch({ type: "SET_QUANTITY", productId, quantity }),
+        (key: string, quantity: number) => dispatch({ type: "SET_QUANTITY", key, quantity }),
         [],
     );
     const setNotes = useCallback(
-        (productId: string, notes: string) => dispatch({ type: "SET_NOTES", productId, notes }),
+        (key: string, notes: string) => dispatch({ type: "SET_NOTES", key, notes }),
         [],
     );
     const clear = useCallback(() => dispatch({ type: "CLEAR" }), []);

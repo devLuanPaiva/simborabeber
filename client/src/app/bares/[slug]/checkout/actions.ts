@@ -39,6 +39,9 @@ export async function createOrder(formData: FormData, slug: string) {
                 productId: item.productId,
                 quantity: item.quantity,
                 ...(item.notes ? { notes: item.notes } : {}),
+                ...(item.variantId ? { variantId: item.variantId } : {}),
+                ...(item.extraProductId ? { extraProductId: item.extraProductId } : {}),
+                ...(item.addonIds?.length ? { addonIds: item.addonIds } : {}),
             })),
         });
 

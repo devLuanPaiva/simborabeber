@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/data/cart/CartContext";
+import { cartItemKey } from "@/data/cart/cartReducer";
 import { formatCurrency } from "@/data/functions";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,54 +53,57 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
       </header>
 
       <div className="w-11/12 max-w-2xl mx-auto mt-6 space-y-4">
-        {items.map((item) => (
-          <div
-            key={item.productId}
-            className="flex flex-col gap-3 bg-white rounded-xl shadow-sm border border-[#BFAE99]/20 p-4"
-          >
-            <div className="flex justify-between items-start gap-3">
-              <div>
-                <h3 className="font-semibold text-zinc-800">{item.name}</h3>
-                <span className="text-[#F2A20C] font-bold">{formatCurrency(item.price)}</span>
+        {items.map((item) => {
+          const key = cartItemKey(item);
+          return (
+            <div
+              key={key}
+              className="flex flex-col gap-3 bg-white rounded-xl shadow-sm border border-[#BFAE99]/20 p-4"
+            >
+              <div className="flex justify-between items-start gap-3">
+                <div>
+                  <h3 className="font-semibold text-zinc-800">{item.name}</h3>
+                  <span className="text-[#F2A20C] font-bold">{formatCurrency(item.price)}</span>
+                </div>
+
+                <button
+                  onClick={() => removeItem(key)}
+                  aria-label={`Remover ${item.name}`}
+                  className="text-zinc-400 hover:text-red-500"
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
 
-              <button
-                onClick={() => removeItem(item.productId)}
-                aria-label={`Remover ${item.name}`}
-                className="text-zinc-400 hover:text-red-500"
-              >
-                <Trash2 size={18} />
-              </button>
-            </div>
+              <div className="flex items-center border border-[#BFAE99]/40 rounded-full w-fit">
+                <button
+                  type="button"
+                  onClick={() => setQuantity(key, item.quantity - 1)}
+                  className="p-2 text-zinc-600 hover:text-[#F28B0C]"
+                  aria-label={`Diminuir quantidade de ${item.name}`}
+                >
+                  <Minus size={16} />
+                </button>
+                <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(key, item.quantity + 1)}
+                  className="p-2 text-zinc-600 hover:text-[#F28B0C]"
+                  aria-label={`Aumentar quantidade de ${item.name}`}
+                >
+                  <Plus size={16} />
+                </button>
+              </div>
 
-            <div className="flex items-center border border-[#BFAE99]/40 rounded-full w-fit">
-              <button
-                type="button"
-                onClick={() => setQuantity(item.productId, item.quantity - 1)}
-                className="p-2 text-zinc-600 hover:text-[#F28B0C]"
-                aria-label={`Diminuir quantidade de ${item.name}`}
-              >
-                <Minus size={16} />
-              </button>
-              <span className="w-8 text-center font-semibold">{item.quantity}</span>
-              <button
-                type="button"
-                onClick={() => setQuantity(item.productId, item.quantity + 1)}
-                className="p-2 text-zinc-600 hover:text-[#F28B0C]"
-                aria-label={`Aumentar quantidade de ${item.name}`}
-              >
-                <Plus size={16} />
-              </button>
+              <Textarea
+                placeholder="Alguma observação? Ex: sem cebola"
+                defaultValue={item.notes ?? ""}
+                onBlur={(e) => setNotes(key, e.target.value)}
+                className="text-sm"
+              />
             </div>
-
-            <Textarea
-              placeholder="Alguma observação? Ex: sem cebola"
-              defaultValue={item.notes ?? ""}
-              onBlur={(e) => setNotes(item.productId, e.target.value)}
-              className="text-sm"
-            />
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#BFAE99]/30 p-4 space-y-3">
