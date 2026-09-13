@@ -6,6 +6,7 @@ export enum ProductCategory {
     OTHER = 'other',
     SKEWER = 'skewer',
     SOFT_DRINKS = 'soft_drinks',
+    PIZZA = 'pizza',
 }
 
 export const ProductCategoryLabels: Record<ProductCategory, string> = {
@@ -16,6 +17,7 @@ export const ProductCategoryLabels: Record<ProductCategory, string> = {
     [ProductCategory.OTHER]: 'Outros',
     [ProductCategory.SKEWER]: 'Espetinhos',
     [ProductCategory.SOFT_DRINKS]: 'Refrigerantes',
+    [ProductCategory.PIZZA]: 'Pizzas',
 }
 
 export interface IProduct {
