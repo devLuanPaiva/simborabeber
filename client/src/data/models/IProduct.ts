@@ -25,7 +25,7 @@ export interface IProductVariant {
     label: string;
     price: number;
     sortOrder: number;
-    maxFlavors: number;
+    numberOfSlices: number;
     isActive: boolean;
 }
 
@@ -35,7 +35,7 @@ export interface IProduct {
     description: string
     image: string;
     isActive: boolean;
-    price: number;
+    price?: number;
     category: ProductCategory;
     variants?: IProductVariant[];
     createdAt: Date;

@@ -20,7 +20,7 @@ import {
 type VariantDraft = {
   label: string;
   price: string;
-  maxFlavors: string;
+  numberOfSlices: string;
 };
 
 type ProductRegistrationFormProps = {
@@ -38,19 +38,30 @@ export function ProductRegistrationForm({
   const [showVariants, setShowVariants] = useState(false);
   const [variants, setVariants] = useState<VariantDraft[]>([]);
 
-  const addVariant = () => setVariants((v) => [...v, { label: "", price: "", maxFlavors: "1" }]);
+  const addVariant = () => setVariants((v) => [...v, { label: "", price: "", numberOfSlices: "" }]);
   const removeVariant = (index: number) => setVariants((v) => v.filter((_, i) => i !== index));
   const updateVariant = (index: number, patch: Partial<VariantDraft>) =>
     setVariants((v) => v.map((item, i) => (i === index ? { ...item, ...patch } : item)));
 
+  function validateVariants(): string | null {
+    for (const variant of variants) {
+      if (!variant.label.trim()) return "Informe o tamanho de todas as variações";
+      if (!variant.price.trim() || Number.isNaN(Number(variant.price))) {
+        return `Informe o preço do tamanho "${variant.label.trim()}"`;
+      }
+      if (!variant.numberOfSlices.trim() || Number.isNaN(Number(variant.numberOfSlices))) {
+        return `Informe o número de fatias do tamanho "${variant.label.trim()}"`;
+      }
+    }
+    return null;
+  }
+
   const variantsPayload = JSON.stringify(
-    variants
-      .filter((v) => v.label.trim() && v.price.trim())
-      .map((v) => ({
-        label: v.label.trim(),
-        price: Number(v.price),
-        maxFlavors: Number(v.maxFlavors) || 1,
-      })),
+    variants.map((v) => ({
+      label: v.label.trim(),
+      price: Number(v.price),
+      numberOfSlices: Number(v.numberOfSlices),
+    })),
   );
 
   async function handleUpload(file: File) {
@@ -75,6 +86,12 @@ export function ProductRegistrationForm({
   return (
     <form
       action={async (formData) => {
+        const variantsError = validateVariants();
+        if (variantsError) {
+          appToast.error(variantsError);
+          return;
+        }
+
         try {
           const res = await createProduct(formData, slug);
           if (res?.success) {
@@ -110,14 +127,15 @@ export function ProductRegistrationForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="space-y-1">
           <Label htmlFor="price" className="text-sm text-zinc-600">
-            Preço <span className="text-red-500">*</span>
+            Preço {variants.length === 0 && <span className="text-red-500">*</span>}
+            {variants.length > 0 && <span className="text-zinc-400">(opcional)</span>}
           </Label>
           <Input
             id="price"
             name="price"
             type="number"
             step="0.01"
-            required
+            required={variants.length === 0}
             className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
           />
         </div>
@@ -295,13 +313,13 @@ export function ProductRegistrationForm({
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs text-zinc-500">Máx. sabores</Label>
+                  <Label className="text-xs text-zinc-500">Número de fatias</Label>
                   <Input
                     type="number"
                     min={1}
-                    max={2}
-                    value={variant.maxFlavors}
-                    onChange={(e) => updateVariant(index, { maxFlavors: e.target.value })}
+                    value={variant.numberOfSlices}
+                    onChange={(e) => updateVariant(index, { numberOfSlices: e.target.value })}
+                    placeholder="8"
                     className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
                   />
                 </div>

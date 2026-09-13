@@ -50,7 +50,8 @@ export async function uploadImage(file: File, productName: string) {
 
 export async function createProduct(formData: FormData, slug: string) {
     const productName = getFormStringValue(formData, "productName");
-    const price = Number(formData.get("price"));
+    const priceRaw = getFormStringValue(formData, "price");
+    const price = priceRaw ? Number(priceRaw) : undefined;
     const description = getFormStringValue(formData, "description");
     const category = getFormStringValue(formData, "category");
     const imageUrl = getFormStringValue(formData, "imageUrl");

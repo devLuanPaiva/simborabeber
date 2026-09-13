@@ -104,7 +104,7 @@ export function AddProducts({
               <div>
                 <p className="text-sm font-medium">{product.name}</p>
                 <p className="text-xs text-zinc-500">
-                  {formatCurrency(product.price)}
+                  {formatCurrency(product.price ?? 0)}
                 </p>
               </div>
             </div>

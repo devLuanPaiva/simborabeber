@@ -90,14 +90,14 @@ export async function deleteProduct(id: string, slug: string) {
 export async function createProductVariant(productId: string, slug: string, formData: FormData) {
     const label = String(formData.get("label") ?? "").trim();
     const price = Number(formData.get("price"));
-    const maxFlavors = Number(formData.get("maxFlavors")) || 1;
+    const numberOfSlices = Number(formData.get("numberOfSlices"));
 
-    if (!label || Number.isNaN(price)) {
-        return { success: false, error: "Preencha tamanho e preço corretamente" };
+    if (!label || Number.isNaN(price) || Number.isNaN(numberOfSlices) || numberOfSlices < 1) {
+        return { success: false, error: "Preencha tamanho, preço e número de fatias corretamente" };
     }
 
     try {
-        const response = await serverPost(`/product-variant/by-product/${productId}`, { label, price, maxFlavors });
+        const response = await serverPost(`/product-variant/by-product/${productId}`, { label, price, numberOfSlices });
         const body: ApiResponse<IProductVariant> = await response.json().catch(() => ({} as ApiResponse<IProductVariant>));
 
         if (!response.ok) {
@@ -124,10 +124,10 @@ export async function updateProductVariant(variantId: string, productId: string,
         if (!Number.isNaN(n)) payload.price = n;
     }
 
-    const maxFlavorsVal = formData.get("maxFlavors");
-    if (maxFlavorsVal !== null && String(maxFlavorsVal).trim() !== "") {
-        const n = Number(maxFlavorsVal);
-        if (!Number.isNaN(n)) payload.maxFlavors = n;
+    const numberOfSlicesVal = formData.get("numberOfSlices");
+    if (numberOfSlicesVal !== null && String(numberOfSlicesVal).trim() !== "") {
+        const n = Number(numberOfSlicesVal);
+        if (!Number.isNaN(n)) payload.numberOfSlices = n;
     }
 
     try {

@@ -38,7 +38,11 @@ export async function ProductsByCategory({ slug, category }: Readonly<ProductsBy
 
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
 
-        {products.map((product) => (
+        {products.map((product) => {
+          const activeVariants = (product.variants ?? []).filter((v) => v.isActive);
+          const displayPrice = activeVariants.length > 0 ? Number(activeVariants[0].price) : Number(product.price ?? 0);
+
+          return (
           <Link
             key={product.id}
             href={`/bares/${slug}/produto/${product.id}`}
@@ -66,12 +70,16 @@ export async function ProductsByCategory({ slug, category }: Readonly<ProductsBy
               </h3>
 
               <p className="text-[#F2A20C] font-bold text-sm">
-               {formatCurrency(product.price)}
+               {activeVariants.length > 0 && (
+                 <span className="text-xs font-normal text-zinc-400">a partir de </span>
+               )}
+               {formatCurrency(displayPrice)}
               </p>
 
             </div>
           </Link>
-        ))}
+          );
+        })}
 
       </div>
     </section>

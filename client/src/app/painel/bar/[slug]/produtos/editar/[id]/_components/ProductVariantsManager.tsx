@@ -84,11 +84,11 @@ function VariantRow({
         </div>
         <div className="space-y-1">
           <Label className="text-xs text-zinc-500">Preço</Label>
-          <Input name="price" type="number" step="0.01" defaultValue={variant.price} className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
+          <Input name="price" type="number" step="0.01" required defaultValue={variant.price} className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs text-zinc-500">Máx. sabores</Label>
-          <Input name="maxFlavors" type="number" min={1} max={2} defaultValue={variant.maxFlavors} className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
+          <Label className="text-xs text-zinc-500">Número de fatias</Label>
+          <Input name="numberOfSlices" type="number" min={1} required defaultValue={variant.numberOfSlices} className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
         </div>
         <div className="flex gap-2">
           <button type="submit" className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white py-2 rounded-lg font-semibold text-sm cursor-pointer">
@@ -107,9 +107,7 @@ function VariantRow({
       <div>
         <span className="font-semibold text-zinc-800">{variant.label}</span>
         <span className="text-sm text-zinc-500 ml-2">{formatCurrency(variant.price)}</span>
-        {variant.maxFlavors > 1 && (
-          <span className="text-xs text-zinc-400 ml-2">até {variant.maxFlavors} sabores</span>
-        )}
+        <span className="text-xs text-zinc-400 ml-2">{variant.numberOfSlices} fatias</span>
       </div>
 
       <div className="flex items-center gap-2">
@@ -167,8 +165,8 @@ function NewVariantForm({
         <Input name="price" type="number" step="0.01" placeholder="45.90" required className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
       </div>
       <div className="space-y-1">
-        <Label className="text-xs text-zinc-500">Máx. sabores</Label>
-        <Input name="maxFlavors" type="number" min={1} max={2} defaultValue={1} className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
+        <Label className="text-xs text-zinc-500">Número de fatias</Label>
+        <Input name="numberOfSlices" type="number" min={1} placeholder="8" required className="border border-[#BFAE99]/50 rounded-lg px-3 py-2" />
       </div>
       <div className="flex gap-2">
         <button type="submit" className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white py-2 rounded-lg font-semibold text-sm cursor-pointer">

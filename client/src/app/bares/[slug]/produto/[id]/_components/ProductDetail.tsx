@@ -30,7 +30,7 @@ export function ProductDetail({ product, canOrder, flavorOptions, addonOptions }
 
   const [variantId, setVariantId] = useState<string | undefined>(sortedVariants[0]?.id);
   const selectedVariant = sortedVariants.find((v) => v.id === variantId);
-  const canCombineFlavors = !!selectedVariant && selectedVariant.maxFlavors >= 2;
+  const canCombineFlavors = !!selectedVariant;
 
   const [extraProductId, setExtraProductId] = useState<string>("");
   useEffect(() => {
@@ -51,7 +51,7 @@ export function ProductDetail({ product, canOrder, flavorOptions, addonOptions }
     setAddonIds((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
   const selectedAddons = addonOptions.filter((a) => addonIds.includes(a.id));
 
-  const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.price);
+  const unitPrice = selectedVariant ? Number(selectedVariant.price) : Number(product.price ?? 0);
   const addonsTotal = selectedAddons.reduce((sum, a) => sum + Number(a.price), 0);
   const totalUnitPrice = unitPrice + addonsTotal;
 
