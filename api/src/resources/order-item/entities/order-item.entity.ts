@@ -1,6 +1,8 @@
 import { ProductCategory } from "../../product/entities/product-category.enum";
 import { OrderEntity } from "../../order/entities/order.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { OrderItemComponentEntity } from "./order-item-component.entity";
+import { OrderItemAddonEntity } from "./order-item-addon.entity";
 
 @Entity({ name: 'order_items', schema: 'public' })
 export class OrderItemEntity {
@@ -36,6 +38,12 @@ export class OrderItemEntity {
 
     @JoinColumn({ name: 'order_id' })
     order: OrderEntity
+
+    @OneToMany(() => OrderItemComponentEntity, component => component.orderItem, { cascade: true })
+    components: OrderItemComponentEntity[];
+
+    @OneToMany(() => OrderItemAddonEntity, addon => addon.orderItem, { cascade: true })
+    addons: OrderItemAddonEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;
