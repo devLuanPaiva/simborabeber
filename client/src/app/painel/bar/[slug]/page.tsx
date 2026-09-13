@@ -1,11 +1,13 @@
 import { Header } from "@/components/layout/Header";
 import Link from "next/link";
-import { ClipboardList, Beer, Users, BarChart, Bike } from "lucide-react";
+import { ClipboardList, Beer, Users, BarChart, Bike, Settings } from "lucide-react";
+import { getBarBySlug } from "@/actions";
 
 export default async function PanelBarPage(
   props: Readonly<{ params: Promise<{ slug: string }> }>,
 ) {
   const { slug } = await props.params;
+  const bar = await getBarBySlug(slug);
 
   const modules = [
     {
@@ -13,32 +15,44 @@ export default async function PanelBarPage(
       description: "Gerencie pedidos e mesas",
       icon: ClipboardList,
       href: `/painel/bar/${slug}/comandas`,
+      visible: bar?.comandasEnabled ?? true,
     },
     {
       title: "Produtos",
       description: "Cardápio e itens do bar",
       icon: Beer,
       href: `/painel/bar/${slug}/produtos`,
+      visible: true,
     },
     {
       title: "Pedidos",
       description: "Fila de pedidos de delivery e retirada",
       icon: Bike,
       href: `/painel/bar/${slug}/pedidos`,
+      visible: !!bar?.deliveryEnabled,
     },
     {
       title: "Relatórios",
       description: "Visualize dados e métricas",
       icon: BarChart,
       href: `/painel/bar/${slug}/relatorio-vendas`,
+      visible: true,
     },
     {
       title: "Usuários",
       description: "Gerencie usuários e permissões",
       icon: Users,
       href: `/painel/usuarios`,
+      visible: true,
     },
-  ];
+    {
+      title: "Configurações",
+      description: "Comandas, delivery, taxas e horários",
+      icon: Settings,
+      href: `/painel/bar/${slug}/configuracoes`,
+      visible: true,
+    },
+  ].filter((module) => module.visible);
 
   return (
     <main className="min-h-screen bg-[#F2F2F2]">
