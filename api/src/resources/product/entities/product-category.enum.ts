@@ -6,4 +6,5 @@ export enum ProductCategory {
     OTHER = 'other',
     SKEWER = 'skewer',
     SOFT_DRINKS = 'soft_drinks',
+    PIZZA = 'pizza',
 }
