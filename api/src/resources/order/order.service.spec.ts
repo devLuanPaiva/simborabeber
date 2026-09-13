@@ -272,4 +272,24 @@ describe('OrderService', () => {
       expect(result.attendedBy).toEqual({ id: 'user-1', name: 'Maria' });
     });
   });
+
+  describe('findOnePublicView', () => {
+    it('throws NotFoundException when the order does not exist', async () => {
+      orderRepository.findById.mockResolvedValue(null);
+
+      await expect(service.findOnePublicView('missing')).rejects.toBeInstanceOf(NotFoundException);
+    });
+
+    it('never exposes attendedBy or other administrative fields', async () => {
+      orderRepository.findById.mockResolvedValue(
+        buildOrder({ attendedBy: { id: 'user-1', name: 'Maria', password: 'hashed' } as UserEntity }),
+      );
+
+      const result = await service.findOnePublicView('order-1');
+
+      expect(result).not.toHaveProperty('attendedBy');
+      expect(result.id).toBe('order-1');
+      expect(result.items).toEqual([]);
+    });
+  });
 });

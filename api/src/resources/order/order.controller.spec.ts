@@ -20,6 +20,7 @@ describe('OrderController', () => {
             createPublicOrder: jest.fn(),
             findThemAllByBarSlug: jest.fn(),
             findOne: jest.fn(),
+            findOnePublicView: jest.fn(),
             updateStatus: jest.fn(),
             remove: jest.fn(),
           },
@@ -66,6 +67,12 @@ describe('OrderController', () => {
     controller.findOne('order-1');
 
     expect(service.findOne).toHaveBeenCalledWith('order-1');
+  });
+
+  it('findOnePublic forwards the order id to the public view', () => {
+    controller.findOnePublic('order-1');
+
+    expect(service.findOnePublicView).toHaveBeenCalledWith('order-1');
   });
 
   it('updateStatus extracts the user id from the request and forwards the new status', () => {
