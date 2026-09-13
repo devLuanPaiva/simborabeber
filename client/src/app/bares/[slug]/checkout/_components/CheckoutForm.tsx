@@ -39,11 +39,12 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.PIX);
   const [isPending, startTransition] = useTransition();
 
+  const hasPendingSize = items.some((item) => !!item.sizeOptions?.length);
   const missingForMinimum =
     type === OrderType.DELIVERY ? Math.max(0, minOrderValue - subtotal) : 0;
   const fee = type === OrderType.DELIVERY ? deliveryFee : 0;
   const total = subtotal + fee;
-  const canSubmit = items.length > 0 && missingForMinimum === 0 && !isPending;
+  const canSubmit = items.length > 0 && missingForMinimum === 0 && !hasPendingSize && !isPending;
 
   if (items.length === 0) {
     return (
@@ -173,6 +174,12 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
             <span>{formatCurrency(total)}</span>
           </div>
         </div>
+
+        {hasPendingSize && (
+          <p className="text-sm text-red-500">
+            Volte ao carrinho e escolha o tamanho de todos os itens antes de continuar.
+          </p>
+        )}
 
         {missingForMinimum > 0 && (
           <p className="text-sm text-red-500">

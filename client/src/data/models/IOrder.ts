@@ -51,6 +51,12 @@ export interface ICartItemAddon {
     price: number;
 }
 
+export interface ICartItemSizeOption {
+    id: string;
+    label: string;
+    price: number;
+}
+
 export interface ICartItem {
     productId: string;
     name: string;
@@ -65,6 +71,12 @@ export interface ICartItem {
     extraProductName?: string;
     addonIds?: string[];
     addonsSnapshot?: ICartItemAddon[];
+    /**
+     * Present only while the size hasn't been chosen yet (quick-add from the
+     * listing skips size selection - it's finished later in the cart). Once
+     * a size is set via SET_VARIANT, this is cleared.
+     */
+    sizeOptions?: ICartItemSizeOption[];
 }
 
 export interface IOrderItemComponent {

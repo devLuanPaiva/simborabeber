@@ -150,6 +150,152 @@ describe("cartReducer", () => {
       expect(state.items).toHaveLength(1);
     });
   });
+
+  describe("SET_VARIANT (quick-add finishing size selection in the cart)", () => {
+    const pendingCalabresa: ICartItem = {
+      productId: "product-3",
+      name: "Calabresa",
+      price: 35.9,
+      quantity: 1,
+      category: ProductCategory.PIZZA,
+      sizeOptions: [
+        { id: "variant-m", label: "M", price: 35.9 },
+        { id: "variant-g", label: "G", price: 45.9 },
+      ],
+    };
+
+    it("assigns the chosen size, updates the price and clears sizeOptions", () => {
+      const withPending = cartReducer(emptyCartState, { type: "ADD_ITEM", item: pendingCalabresa });
+      const key = cartItemKey(pendingCalabresa);
+
+      const updated = cartReducer(withPending, {
+        type: "SET_VARIANT",
+        key,
+        variant: { id: "variant-g", label: "G", price: 45.9 },
+      });
+
+      expect(updated.items).toEqual([
+        { ...pendingCalabresa, variantId: "variant-g", variantLabel: "G", price: 45.9, sizeOptions: undefined },
+      ]);
+    });
+
+    it("merges into an existing line if the chosen size already matches another line", () => {
+      const withBoth = [pendingCalabresa, pizzaGCalabresa].reduce(
+        (acc, item) => cartReducer(acc, { type: "ADD_ITEM", item }),
+        emptyCartState,
+      );
+
+      const updated = cartReducer(withBoth, {
+        type: "SET_VARIANT",
+        key: cartItemKey(pendingCalabresa),
+        variant: { id: "variant-g", label: "G", price: 45.9 },
+      });
+
+      expect(updated.items).toHaveLength(1);
+      expect(updated.items[0].quantity).toBe(2);
+    });
+
+    it("is a no-op when the key does not match any line", () => {
+      const withPending = cartReducer(emptyCartState, { type: "ADD_ITEM", item: pendingCalabresa });
+
+      const updated = cartReducer(withPending, {
+        type: "SET_VARIANT",
+        key: "does-not-exist",
+        variant: { id: "variant-g", label: "G", price: 45.9 },
+      });
+
+      expect(updated).toBe(withPending);
+    });
+  });
+
+  describe("COMBINE_ITEMS (half-and-half decided in the cart)", () => {
+    const calabresaG: ICartItem = {
+      productId: "product-calabresa",
+      name: "Calabresa",
+      price: 45.9,
+      quantity: 2,
+      category: ProductCategory.PIZZA,
+      variantId: "variant-g",
+      variantLabel: "G",
+    };
+
+    const frangoG: ICartItem = {
+      productId: "product-frango",
+      name: "Frango",
+      price: 45.9,
+      quantity: 1,
+      category: ProductCategory.PIZZA,
+      variantId: "variant-g",
+      variantLabel: "G",
+    };
+
+    function seed(items: ICartItem[]) {
+      return items.reduce((acc, item) => cartReducer(acc, { type: "ADD_ITEM", item }), emptyCartState);
+    }
+
+    it("takes one unit from each line and creates a combined half-and-half line", () => {
+      const state = seed([calabresaG, frangoG]);
+
+      const combined = cartReducer(state, {
+        type: "COMBINE_ITEMS",
+        primaryKey: cartItemKey(calabresaG),
+        secondaryKey: cartItemKey(frangoG),
+      });
+
+      const comboLine = combined.items.find((i) => i.extraProductId === "product-frango");
+      expect(comboLine).toMatchObject({
+        name: "Calabresa / Frango",
+        quantity: 1,
+        price: 45.9,
+        variantId: "variant-g",
+        extraProductId: "product-frango",
+        extraProductName: "Frango",
+      });
+
+      const leftoverCalabresa = combined.items.find((i) => i.productId === "product-calabresa" && !i.extraProductId);
+      expect(leftoverCalabresa?.quantity).toBe(1);
+
+      const leftoverFrango = combined.items.find((i) => i.productId === "product-frango" && !i.extraProductId);
+      expect(leftoverFrango).toBeUndefined();
+    });
+
+    it("does not combine lines with different sizes", () => {
+      const state = seed([calabresaG, { ...frangoG, variantId: "variant-m", variantLabel: "M" }]);
+
+      const combined = cartReducer(state, {
+        type: "COMBINE_ITEMS",
+        primaryKey: cartItemKey(calabresaG),
+        secondaryKey: cartItemKey({ ...frangoG, variantId: "variant-m" }),
+      });
+
+      expect(combined).toEqual(state);
+    });
+
+    it("does not combine a line that is already a combo", () => {
+      const alreadyCombined = { ...calabresaG, extraProductId: "product-frango", extraProductName: "Frango" };
+      const state = seed([alreadyCombined, frangoG]);
+
+      const combined = cartReducer(state, {
+        type: "COMBINE_ITEMS",
+        primaryKey: cartItemKey(alreadyCombined),
+        secondaryKey: cartItemKey(frangoG),
+      });
+
+      expect(combined).toEqual(state);
+    });
+
+    it("is a no-op when either key does not exist", () => {
+      const state = seed([calabresaG, frangoG]);
+
+      const combined = cartReducer(state, {
+        type: "COMBINE_ITEMS",
+        primaryKey: cartItemKey(calabresaG),
+        secondaryKey: "does-not-exist",
+      });
+
+      expect(combined).toBe(state);
+    });
+  });
 });
 
 describe("cartSubtotal", () => {

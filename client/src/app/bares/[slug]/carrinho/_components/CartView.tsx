@@ -1,13 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/data/cart/CartContext";
 import { cartItemKey } from "@/data/cart/cartReducer";
 import { formatCurrency } from "@/data/functions";
+import { ICartItem, ProductCategory } from "@/data/models";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CartViewProps {
   slug: string;
@@ -15,12 +24,22 @@ interface CartViewProps {
   minOrderValue: number;
 }
 
+function isPending(item: ICartItem): boolean {
+  return !!item.sizeOptions?.length;
+}
+
+function canCombine(item: ICartItem): boolean {
+  return item.category === ProductCategory.PIZZA && !isPending(item) && !item.extraProductId;
+}
+
 export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartViewProps>) {
   const router = useRouter();
-  const { items, subtotal, setQuantity, setNotes, removeItem } = useCart();
+  const { items, subtotal, setQuantity, setNotes, removeItem, setVariant, combineItems } = useCart();
+  const [combineTarget, setCombineTarget] = useState<Record<string, string>>({});
 
+  const hasPendingSize = items.some(isPending);
   const missingForMinimum = Math.max(0, minOrderValue - subtotal);
-  const canCheckout = items.length > 0 && missingForMinimum === 0;
+  const canCheckout = items.length > 0 && missingForMinimum === 0 && !hasPendingSize;
 
   if (items.length === 0) {
     return (
@@ -55,6 +74,18 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
       <div className="w-11/12 max-w-2xl mx-auto mt-6 space-y-4">
         {items.map((item) => {
           const key = cartItemKey(item);
+          const pending = isPending(item);
+
+          const combineOptions = canCombine(item)
+            ? items.filter(
+                (other) =>
+                  cartItemKey(other) !== key &&
+                  canCombine(other) &&
+                  other.variantLabel === item.variantLabel &&
+                  other.productId !== item.productId,
+              )
+            : [];
+
           return (
             <div
               key={key}
@@ -63,7 +94,10 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
               <div className="flex justify-between items-start gap-3">
                 <div>
                   <h3 className="font-semibold text-zinc-800">{item.name}</h3>
-                  <span className="text-[#F2A20C] font-bold">{formatCurrency(item.price)}</span>
+                  <span className="text-[#F2A20C] font-bold">
+                    {pending && <span className="text-xs font-normal text-zinc-400">a partir de </span>}
+                    {formatCurrency(item.price)}
+                  </span>
                 </div>
 
                 <button
@@ -74,6 +108,24 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
                   <Trash2 size={18} />
                 </button>
               </div>
+
+              {pending && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-zinc-700">Escolha o tamanho</p>
+                  <div className="flex flex-wrap gap-2">
+                    {item.sizeOptions?.map((option) => (
+                      <button
+                        key={option.id}
+                        type="button"
+                        onClick={() => setVariant(key, option)}
+                        className="px-3 py-1.5 rounded-full text-sm font-semibold border border-[#F2A20C]/40 text-[#F28B0C] hover:bg-[#F2A20C] hover:text-white transition"
+                      >
+                        {option.label} · {formatCurrency(option.price)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center border border-[#BFAE99]/40 rounded-full w-fit">
                 <button
@@ -94,6 +146,40 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
                   <Plus size={16} />
                 </button>
               </div>
+
+              {combineOptions.length > 0 && (
+                <div className="space-y-2 border-t border-[#BFAE99]/20 pt-3">
+                  <p className="text-sm font-medium text-zinc-700">Combinar meio a meio com...</p>
+                  <div className="flex gap-2">
+                    <Select
+                      value={combineTarget[key] ?? ""}
+                      onValueChange={(val) => setCombineTarget((prev) => ({ ...prev, [key]: val }))}
+                    >
+                      <SelectTrigger className="flex-1 border border-[#BFAE99]/50 rounded-lg px-3 py-2 text-sm">
+                        <SelectValue placeholder="Escolha outro sabor" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {combineOptions.map((option) => (
+                          <SelectItem key={cartItemKey(option)} value={cartItemKey(option)}>
+                            {option.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <button
+                      type="button"
+                      disabled={!combineTarget[key]}
+                      onClick={() => {
+                        combineItems(key, combineTarget[key]);
+                        setCombineTarget((prev) => ({ ...prev, [key]: "" }));
+                      }}
+                      className="px-4 py-2 rounded-lg text-sm font-semibold bg-[#F2A20C] hover:bg-[#F28B0C] text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
+                    >
+                      Combinar
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <Textarea
                 placeholder="Alguma observação? Ex: sem cebola"
@@ -117,6 +203,12 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
             <span>Taxa de entrega (estimada)</span>
             <span>{formatCurrency(deliveryFee)}</span>
           </div>
+        )}
+
+        {hasPendingSize && (
+          <p className="w-11/12 max-w-2xl mx-auto text-sm text-red-500">
+            Escolha o tamanho de todos os itens para continuar.
+          </p>
         )}
 
         {missingForMinimum > 0 && (

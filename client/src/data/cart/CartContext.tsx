@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef } from "react";
-import { ICartItem } from "@/data/models";
+import { ICartItem, ICartItemSizeOption } from "@/data/models";
 import { cartReducer, cartSubtotal, cartItemCount, emptyCartState } from "./cartReducer";
 
 interface CartContextValue {
@@ -12,6 +12,8 @@ interface CartContextValue {
     removeItem: (key: string) => void;
     setQuantity: (key: string, quantity: number) => void;
     setNotes: (key: string, notes: string) => void;
+    setVariant: (key: string, variant: ICartItemSizeOption) => void;
+    combineItems: (primaryKey: string, secondaryKey: string) => void;
     clear: () => void;
 }
 
@@ -64,6 +66,14 @@ export function CartProvider({ barSlug, children }: Readonly<{ barSlug: string; 
         (key: string, notes: string) => dispatch({ type: "SET_NOTES", key, notes }),
         [],
     );
+    const setVariant = useCallback(
+        (key: string, variant: ICartItemSizeOption) => dispatch({ type: "SET_VARIANT", key, variant }),
+        [],
+    );
+    const combineItems = useCallback(
+        (primaryKey: string, secondaryKey: string) => dispatch({ type: "COMBINE_ITEMS", primaryKey, secondaryKey }),
+        [],
+    );
     const clear = useCallback(() => dispatch({ type: "CLEAR" }), []);
 
     const value = useMemo<CartContextValue>(
@@ -75,9 +85,11 @@ export function CartProvider({ barSlug, children }: Readonly<{ barSlug: string; 
             removeItem,
             setQuantity,
             setNotes,
+            setVariant,
+            combineItems,
             clear,
         }),
-        [state, addItem, removeItem, setQuantity, setNotes, clear],
+        [state, addItem, removeItem, setQuantity, setNotes, setVariant, combineItems, clear],
     );
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
