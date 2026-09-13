@@ -85,7 +85,7 @@ export default function Menu({
       )}
 
       {mode === "panel" && (
-        <div className="mx-auto w-11/12 max-w-4xl flex justify-between py-6">
+        <div className="mx-auto w-11/12 max-w-4xl flex justify-between items-center py-6 gap-3">
           <Link
             href={`/painel/bar/${slug}`}
             className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white px-3 py-1 rounded-md text-sm font-medium"
@@ -94,13 +94,22 @@ export default function Menu({
             Voltar
           </Link>
 
-          <Link
-            href={`/painel/bar/${slug}/produtos/cadastrar`}
-            className="flex items-center gap-1 bg-[#F28B0C] hover:bg-[#F2A20C] text-white px-3 py-1 rounded-md text-sm font-medium"
-          >
-            <Plus />
-            Cadastrar Produto
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/painel/bar/${slug}/adicionais`}
+              className="flex items-center gap-1 bg-white border border-[#BFAE99]/40 text-zinc-700 hover:bg-[#F2F2F2] px-3 py-1 rounded-md text-sm font-medium"
+            >
+              Adicionais
+            </Link>
+
+            <Link
+              href={`/painel/bar/${slug}/produtos/cadastrar`}
+              className="flex items-center gap-1 bg-[#F28B0C] hover:bg-[#F2A20C] text-white px-3 py-1 rounded-md text-sm font-medium"
+            >
+              <Plus />
+              Cadastrar Produto
+            </Link>
+          </div>
         </div>
       )}
 
