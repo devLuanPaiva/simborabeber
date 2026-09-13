@@ -1,6 +1,7 @@
 import { BarEntity } from "../../bar/entities/bar.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { ProductCategory } from "./product-category.enum";
+import { ProductVariantEntity } from "../../product-variant/entities/product-variant.entity";
 
 export { ProductCategory };
 
@@ -52,6 +53,9 @@ export class ProductEntity {
 
     @JoinColumn({ name: 'bar_id' })
     bar: BarEntity;
+
+    @OneToMany(() => ProductVariantEntity, variant => variant.product, { cascade: true })
+    variants: ProductVariantEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;
