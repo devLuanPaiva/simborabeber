@@ -20,12 +20,12 @@ export class CreateProductVariantDto {
     @ApiProperty({ example: 0, description: 'Ordem de exibição da variação', required: false })
     sortOrder?: number
 
-    @IsOptional()
-    @IsInt({ message: 'Quantidade máxima de sabores deve ser um número inteiro' })
-    @Min(1, { message: 'Quantidade máxima de sabores deve ser ao menos 1' })
-    @Max(2, { message: 'Quantidade máxima de sabores é 2' })
-    @ApiProperty({ example: 2, description: 'Quantos sabores podem ser combinados nesta variação (máximo 2)', required: false })
-    maxFlavors?: number
+    @IsNotEmpty({ message: 'Número de fatias é obrigatório' })
+    @IsInt({ message: 'Número de fatias deve ser um número inteiro' })
+    @Min(1, { message: 'Número de fatias deve ser ao menos 1' })
+    @Max(100, { message: 'Número de fatias deve ser no máximo 100' })
+    @ApiProperty({ example: 8, description: 'Número de fatias desta variação' })
+    numberOfSlices: number
 
     @IsOptional()
     @IsBoolean({ message: 'Status deve ser um booleano' })

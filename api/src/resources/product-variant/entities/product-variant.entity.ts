@@ -15,8 +15,8 @@ export class ProductVariantEntity {
     @Column({ type: 'integer', default: 0, name: 'sort_order' })
     sortOrder: number;
 
-    @Column({ type: 'integer', default: 1, name: 'max_flavors' })
-    maxFlavors: number;
+    @Column({ type: 'integer', default: 1, name: 'number_of_slices' })
+    numberOfSlices: number;
 
     @Column({ type: 'boolean', default: true, name: 'is_active' })
     isActive: boolean;

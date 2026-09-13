@@ -283,7 +283,7 @@ describe('OrderService', () => {
         label: 'G',
         price: 45.9,
         sortOrder: 0,
-        maxFlavors: 2,
+        numberOfSlices: 8,
         isActive: true,
         ...overrides,
       } as ProductVariantEntity);
@@ -350,8 +350,8 @@ describe('OrderService', () => {
           .mockResolvedValueOnce(buildProduct({ id: 'product-1', name: 'Calabresa', category: ProductCategory.PIZZA }))
           .mockResolvedValueOnce(buildProduct({ id: 'product-2', name: 'Marguerita', category: ProductCategory.PIZZA }));
         productVariantRepository.findAllByProductId
-          .mockResolvedValueOnce([buildVariant({ id: 'variant-g', price: 45.9, maxFlavors: 2 })])
-          .mockResolvedValueOnce([buildVariant({ id: 'variant-g-2', price: 65.9, maxFlavors: 2 })]);
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g', price: 45.9 })])
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g-2', price: 65.9 })]);
         orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
 
         await service.createPublicOrder(
@@ -373,13 +373,34 @@ describe('OrderService', () => {
         );
       });
 
-      it('rejects a second flavor when the chosen size does not allow combining', async () => {
+      it('allows combining flavors regardless of numberOfSlices - that limit is purely informational now', async () => {
+        barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 0 }));
+        productRepository.findByIdForBar
+          .mockResolvedValueOnce(buildProduct({ id: 'product-1', name: 'Calabresa', category: ProductCategory.PIZZA }))
+          .mockResolvedValueOnce(buildProduct({ id: 'product-2', name: 'Marguerita', category: ProductCategory.PIZZA }));
+        productVariantRepository.findAllByProductId
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g', numberOfSlices: 1 })])
+          .mockResolvedValueOnce([buildVariant({ id: 'variant-g-2', numberOfSlices: 1 })]);
+        orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+        await service.createPublicOrder(
+          'bar-do-joao',
+          pizzaDto({ variantId: 'variant-g', extraProductId: 'product-2' }) as any,
+        );
+
+        expect(orderRepository.createOrder).toHaveBeenCalled();
+      });
+
+      it('rejects combining a second flavor onto a product without an active size', async () => {
         barRepository.findBySlug.mockResolvedValue(buildBar());
-        productRepository.findByIdForBar.mockResolvedValue(buildProduct({ category: ProductCategory.PIZZA }));
-        productVariantRepository.findAllByProductId.mockResolvedValue([buildVariant({ maxFlavors: 1 })]);
+        productRepository.findByIdForBar.mockResolvedValue(buildProduct());
+        productVariantRepository.findAllByProductId.mockResolvedValue([]);
 
         await expect(
-          service.createPublicOrder('bar-do-joao', pizzaDto({ variantId: 'variant-g', extraProductId: 'product-2' }) as any),
+          service.createPublicOrder(
+            'bar-do-joao',
+            baseDto({ items: [{ productId: 'product-1', quantity: 1, extraProductId: 'product-2' }] }) as any,
+          ),
         ).rejects.toBeInstanceOf(BadRequestException);
       });
 

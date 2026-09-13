@@ -116,6 +116,9 @@ export class OrderService {
     }
 
     const unitPrice = variant ? variant.price : product.price;
+    if (unitPrice === null || unitPrice === undefined) {
+      throw new BadRequestException({ message: 'Produto sem preço configurado', field: 'items', detail: `"${product.name}" não possui um preço configurado` });
+    }
 
     const components: Partial<OrderItemEntity['components'][number]>[] = [{
       product,
@@ -130,8 +133,8 @@ export class OrderService {
       if (itemDto.extraProductId === itemDto.productId) {
         throw new BadRequestException({ message: 'Sabores repetidos', field: 'extraProductId', detail: 'Escolha dois sabores diferentes' });
       }
-      if (!variant || variant.maxFlavors < 2) {
-        throw new BadRequestException({ message: 'Combinação não permitida', field: 'extraProductId', detail: `Este tamanho não permite combinar sabores` });
+      if (!variant) {
+        throw new BadRequestException({ message: 'Combinação não permitida', field: 'extraProductId', detail: `Selecione um tamanho para combinar sabores` });
       }
 
       const extraProduct = await this.productRepository.findByIdForBar(itemDto.extraProductId, bar.id);

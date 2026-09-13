@@ -17,7 +17,7 @@ export class ProductVariantRepository {
         result.label = variant.label;
         result.price = typeof variant.price === 'string' ? Number.parseFloat(variant.price) : variant.price;
         result.sortOrder = variant.sortOrder;
-        result.maxFlavors = variant.maxFlavors;
+        result.numberOfSlices = variant.numberOfSlices;
         result.isActive = variant.isActive;
         result.createdAt = variant.createdAt;
         result.updatedAt = variant.updatedAt;
