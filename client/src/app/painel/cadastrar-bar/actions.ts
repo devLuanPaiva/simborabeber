@@ -5,39 +5,40 @@ import { getFormStringValue } from "@/data/helpers";
 import { AccessPlan, IBar } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
+import { uploadToS3 } from "@/lib/aws/uploadToS3";
 import { revalidatePath } from "next/cache";
 
-export async function uploadImage(file: File, barName: string) {
+export async function uploadImage(
+    file: File,
+    barName: string,
+): Promise<{ success: true; url: string } | { success: false; error: string }> {
     const slug = createSlug(barName);
     const randomSuffix = generateRandomString(6);
     const ext = file.name.split(".").pop() || "";
     const newFileName = `${slug}-${randomSuffix}${ext ? "." + ext : ""}`;
+    const key = `bares/${newFileName}`;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("filename", newFileName);
-    formData.append("path", "bares");
-    const base_url = process.env.NEXT_PUBLIC_API_URL || "";
+    console.log("[uploadImage:bar] starting upload", JSON.stringify({
+        key,
+        fileName: file.name,
+        contentType: file.type,
+        sizeBytes: file.size,
+    }, null, 2));
 
-    const response = await fetch(`${base_url}/api/images/upload`, {
-        method: "POST",
-        headers: {
-            "x-client-origin": base_url,
-        },
-        body: formData,
-    });
+    try {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const url = await uploadToS3({ buffer, key, contentType: file.type });
 
-    if (!response.ok) {
-        const errorData = await response.json();
+        console.log("[uploadImage:bar] upload finished", JSON.stringify({ url }, null, 2));
+
+        return { success: true, url };
+    } catch (error) {
+        console.error("[uploadImage:bar] upload failed", error instanceof Error ? error.message : JSON.stringify(error, null, 2));
         return {
             success: false,
-            error: errorData.errors?.detail || "Erro ao fazer upload da imagem",
-        }
-
+            error: "Erro ao fazer upload da imagem",
+        };
     }
-
-    const result = await response.json();
-    return { success: true, url: result.result?.url || result.url || "" };
 }
 
 

@@ -4,11 +4,15 @@ import { getFormStringValue } from "@/data/helpers";
 import { IProduct } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverPost } from "@/lib/api/serverPost";
+import { uploadToS3 } from "@/lib/aws/uploadToS3";
 import { revalidatePath } from "next/cache";
-const MAX_FILE_SIZE = 50 * 1024 * 1024; 
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
 
 
-export async function uploadImage(file: File, productName: string) {
+export async function uploadImage(
+    file: File,
+    productName: string,
+): Promise<{ success: true; url: string } | { success: false; error: string }> {
     if (file.size > MAX_FILE_SIZE) {
         return {
             success: false,
@@ -20,32 +24,29 @@ export async function uploadImage(file: File, productName: string) {
     const randomSuffix = generateRandomString(6);
     const ext = file.name.split(".").pop() || "";
     const newFileName = `${slug}-${randomSuffix}${ext ? "." + ext : ""}`;
+    const key = `produtos/${newFileName}`;
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("filename", newFileName);
-    formData.append("path", "produtos");
-    const base_url = process.env.NEXT_PUBLIC_API_URL || "";
+    console.log("[uploadImage:product] starting upload", JSON.stringify({
+        key,
+        fileName: file.name,
+        contentType: file.type,
+        sizeBytes: file.size,
+    }, null, 2));
 
-    const response = await fetch(`${base_url}/api/images/upload`, {
-        method: "POST",
-        headers: {
-            "x-client-origin": base_url,
-        },
-        body: formData,
-    });
+    try {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const url = await uploadToS3({ buffer, key, contentType: file.type });
 
-    if (!response.ok) {
-        const errorData = await response.json();
+        console.log("[uploadImage:product] upload finished", JSON.stringify({ url }, null, 2));
+
+        return { success: true, url };
+    } catch (error) {
+        console.error("[uploadImage:product] upload failed", error instanceof Error ? error.message : JSON.stringify(error, null, 2));
         return {
             success: false,
-            error: errorData.errors?.detail || "Erro ao fazer upload da imagem",
-        }
-
+            error: "Erro ao fazer upload da imagem",
+        };
     }
-
-    const result = await response.json();
-    return { success: true, url: result.result?.url || result.url || "" };
 }
 
 export async function createProduct(formData: FormData, slug: string) {
