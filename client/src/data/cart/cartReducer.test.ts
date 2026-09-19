@@ -208,6 +208,69 @@ describe("cartReducer", () => {
     });
   });
 
+  describe("SET_ADDONS (choosing add-ons from the cart)", () => {
+    it("adds the addons total to the price and stores the snapshot", () => {
+      const withPizza = cartReducer(emptyCartState, { type: "ADD_ITEM", item: pizzaGCalabresa });
+
+      const updated = cartReducer(withPizza, {
+        type: "SET_ADDONS",
+        key: cartItemKey(pizzaGCalabresa),
+        addons: [{ id: "addon-1", name: "Borda Catupiry", price: 8 }],
+      });
+
+      expect(updated.items).toEqual([
+        {
+          ...pizzaGCalabresa,
+          price: 53.9,
+          addonIds: ["addon-1"],
+          addonsSnapshot: [{ id: "addon-1", name: "Borda Catupiry", price: 8 }],
+        },
+      ]);
+    });
+
+    it("recovers the base price before applying a different set of addons", () => {
+      const withAddon = cartReducer(emptyCartState, { type: "ADD_ITEM", item: pizzaGCalabresaComBorda });
+
+      const updated = cartReducer(withAddon, {
+        type: "SET_ADDONS",
+        key: cartItemKey(pizzaGCalabresaComBorda),
+        addons: [],
+      });
+
+      expect(updated.items).toEqual([
+        { ...pizzaGCalabresaComBorda, price: 45.9, addonIds: undefined, addonsSnapshot: undefined },
+      ]);
+    });
+
+    it("merges into an existing line if the new addon set already matches another line", () => {
+      const withBoth = [pizzaGCalabresa, pizzaGCalabresaComBorda].reduce(
+        (acc, item) => cartReducer(acc, { type: "ADD_ITEM", item }),
+        emptyCartState,
+      );
+
+      const updated = cartReducer(withBoth, {
+        type: "SET_ADDONS",
+        key: cartItemKey(pizzaGCalabresa),
+        addons: [{ id: "addon-1", name: "Borda Catupiry", price: 8 }],
+      });
+
+      expect(updated.items).toHaveLength(1);
+      expect(updated.items[0].quantity).toBe(2);
+    });
+
+    it("is a no-op when the key does not match any line", () => {
+      const withPizza = cartReducer(emptyCartState, { type: "ADD_ITEM", item: pizzaGCalabresa });
+
+      const updated = cartReducer(withPizza, {
+        type: "SET_ADDONS",
+        key: "does-not-exist",
+        addons: [{ id: "addon-1", name: "Borda Catupiry", price: 8 }],
+      });
+
+      expect(updated).toBe(withPizza);
+    });
+  });
+
   describe("COMBINE_ITEMS (half-and-half decided in the cart)", () => {
     const calabresaG: ICartItem = {
       productId: "product-calabresa",

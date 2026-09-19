@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getBarBySlug } from "@/actions";
+import { getBarBySlug, getProductAddonsByBarSlug } from "@/actions";
 import { CartView } from "./_components/CartView";
 
 export default async function CartPage(
@@ -12,11 +12,15 @@ export default async function CartPage(
     return notFound();
   }
 
+  const addons = await getProductAddonsByBarSlug(slug);
+  const addonOptions = addons.filter((addon) => addon.isActive);
+
   return (
     <CartView
       slug={slug}
       deliveryFee={Number(bar.deliveryFee)}
       minOrderValue={Number(bar.minOrderValue)}
+      addonOptions={addonOptions}
     />
   );
 }
