@@ -23,7 +23,7 @@ export function ProductDetail({ product, canOrder, flavorOptions, addonOptions }
   const [quantity, setQuantity] = useState(1);
 
   const sortedVariants = useMemo(
-    () => [...(product.variants ?? [])].filter((v) => v.isActive).sort((a, b) => a.sortOrder - b.sortOrder),
+    () => [...(product.variants ?? [])].filter((v) => v.isActive).sort((a, b) => a.price - b.price),
     [product.variants],
   );
   const hasVariants = sortedVariants.length > 0;
