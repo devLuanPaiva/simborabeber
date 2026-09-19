@@ -195,7 +195,7 @@ export default function Menu({
                             {activeVariants.length > 0 && (
                               <span className="text-xs font-normal text-zinc-400">a partir de </span>
                             )}
-                            {formatCurrency(displayPrice)}
+                            {formatCurrency(Number(displayPrice))}
                           </span>
 
                           {mode === "client" && bar?.deliveryEnabled && (

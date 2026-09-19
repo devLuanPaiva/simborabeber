@@ -169,17 +169,17 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
         <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-4 space-y-2">
           <div className="flex justify-between text-zinc-700">
             <span>Subtotal</span>
-            <span className="font-semibold">{formatCurrency(subtotal)}</span>
+            <span className="font-semibold">{formatCurrency(Number(subtotal))}</span>
           </div>
           {fee > 0 && (
             <div className="flex justify-between text-zinc-500 text-sm">
               <span>Taxa de entrega</span>
-              <span>{formatCurrency(fee)}</span>
+              <span>{formatCurrency(Number(fee))}</span>
             </div>
           )}
           <div className="flex justify-between text-lg font-bold text-[#F2A20C] pt-2 border-t border-[#BFAE99]/20">
             <span>Total</span>
-            <span>{formatCurrency(total)}</span>
+            <span>{formatCurrency(Number(total))}</span>
           </div>
         </div>
 
@@ -191,8 +191,8 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
 
         {missingForMinimum > 0 && (
           <p className="text-sm text-red-500">
-            Faltam {formatCurrency(missingForMinimum)} para atingir o pedido mínimo de{" "}
-            {formatCurrency(minOrderValue)}.
+            Faltam {formatCurrency(Number(missingForMinimum))} para atingir o pedido mínimo de{" "}
+            {formatCurrency(Number(minOrderValue))}.
           </p>
         )}
 

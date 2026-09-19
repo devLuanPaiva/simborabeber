@@ -75,7 +75,7 @@ export async function ProductsByCategory({ slug, category }: Readonly<ProductsBy
                {activeVariants.length > 0 && (
                  <span className="text-xs font-normal text-zinc-400">a partir de </span>
                )}
-               {formatCurrency(displayPrice)}
+               {formatCurrency(Number(displayPrice))}
               </p>
 
             </div>

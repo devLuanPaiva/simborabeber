@@ -41,7 +41,7 @@ export function TabCard({ tab, slug }: Readonly<TabCardProps>) {
 
         <div className="flex items-center gap-2 mt-3 text-[#F28B0C] font-bold">
           <Receipt size={16} />
-          {formatCurrency(tab.totalValue)}
+          {formatCurrency(Number(tab.totalValue))}
         </div>
       </div>
     </Link>

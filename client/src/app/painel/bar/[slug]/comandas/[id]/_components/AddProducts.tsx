@@ -177,7 +177,7 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
                     <p className="text-sm font-medium">{product.name}</p>
                     <p className="text-xs text-zinc-500">
                       {hasVariants && <span>a partir de </span>}
-                      {formatCurrency(sortedActiveVariants(product)[0]?.price ?? product.price ?? 0)}
+                      {formatCurrency(Number(sortedActiveVariants(product)[0]?.price ?? product.price ?? 0))}
                     </p>
                   </div>
                 </div>
@@ -267,7 +267,7 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
                       disabled={!selectedVariant}
                       className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded-lg text-sm font-semibold cursor-pointer"
                     >
-                      Adicionar {selectedVariant && `· ${formatCurrency(configuringUnitPrice)}`}
+                      Adicionar {selectedVariant && `· ${formatCurrency(Number(configuringUnitPrice))}`}
                     </button>
                     <button
                       type="button"
@@ -296,7 +296,7 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
                 <p className="text-sm font-medium text-zinc-800">
                   {line.quantity}x {line.name}
                 </p>
-                <p className="text-xs text-zinc-500">{formatCurrency(line.unitPrice)}</p>
+                <p className="text-xs text-zinc-500">{formatCurrency(Number(line.unitPrice))}</p>
               </div>
               <button
                 type="button"

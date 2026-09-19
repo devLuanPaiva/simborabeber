@@ -51,7 +51,7 @@ export default async function PanelTabPage(
             <div className="text-right">
               <p className="text-xs text-zinc-500">Total</p>
               <p className="text-2xl font-bold text-[#F28B0C]">
-                {formatCurrency(total)}
+                {formatCurrency(Number(total))}
               </p>
             </div>
           </div>

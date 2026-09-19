@@ -106,7 +106,7 @@ function VariantRow({
     <div className="flex items-center justify-between gap-3 border border-[#BFAE99]/20 rounded-lg p-3">
       <div>
         <span className="font-semibold text-zinc-800">{variant.label}</span>
-        <span className="text-sm text-zinc-500 ml-2">{formatCurrency(variant.price)}</span>
+        <span className="text-sm text-zinc-500 ml-2">{formatCurrency(Number(variant.price))}</span>
         <span className="text-xs text-zinc-400 ml-2">{variant.numberOfSlices} fatias</span>
       </div>
 

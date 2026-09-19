@@ -37,7 +37,7 @@ export function TabItems({
                   {item.name}
                 </span>
                 <span className=" text-[#BFAE99] font-medium text-xs md:text-sm">
-                  {formatCurrency(item.price)}
+                  {formatCurrency(Number(item.price))}
                 </span>
 
                 {item.components && item.components.length > 0 && (
@@ -172,7 +172,7 @@ export function TabItems({
               </div>
 
               <span className="text-sm font-semibold text-zinc-700">
-                {formatCurrency(item.price * item.quantity)}
+                {formatCurrency(Number(item.price * item.quantity))}
               </span>
             </div>
           </div>

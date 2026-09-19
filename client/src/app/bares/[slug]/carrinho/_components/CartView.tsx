@@ -102,7 +102,7 @@ export function CartView({ slug, deliveryFee, minOrderValue, addonOptions }: Rea
                   <h3 className="font-semibold text-zinc-800">{item.name}</h3>
                   <span className="text-[#F2A20C] font-bold">
                     {pending && <span className="text-xs font-normal text-zinc-400">a partir de </span>}
-                    {formatCurrency(item.price)}
+                    {formatCurrency(Number(item.price))}
                   </span>
                 </div>
 
@@ -126,7 +126,7 @@ export function CartView({ slug, deliveryFee, minOrderValue, addonOptions }: Rea
                         onClick={() => setVariant(key, option)}
                         className="px-3 py-1.5 rounded-full text-sm font-semibold border border-[#F2A20C]/40 text-[#F28B0C] hover:bg-[#F2A20C] hover:text-white transition"
                       >
-                        {option.label} · {formatCurrency(option.price)}
+                        {option.label} · {formatCurrency(Number(option.price))}
                       </button>
                     ))}
                   </div>
@@ -240,13 +240,13 @@ export function CartView({ slug, deliveryFee, minOrderValue, addonOptions }: Rea
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#BFAE99]/30 p-4 space-y-3">
         <div className="w-11/12 max-w-2xl mx-auto flex justify-between text-zinc-700">
           <span>Subtotal</span>
-          <span className="font-semibold">{formatCurrency(subtotal)}</span>
+          <span className="font-semibold">{formatCurrency(Number(subtotal))}</span>
         </div>
 
         {deliveryFee > 0 && (
           <div className="w-11/12 max-w-2xl mx-auto flex justify-between text-zinc-500 text-sm">
             <span>Taxa de entrega (estimada)</span>
-            <span>{formatCurrency(deliveryFee)}</span>
+            <span>{formatCurrency(Number(deliveryFee))}</span>
           </div>
         )}
 
@@ -258,8 +258,8 @@ export function CartView({ slug, deliveryFee, minOrderValue, addonOptions }: Rea
 
         {missingForMinimum > 0 && (
           <p className="w-11/12 max-w-2xl mx-auto text-sm text-red-500">
-            Faltam {formatCurrency(missingForMinimum)} para atingir o pedido mínimo de{" "}
-            {formatCurrency(minOrderValue)}.
+            Faltam {formatCurrency(Number(missingForMinimum))} para atingir o pedido mínimo de{" "}
+            {formatCurrency(Number(minOrderValue))}.
           </p>
         )}
 

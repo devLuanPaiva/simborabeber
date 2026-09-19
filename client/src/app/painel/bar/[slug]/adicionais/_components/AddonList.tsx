@@ -75,7 +75,7 @@ function AddonRow({
         <p className="text-sm text-zinc-500">
           {addon.category ? ProductCategoryLabels[addon.category] : "Todas as categorias"}
         </p>
-        <span className="font-bold text-[#F2A20C]">{formatCurrency(addon.price)}</span>
+        <span className="font-bold text-[#F2A20C]">{formatCurrency(Number(addon.price))}</span>
       </div>
 
       <div className="flex items-center gap-2">

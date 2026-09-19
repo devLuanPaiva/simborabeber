@@ -114,7 +114,7 @@ export function ProductDetail({ product, canOrder, flavorOptions, addonOptions }
         <h1 className="text-3xl font-bold text-gray-800">{product.name}</h1>
 
         <p className="text-2xl font-bold text-[#F2A20C] mt-2">
-          {formatCurrency(totalUnitPrice)}
+          {formatCurrency(Number(totalUnitPrice))}
         </p>
 
         <p className="text-gray-600 mt-4 leading-relaxed">

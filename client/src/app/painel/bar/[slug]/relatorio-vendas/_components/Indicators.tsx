@@ -18,17 +18,17 @@ export async function Indicators() {
   const cards = [
     {
       label: "Faturamento Total",
-      value: formatCurrency(indicators.totalRevenue),
+      value: formatCurrency(Number(indicators.totalRevenue)),
       icon: DollarSign,
     },
     {
       label: "Faturamento Hoje",
-      value: formatCurrency(indicators.todayRevenue),
+      value: formatCurrency(Number(indicators.todayRevenue)),
       icon: TrendingUp,
     },
     {
       label: "Ticket Médio",
-      value: formatCurrency(indicators.averageTicketValue),
+      value: formatCurrency(Number(indicators.averageTicketValue)),
       icon: Receipt,
     },
     {

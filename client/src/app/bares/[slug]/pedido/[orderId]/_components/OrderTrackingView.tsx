@@ -100,20 +100,20 @@ export function OrderTrackingView({ slug, initialOrder }: Readonly<OrderTracking
                 {item.quantity}x {item.name}
                 {item.notes ? ` (${item.notes})` : ""}
               </span>
-              <span>{formatCurrency(item.price * item.quantity)}</span>
+              <span>{formatCurrency(Number(item.price * item.quantity))}</span>
             </div>
           ))}
 
           {order.deliveryFee > 0 && (
             <div className="flex justify-between text-sm text-zinc-500 pt-2 border-t border-[#BFAE99]/20">
               <span>Taxa de entrega</span>
-              <span>{formatCurrency(order.deliveryFee)}</span>
+              <span>{formatCurrency(Number(order.deliveryFee))}</span>
             </div>
           )}
 
           <div className="flex justify-between text-lg font-bold text-[#F2A20C] pt-2 border-t border-[#BFAE99]/20">
             <span>Total</span>
-            <span>{formatCurrency(order.totalValue)}</span>
+            <span>{formatCurrency(Number(order.totalValue))}</span>
           </div>
         </div>
 

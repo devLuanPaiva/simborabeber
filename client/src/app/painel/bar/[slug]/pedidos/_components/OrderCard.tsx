@@ -76,7 +76,7 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
                 {item.quantity}x {item.name}
               </p>
               <span className="text-zinc-500 whitespace-nowrap">
-                {formatCurrency(item.price * item.quantity)}
+                {formatCurrency(Number(item.price * item.quantity))}
               </span>
             </div>
 
@@ -114,13 +114,13 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
       {order.deliveryFee > 0 && (
         <div className="flex items-center justify-between text-sm text-zinc-500">
           <span>Taxa de entrega</span>
-          <span>{formatCurrency(order.deliveryFee)}</span>
+          <span>{formatCurrency(Number(order.deliveryFee))}</span>
         </div>
       )}
 
       <div className="flex items-center justify-between text-sm text-zinc-500 pt-2 border-t border-[#BFAE99]/20">
         <span>{PaymentMethodLabels[order.paymentMethod]}</span>
-        <span className="font-bold text-[#F2A20C] text-base">{formatCurrency(order.totalValue)}</span>
+        <span className="font-bold text-[#F2A20C] text-base">{formatCurrency(Number(order.totalValue))}</span>
       </div>
 
       {nextStatuses.length > 0 && (
