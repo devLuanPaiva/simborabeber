@@ -4,7 +4,7 @@ import { apiError } from "./api-error";
 const allowedOrigins = new Set([
     "https://oseucardapio.com.br",
     "https://www.oseucardapio.com.br",
-    
+    "https://oseucardapio.vercel.app",
 ]);
 
 export function getCorsHeaders(origin: string | null) {
