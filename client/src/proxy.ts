@@ -102,9 +102,9 @@ async function handlePainel(request: NextRequest, accessToken: string | undefine
 export async function proxy(request: NextRequest) {
     const host = request.headers.get("host")
 
-    if (host === "painel.simborabeber.com.br") {
+    if (host === "painel.oseucardapio.com.br") {
         return NextResponse.redirect(
-            new URL("https://www.simborabeber.com.br/acessar")
+            new URL("https://www.oseucardapio.com.br/acessar")
         )
     }
 

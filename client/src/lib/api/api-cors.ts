@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { apiError } from "./api-error";
 
 const allowedOrigins = new Set([
-    "https://simborabeber.com.br",
-    "https://www.simborabeber.com.br",
+    "https://oseucardapio.com.br",
+    "https://www.oseucardapio.com.br",
     
 ]);
 

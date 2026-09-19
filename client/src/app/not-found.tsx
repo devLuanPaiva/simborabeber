@@ -21,8 +21,8 @@ export default function NotFoundPage() {
                                 <Image
                                     height={400}
                                     width={400}
-                                    src={`/logotipo-sem-fundo.png`}
-                                    alt="Logo Simborabeber"
+                                    src={`/icone-sem-fundo.png`}
+                                    alt="Logo o seu cardápio"
                                     className="opacity-90"
                                 />
                             </motion.div>

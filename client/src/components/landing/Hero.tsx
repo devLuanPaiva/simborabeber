@@ -60,7 +60,7 @@ export function Hero() {
       >
         <Image
           src={homemImg}
-          alt="Sistema de gestão para bares Simbora Beber"
+          alt="Sistema de gestão para bares o seu cardápio"
           className="w-[280px] sm:w-[350px] md:w-[450px] lg:w-[520px] h-auto z-0 "
           priority
         />
