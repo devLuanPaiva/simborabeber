@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { TabItemEntity } from "../entities/tab-item.entity";
 import { TabEntity, TabStatus } from "../../tab/entities/tab.entity";
-import { Repository } from "typeorm";
+import { EntityManager, Repository } from "typeorm";
 import { UserEntity } from "../../user/entities/user.entity";
 
 @Injectable()
@@ -18,11 +18,30 @@ export class TabItemsRepository {
         result.name = item.name;
         result.price = typeof item.price === 'string' ? Number.parseFloat(item.price) : item.price;
         result.quantity = typeof item.quantity === 'string' ? Number.parseInt(item.quantity) : item.quantity;
+        result.notes = item.notes;
         result.category = item.category;
         result.createdAt = item.createdAt;
         result.updatedAt = item.updatedAt;
         result.waiterAdded = waiterAdded || (item.waiterAdded ? { id: item.waiterAdded.id, name: item.waiterAdded.name } as UserEntity : undefined);
+        result.components = (item.components ?? []).map((c) => ({
+            ...c,
+            price: typeof c.price === 'string' ? Number.parseFloat(c.price) : c.price,
+        }));
+        result.addons = (item.addons ?? []).map((a) => ({
+            ...a,
+            price: typeof a.price === 'string' ? Number.parseFloat(a.price) : a.price,
+        }));
         return result;
+    }
+
+    private findHydratedById(manager: EntityManager, id: string): Promise<TabItemEntity | null> {
+        return manager.getRepository(TabItemEntity).createQueryBuilder('item')
+            .leftJoin('item.waiterAdded', 'waiterAdded')
+            .addSelect(['waiterAdded.id', 'waiterAdded.name'])
+            .leftJoinAndSelect('item.components', 'components')
+            .leftJoinAndSelect('item.addons', 'addons')
+            .where('item.id = :id', { id })
+            .getOne();
     }
 
     async createItemByTab(tabId: string, itemData: Partial<TabItemEntity>, userId: string): Promise<TabItemEntity> {
@@ -44,7 +63,8 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + addedValue;
             await tabRepo.save(tab);
 
-            return this.mapTabItemEntity(saved);
+            const hydrated = await this.findHydratedById(manager, saved.id);
+            return this.mapTabItemEntity(hydrated as TabItemEntity);
         });
     }
 
@@ -69,55 +89,39 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + addedValue;
             await tabRepo.save(tab);
 
-            return saved.map((s) => this.mapTabItemEntity(s));
+            const hydrated = await Promise.all(saved.map((s) => this.findHydratedById(manager, s.id)));
+            return hydrated.map((h) => this.mapTabItemEntity(h as TabItemEntity));
         });
     }
 
     async findItemsByTab(tabId: string): Promise<TabItemEntity[]> {
-        const rows = await this.repository.createQueryBuilder('item')
+        const items = await this.repository.createQueryBuilder('item')
             .innerJoin('item.tab', 'tab', 'tab.id = :tabId', { tabId })
             .leftJoin('item.waiterAdded', 'waiterAdded')
-            .select([
-                'item.id as id',
-                'item.name as name',
-                'item.price as price',
-                'item.category as category',
-                'item.quantity as quantity',
-                'item.created_at as createdAt',
-                'item.updated_at as updatedAt',
-                'waiterAdded.id as "waiterAddedId"',
-                'waiterAdded.name as "waiterAddedName"',
-            ])
+            .addSelect(['waiterAdded.id', 'waiterAdded.name'])
+            .leftJoinAndSelect('item.components', 'components')
+            .leftJoinAndSelect('item.addons', 'addons')
             .orderBy("LOWER(unaccent(item.name))", 'ASC')
             .addOrderBy('item.created_at', 'DESC')
-            .getRawMany();
+            .getMany();
 
-        return rows.map((r) => this.mapTabItemEntity(r, r.waiterAddedId ? { id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity : undefined));
-
+        return items.map((item) => this.mapTabItemEntity(item));
     }
 
     async findItemsByBarSlug(barSlug: string): Promise<TabItemEntity[]> {
-        const rows = await this.repository.createQueryBuilder('item')
+        const items = await this.repository.createQueryBuilder('item')
             .innerJoin('item.tab', 'tab')
             .innerJoin('tab.bar', 'bar', 'bar.slug = :slug', { slug: barSlug })
             .leftJoin('item.waiterAdded', 'waiterAdded')
-            .select([
-                'item.id as id',
-                'item.name as name',
-                'item.price as price',
-                'item.quantity as quantity',
-                'item.category as category',
-                'item.created_at as createdAt',
-                'item.updated_at as updatedAt',
-                'waiterAdded.id as "waiterAddedId"',
-                'waiterAdded.name as "waiterAddedName"',
-            ])
+            .addSelect(['waiterAdded.id', 'waiterAdded.name'])
+            .leftJoinAndSelect('item.components', 'components')
+            .leftJoinAndSelect('item.addons', 'addons')
             .where('tab.status = :closed', { closed: TabStatus.CLOSED })
             .orderBy("LOWER(unaccent(item.name))", 'ASC')
             .addOrderBy('item.created_at', 'DESC')
-            .getRawMany();
+            .getMany();
 
-        return rows.map((r) => this.mapTabItemEntity(r as unknown as TabItemEntity, r.waiterAddedId ? { id: r.waiterAddedId, name: r.waiterAddedName } as UserEntity : undefined));
+        return items.map((item) => this.mapTabItemEntity(item));
     }
 
     async findByIdWithTab(id: string): Promise<TabItemEntity | null> {
@@ -143,7 +147,8 @@ export class TabItemsRepository {
             tab.totalValue = Number(tab.totalValue || 0) + diff;
             await tabRepo.save(tab);
 
-            return this.mapTabItemEntity(savedItem);
+            const hydrated = await this.findHydratedById(manager, savedItem.id);
+            return this.mapTabItemEntity(hydrated as TabItemEntity);
         });
     }
 
