@@ -94,25 +94,6 @@ export default function Menu({
         </nav>
       )}
 
-      {mode === "panel" && (
-        <div className={`mx-auto w-11/12 ${contentMaxWidth} flex justify-end items-center py-6 gap-3`}>
-          <Link
-            href={`/painel/bar/${slug}/adicionais`}
-            className="flex items-center gap-1 bg-white border border-[#BFAE99]/40 text-zinc-700 hover:bg-[#F2F2F2] px-3 py-1 rounded-md text-sm font-medium"
-          >
-            Adicionais
-          </Link>
-
-          <Link
-            href={`/painel/bar/${slug}/produtos/cadastrar`}
-            className="flex items-center gap-1 bg-[#F28B0C] hover:bg-[#F2A20C] text-white px-3 py-1 rounded-md text-sm font-medium"
-          >
-            <Plus />
-            Cadastrar Produto
-          </Link>
-        </div>
-      )}
-
       {isEmpty && (
         <div className={`w-11/12 ${contentMaxWidth} mx-auto mt-16 flex flex-col items-center text-center space-y-4`}>
           <div className="bg-[#F2BE5C]/30 p-6 rounded-full">
