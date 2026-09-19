@@ -71,9 +71,14 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
       <ul className="text-sm text-zinc-600 space-y-2">
         {order.items.map((item) => (
           <li key={item.id} className="border-b border-dashed border-[#BFAE99]/30 pb-2 last:border-0 last:pb-0">
-            <p className="font-medium text-zinc-700">
-              {item.quantity}x {item.name}
-            </p>
+            <div className="flex items-center justify-between gap-2">
+              <p className="font-medium text-zinc-700">
+                {item.quantity}x {item.name}
+              </p>
+              <span className="text-zinc-500 whitespace-nowrap">
+                {formatCurrency(item.price * item.quantity)}
+              </span>
+            </div>
 
             {item.components && item.components.length > 0 && (
               <ul className="mt-1 pl-4 text-xs text-zinc-500 list-disc space-y-0.5">
@@ -103,6 +108,13 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
         <div className="text-sm bg-[#F2BE5C]/15 border border-[#F2BE5C]/40 rounded-lg p-2">
           <span className="font-semibold text-zinc-700">Observação geral: </span>
           <span className="text-zinc-600">{order.notes}</span>
+        </div>
+      )}
+
+      {order.deliveryFee > 0 && (
+        <div className="flex items-center justify-between text-sm text-zinc-500">
+          <span>Taxa de entrega</span>
+          <span>{formatCurrency(order.deliveryFee)}</span>
         </div>
       )}
 
