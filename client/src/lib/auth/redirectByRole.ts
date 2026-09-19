@@ -4,7 +4,7 @@ import { redirect } from "next/navigation"
 export function redirectByRole(user: IJwtPayload) {
 
     if (user.role === "admin") {
-        redirect("/painel/gerenciamento")
+        redirect("/painel/usuarios")
     }
 
     if (user.role === "manager") {
