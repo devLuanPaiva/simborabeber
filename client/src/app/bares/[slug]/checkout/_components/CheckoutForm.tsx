@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCart } from "@/data/cart/CartContext";
 import { createOrder } from "../actions";
 import { appToast } from "@/utils/toast-ui";
-import { formatCurrency } from "@/data/functions";
+import { formatCurrency, formatPhoneNumber } from "@/data/functions";
 import {
   OrderType,
   OrderTypeLabels,
@@ -37,6 +37,7 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
   const { items, subtotal, clear } = useCart();
   const [type, setType] = useState<OrderType>(OrderType.DELIVERY);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.PIX);
+  const [customerPhone, setCustomerPhone] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const hasPendingSize = items.some((item) => !!item.sizeOptions?.length);
@@ -120,7 +121,14 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
           <Label htmlFor="customerPhone" className="text-sm text-zinc-600">
             Telefone (com DDD) <span className="text-red-500">*</span>
           </Label>
-          <Input id="customerPhone" name="customerPhone" placeholder="11999999999" required />
+          <Input
+            id="customerPhone"
+            name="customerPhone"
+            placeholder="(11) 99999-9999"
+            value={customerPhone}
+            onChange={(e) => setCustomerPhone(formatPhoneNumber(e.target.value))}
+            required
+          />
         </div>
 
         {type === OrderType.DELIVERY && (
