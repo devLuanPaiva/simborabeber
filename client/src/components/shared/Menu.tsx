@@ -45,6 +45,7 @@ export default function Menu({
   }, [products]);
 
   const categories = Object.keys(productsByCategory) as ProductCategory[];
+  const contentMaxWidth = mode === "panel" ? "max-w-7xl" : "max-w-4xl";
 
   const [activeCategory, setActiveCategory] = useState<ProductCategory | undefined>(categories[0]);
 
@@ -94,36 +95,26 @@ export default function Menu({
       )}
 
       {mode === "panel" && (
-        <div className="mx-auto w-11/12 max-w-4xl flex justify-between items-center py-6 gap-3">
+        <div className={`mx-auto w-11/12 ${contentMaxWidth} flex justify-end items-center py-6 gap-3`}>
           <Link
-            href={`/painel/bar/${slug}`}
-            className="flex items-center gap-1 bg-[#F2A20C] hover:bg-[#F28B0C] text-white px-3 py-1 rounded-md text-sm font-medium"
+            href={`/painel/bar/${slug}/adicionais`}
+            className="flex items-center gap-1 bg-white border border-[#BFAE99]/40 text-zinc-700 hover:bg-[#F2F2F2] px-3 py-1 rounded-md text-sm font-medium"
           >
-            <ChevronLeft />
-            Voltar
+            Adicionais
           </Link>
 
-          <div className="flex items-center gap-3">
-            <Link
-              href={`/painel/bar/${slug}/adicionais`}
-              className="flex items-center gap-1 bg-white border border-[#BFAE99]/40 text-zinc-700 hover:bg-[#F2F2F2] px-3 py-1 rounded-md text-sm font-medium"
-            >
-              Adicionais
-            </Link>
-
-            <Link
-              href={`/painel/bar/${slug}/produtos/cadastrar`}
-              className="flex items-center gap-1 bg-[#F28B0C] hover:bg-[#F2A20C] text-white px-3 py-1 rounded-md text-sm font-medium"
-            >
-              <Plus />
-              Cadastrar Produto
-            </Link>
-          </div>
+          <Link
+            href={`/painel/bar/${slug}/produtos/cadastrar`}
+            className="flex items-center gap-1 bg-[#F28B0C] hover:bg-[#F2A20C] text-white px-3 py-1 rounded-md text-sm font-medium"
+          >
+            <Plus />
+            Cadastrar Produto
+          </Link>
         </div>
       )}
 
       {isEmpty && (
-        <div className="w-11/12 max-w-4xl mx-auto mt-16 flex flex-col items-center text-center space-y-4">
+        <div className={`w-11/12 ${contentMaxWidth} mx-auto mt-16 flex flex-col items-center text-center space-y-4`}>
           <div className="bg-[#F2BE5C]/30 p-6 rounded-full">
             <PackageOpen size={40} className="text-[#F28B0C]" />
           </div>
@@ -161,7 +152,7 @@ export default function Menu({
       )}
 
       {!isEmpty && activeCategory && (
-        <div className="w-11/12 max-w-4xl mx-auto mt-8">
+        <div className={`w-11/12 ${contentMaxWidth} mx-auto mt-8`}>
           <section>
             <h2 className="text-2xl font-bold text-[#F28B0C] mb-4">
               {ProductCategoryLabels[activeCategory]}
@@ -171,7 +162,7 @@ export default function Menu({
               {productsByCategory[activeCategory].map((product, index) => {
                 const activeVariants = (product.variants ?? [])
                   .filter((v) => v.isActive)
-                  .sort((a, b) => a.sortOrder - b.sortOrder);
+                  .sort((a, b) => a.price - b.price);
                 const displayPrice =
                   activeVariants.length > 0 ? Number(activeVariants[0].price) : Number(product.price ?? 0);
 
@@ -218,15 +209,19 @@ export default function Menu({
                           )}
                         </div>
 
-                        <span className="font-bold text-[#F2A20C] mt-2">
-                          {activeVariants.length > 0 && (
-                            <span className="text-xs font-normal text-zinc-400">a partir de </span>
-                          )}
-                          {formatCurrency(displayPrice)}
-                        </span>
-                      </div>
+                        <div className="flex items-center justify-between mt-2">
+                          <span className="font-bold text-[#F2A20C]">
+                            {activeVariants.length > 0 && (
+                              <span className="text-xs font-normal text-zinc-400">a partir de </span>
+                            )}
+                            {formatCurrency(displayPrice)}
+                          </span>
 
-                      {mode === "client" && bar?.deliveryEnabled && <QuickAddButton product={product} />}
+                          {mode === "client" && bar?.deliveryEnabled && (
+                            <QuickAddButton product={product} />
+                          )}
+                        </div>
+                      </div>
                     </motion.div>
                   </Link>
                 );

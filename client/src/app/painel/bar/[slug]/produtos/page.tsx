@@ -1,5 +1,6 @@
 import Menu from "@/components/shared/Menu";
 import { Header } from "@/components/layout/Header";
+import { BackLink } from "@/components/shared/BackLink";
 import { getProductsByBarSlug } from "@/actions";
 
 export default async function PanelBarProductsPage(
@@ -11,6 +12,7 @@ export default async function PanelBarProductsPage(
   return (
     <main className="min-h-screen ">
       <Header slug_bar={slug} />
+      <BackLink slug={`painel/bar/${slug}`} label="Voltar" />
       <Menu products={products} mode="panel" slug={slug} />
     </main>
   );
