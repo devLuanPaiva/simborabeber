@@ -1,7 +1,9 @@
 import { ProductCategory } from "../../product/entities/product-category.enum";
 import { TabEntity } from "../../tab/entities/tab.entity";
 import { UserEntity } from "../../user/entities/user.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { TabItemComponentEntity } from "./tab-item-component.entity";
+import { TabItemAddonEntity } from "./tab-item-addon.entity";
 
 @Entity({ name: 'tab_items', schema: 'public' })
 export class TabItemEntity {
@@ -20,6 +22,9 @@ export class TabItemEntity {
     @Column({ type: 'integer' })
     quantity: number;
 
+    @Column({ type: 'varchar', length: 255, nullable: true })
+    notes?: string;
+
     @Column({
         type: 'enum',
         default: ProductCategory.OTHER,
@@ -34,6 +39,12 @@ export class TabItemEntity {
 
     @JoinColumn({ name: 'tab_id' })
     tab: TabEntity
+
+    @OneToMany(() => TabItemComponentEntity, component => component.tabItem, { cascade: true })
+    components: TabItemComponentEntity[];
+
+    @OneToMany(() => TabItemAddonEntity, addon => addon.tabItem, { cascade: true })
+    addons: TabItemAddonEntity[];
 
     @ManyToOne(() => UserEntity, user => user.addedTabItems, {
         nullable: false,

@@ -5,7 +5,7 @@ import { TabItems } from "./_components/TabItem";
 import { formatCurrency, formatDate } from "@/data/functions";
 import { TabStatus } from "@/data/models";
 import { BackLink } from "@/components/shared/BackLink";
-import { getProductsByBarSlug } from "@/actions";
+import { getProductAddonsByBarSlug, getProductsByBarSlug } from "@/actions";
 import { getTabById, getTabItemsByTabId } from "./actions";
 
 export default async function PanelTabPage(
@@ -13,9 +13,14 @@ export default async function PanelTabPage(
 ) {
   const { slug, id } = await props.params;
 
-  const tab = await getTabById(id);
-  const tab_items = await getTabItemsByTabId(id);
-  const products = await getProductsByBarSlug(slug);
+  const [tab, tab_items, products, addons] = await Promise.all([
+    getTabById(id),
+    getTabItemsByTabId(id),
+    getProductsByBarSlug(slug),
+    getProductAddonsByBarSlug(slug),
+  ]);
+
+  const addonOptions = addons.filter((addon) => addon.isActive);
 
   const total = tab_items.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -102,7 +107,7 @@ export default async function PanelTabPage(
           tabStatus={tab?.status || TabStatus.CLOSED}
         />
         {tab?.status === TabStatus.OPEN && (
-          <AddProducts slug={slug} tabId={id} products={products} />
+          <AddProducts slug={slug} tabId={id} products={products} addonOptions={addonOptions} />
         )}
       </div>
     </main>

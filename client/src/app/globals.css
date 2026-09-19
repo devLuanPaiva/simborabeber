@@ -138,4 +138,17 @@
     font-family: "Bebas Neue", "Oswald", sans-serif;
     letter-spacing: 0.5px;
   }
+
+  a,
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+
+  a:hover,
+  button:not(:disabled):hover,
+  [role="button"]:not([aria-disabled="true"]):hover {
+    opacity: 0.85;
+    transition: opacity 0.15s ease;
+  }
 }

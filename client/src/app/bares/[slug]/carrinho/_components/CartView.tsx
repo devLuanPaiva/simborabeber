@@ -7,7 +7,7 @@ import { ArrowLeft, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react";
 import { useCart } from "@/data/cart/CartContext";
 import { cartItemKey } from "@/data/cart/cartReducer";
 import { formatCurrency } from "@/data/functions";
-import { ICartItem, ProductCategory } from "@/data/models";
+import { ICartItem, IProductAddon, ProductCategory } from "@/data/models";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -22,6 +22,7 @@ interface CartViewProps {
   slug: string;
   deliveryFee: number;
   minOrderValue: number;
+  addonOptions: IProductAddon[];
 }
 
 function isPending(item: ICartItem): boolean {
@@ -32,9 +33,9 @@ function canCombine(item: ICartItem): boolean {
   return item.category === ProductCategory.PIZZA && !isPending(item) && !item.extraProductId;
 }
 
-export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartViewProps>) {
+export function CartView({ slug, deliveryFee, minOrderValue, addonOptions }: Readonly<CartViewProps>) {
   const router = useRouter();
-  const { items, subtotal, setQuantity, setNotes, removeItem, setVariant, combineItems } = useCart();
+  const { items, subtotal, setQuantity, setNotes, removeItem, setVariant, setAddons, combineItems } = useCart();
   const [combineTarget, setCombineTarget] = useState<Record<string, string>>({});
 
   const hasPendingSize = items.some(isPending);
@@ -86,6 +87,11 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
               )
             : [];
 
+          const addonsForItem = addonOptions.filter(
+            (addon) => !addon.category || addon.category === item.category,
+          );
+          const selectedAddonIds = item.addonIds ?? [];
+
           return (
             <div
               key={key}
@@ -123,6 +129,45 @@ export function CartView({ slug, deliveryFee, minOrderValue }: Readonly<CartView
                         {option.label} · {formatCurrency(option.price)}
                       </button>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {!pending && addonsForItem.length > 0 && (
+                <div className="space-y-2 border-t border-[#BFAE99]/20 pt-3">
+                  <p className="text-sm font-medium text-zinc-700">Adicionais</p>
+                  <div className="space-y-2">
+                    {addonsForItem.map((addon) => {
+                      const checked = selectedAddonIds.includes(addon.id);
+
+                      return (
+                        <label
+                          key={addon.id}
+                          className="flex items-center justify-between gap-3 border border-[#BFAE99]/30 rounded-lg px-3 py-2 cursor-pointer"
+                        >
+                          <span className="flex items-center gap-2 text-sm text-zinc-700">
+                            <input
+                              type="checkbox"
+                              checked={checked}
+                              onChange={() => {
+                                const nextAddons = checked
+                                  ? (item.addonsSnapshot ?? []).filter((a) => a.id !== addon.id)
+                                  : [
+                                      ...(item.addonsSnapshot ?? []),
+                                      { id: addon.id, name: addon.name, price: Number(addon.price) },
+                                    ];
+                                setAddons(key, nextAddons);
+                              }}
+                              className="accent-[#F2A20C]"
+                            />
+                            {addon.name}
+                          </span>
+                          <span className="text-sm font-semibold text-[#F2A20C]">
+                            + {formatCurrency(Number(addon.price))}
+                          </span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

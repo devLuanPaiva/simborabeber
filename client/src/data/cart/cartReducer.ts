@@ -1,4 +1,4 @@
-import { ICartItem, ICartItemSizeOption } from "@/data/models";
+import { ICartItem, ICartItemAddon, ICartItemSizeOption } from "@/data/models";
 
 export interface CartState {
     items: ICartItem[];
@@ -10,6 +10,7 @@ export type CartAction =
     | { type: "SET_QUANTITY"; key: string; quantity: number }
     | { type: "SET_NOTES"; key: string; notes: string }
     | { type: "SET_VARIANT"; key: string; variant: ICartItemSizeOption }
+    | { type: "SET_ADDONS"; key: string; addons: ICartItemAddon[] }
     | { type: "COMBINE_ITEMS"; primaryKey: string; secondaryKey: string }
     | { type: "CLEAR" }
     | { type: "HYDRATE"; items: ICartItem[] };
@@ -53,22 +54,89 @@ function decrementOrRemove(items: ICartItem[], key: string): ICartItem[] {
         .filter((i) => i.quantity > 0);
 }
 
+function setQuantity(items: ICartItem[], key: string, quantity: number): ICartItem[] {
+    if (quantity <= 0) {
+        return items.filter((i) => cartItemKey(i) !== key);
+    }
+
+    return items.map((i) => (cartItemKey(i) === key ? { ...i, quantity } : i));
+}
+
+function setVariant(items: ICartItem[], key: string, variant: ICartItemSizeOption): ICartItem[] {
+    const item = items.find((i) => cartItemKey(i) === key);
+    if (!item) return items;
+
+    const updated: ICartItem = {
+        ...item,
+        variantId: variant.id,
+        variantLabel: variant.label,
+        price: variant.price,
+        sizeOptions: undefined,
+    };
+
+    return upsertItem(items.filter((i) => cartItemKey(i) !== key), updated);
+}
+
+/**
+ * Addon selection can change from the cart, but the line's price only ever
+ * stores the total (base + addons), so the base has to be recovered from the
+ * previous snapshot before the new addons total is applied.
+ */
+function setAddons(items: ICartItem[], key: string, addons: ICartItemAddon[]): ICartItem[] {
+    const item = items.find((i) => cartItemKey(i) === key);
+    if (!item) return items;
+
+    const oldAddonsTotal = (item.addonsSnapshot ?? []).reduce((sum, a) => sum + a.price, 0);
+    const newAddonsTotal = addons.reduce((sum, a) => sum + a.price, 0);
+    const basePrice = item.price - oldAddonsTotal;
+
+    const updated: ICartItem = {
+        ...item,
+        price: basePrice + newAddonsTotal,
+        addonIds: addons.length ? addons.map((a) => a.id) : undefined,
+        addonsSnapshot: addons.length ? addons : undefined,
+    };
+
+    return upsertItem(items.filter((i) => cartItemKey(i) !== key), updated);
+}
+
+function combineItems(items: ICartItem[], primaryKey: string, secondaryKey: string): ICartItem[] {
+    if (primaryKey === secondaryKey) return items;
+
+    const primary = items.find((i) => cartItemKey(i) === primaryKey);
+    const secondary = items.find((i) => cartItemKey(i) === secondaryKey);
+
+    const canCombine =
+        primary &&
+        secondary &&
+        !primary.extraProductId &&
+        !secondary.extraProductId &&
+        primary.variantId &&
+        primary.variantLabel === secondary.variantLabel &&
+        primary.category === secondary.category &&
+        primary.productId !== secondary.productId;
+
+    if (!primary || !secondary || !canCombine) return items;
+
+    const combined: ICartItem = {
+        ...primary,
+        name: `${primary.name} / ${secondary.name}`,
+        quantity: 1,
+        extraProductId: secondary.productId,
+        extraProductName: secondary.name,
+    };
+
+    const decremented = decrementOrRemove(decrementOrRemove(items, primaryKey), secondaryKey);
+    return upsertItem(decremented, combined);
+}
+
 export function cartReducer(state: CartState, action: CartAction): CartState {
     switch (action.type) {
         case "ADD_ITEM":
             return { items: upsertItem(state.items, action.item) };
 
-        case "SET_QUANTITY": {
-            if (action.quantity <= 0) {
-                return { items: state.items.filter((i) => cartItemKey(i) !== action.key) };
-            }
-
-            return {
-                items: state.items.map((i) =>
-                    cartItemKey(i) === action.key ? { ...i, quantity: action.quantity } : i,
-                ),
-            };
-        }
+        case "SET_QUANTITY":
+            return { items: setQuantity(state.items, action.key, action.quantity) };
 
         case "SET_NOTES":
             return {
@@ -78,53 +146,18 @@ export function cartReducer(state: CartState, action: CartAction): CartState {
             };
 
         case "SET_VARIANT": {
-            const item = state.items.find((i) => cartItemKey(i) === action.key);
-            if (!item) return state;
+            const items = setVariant(state.items, action.key, action.variant);
+            return items === state.items ? state : { items };
+        }
 
-            const updated: ICartItem = {
-                ...item,
-                variantId: action.variant.id,
-                variantLabel: action.variant.label,
-                price: action.variant.price,
-                sizeOptions: undefined,
-            };
-
-            const withoutOriginal = state.items.filter((i) => cartItemKey(i) !== action.key);
-            return { items: upsertItem(withoutOriginal, updated) };
+        case "SET_ADDONS": {
+            const items = setAddons(state.items, action.key, action.addons);
+            return items === state.items ? state : { items };
         }
 
         case "COMBINE_ITEMS": {
-            if (action.primaryKey === action.secondaryKey) return state;
-
-            const primary = state.items.find((i) => cartItemKey(i) === action.primaryKey);
-            const secondary = state.items.find((i) => cartItemKey(i) === action.secondaryKey);
-
-            const canCombine =
-                primary &&
-                secondary &&
-                !primary.extraProductId &&
-                !secondary.extraProductId &&
-                primary.variantId &&
-                primary.variantLabel === secondary.variantLabel &&
-                primary.category === secondary.category &&
-                primary.productId !== secondary.productId;
-
-            if (!primary || !secondary || !canCombine) return state;
-
-            const combined: ICartItem = {
-                ...primary,
-                name: `${primary.name} / ${secondary.name}`,
-                quantity: 1,
-                extraProductId: secondary.productId,
-                extraProductName: secondary.name,
-            };
-
-            const decremented = decrementOrRemove(
-                decrementOrRemove(state.items, action.primaryKey),
-                action.secondaryKey,
-            );
-
-            return { items: upsertItem(decremented, combined) };
+            const items = combineItems(state.items, action.primaryKey, action.secondaryKey);
+            return items === state.items ? state : { items };
         }
 
         case "REMOVE_ITEM":

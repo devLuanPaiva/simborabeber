@@ -5,6 +5,7 @@ import { connectOrderSocket } from "@/lib/socket/orderSocket";
 import { updateOrderStatus } from "../actions";
 import { appToast } from "@/utils/toast-ui";
 import { IOrder, OrderStatus, OrderStatusLabels } from "@/data/models";
+import { ClipboardList } from "lucide-react";
 import { OrderCard } from "./OrderCard";
 
 interface PedidosBoardProps {
@@ -25,6 +26,7 @@ const MAX_COMPLETED_VISIBLE = 15;
 
 export function PedidosBoard({ slug, initialOrders, accessToken }: Readonly<PedidosBoardProps>) {
   const [orders, setOrders] = useState<IOrder[]>(initialOrders);
+  const [activeStatus, setActiveStatus] = useState<OrderStatus>(COLUMNS[0]);
 
   useEffect(() => {
     const socket = connectOrderSocket(accessToken);
@@ -65,29 +67,57 @@ export function PedidosBoard({ slug, initialOrders, accessToken }: Readonly<Pedi
     return map;
   }, [orders]);
 
+  const activeOrders = grouped.get(activeStatus) ?? [];
+
   return (
-    <div className="flex gap-4 overflow-x-auto pb-4">
-      {COLUMNS.map((status) => {
-        const columnOrders = grouped.get(status) ?? [];
-        return (
-          <div key={status} className="min-w-[280px] w-[280px] flex-shrink-0">
-            <h2 className="font-semibold text-zinc-700 mb-3 flex items-center justify-between">
-              {OrderStatusLabels[status]}
-              <span className="text-xs bg-zinc-200 text-zinc-600 rounded-full px-2 py-0.5">
-                {columnOrders.length}
-              </span>
-            </h2>
-            <div className="space-y-3">
-              {columnOrders.map((order) => (
-                <OrderCard key={order.id} order={order} onChangeStatus={handleChangeStatus} />
-              ))}
-              {columnOrders.length === 0 && (
-                <p className="text-sm text-zinc-400 italic">Nenhum pedido</p>
-              )}
+    <div>
+      <nav className="sticky top-0 z-10 -mx-1 bg-background/95 backdrop-blur-sm">
+        <div className="flex overflow-x-auto gap-3 px-1 py-3 scrollbar-hide">
+          {COLUMNS.map((status) => {
+            const count = grouped.get(status)?.length ?? 0;
+            return (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setActiveStatus(status)}
+                className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition ${
+                  status === activeStatus
+                    ? "bg-[#F28B0C] text-white shadow-sm"
+                    : "bg-[#F2BE5C] text-white hover:bg-[#F28B0C]"
+                }`}
+              >
+                {OrderStatusLabels[status]}
+                <span
+                  className={`text-xs rounded-full px-2 py-0.5 ${
+                    status === activeStatus ? "bg-white/25" : "bg-black/10"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+
+      <div className="space-y-3 mt-1">
+        {activeOrders.map((order) => (
+          <OrderCard key={order.id} order={order} onChangeStatus={handleChangeStatus} />
+        ))}
+        {activeOrders.length === 0 && (
+          <div className="bg-white rounded-xl border border-[#BFAE99]/20 p-10 flex flex-col items-center text-center gap-3">
+            <div className="bg-[#F2BE5C]/30 p-4 rounded-full">
+              <ClipboardList size={28} className="text-[#F28B0C]" />
             </div>
+            <h3 className="font-semibold text-zinc-700">
+              Nenhum pedido em &ldquo;{OrderStatusLabels[activeStatus]}&rdquo;
+            </h3>
+            <p className="text-sm text-zinc-500 max-w-xs">
+              Assim que um pedido entrar nesse status, ele aparece aqui.
+            </p>
           </div>
-        );
-      })}
+        )}
+      </div>
     </div>
   );
 }

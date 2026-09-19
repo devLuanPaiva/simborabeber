@@ -39,7 +39,9 @@ export async function ProductsByCategory({ slug, category }: Readonly<ProductsBy
       <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
 
         {products.map((product) => {
-          const activeVariants = (product.variants ?? []).filter((v) => v.isActive);
+          const activeVariants = (product.variants ?? [])
+            .filter((v) => v.isActive)
+            .sort((a, b) => a.price - b.price);
           const displayPrice = activeVariants.length > 0 ? Number(activeVariants[0].price) : Number(product.price ?? 0);
 
           return (

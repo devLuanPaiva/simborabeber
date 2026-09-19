@@ -14,7 +14,7 @@ export function QuickAddButton({ product }: Readonly<QuickAddButtonProps>) {
 
   const sortedVariants = [...(product.variants ?? [])]
     .filter((v) => v.isActive)
-    .sort((a, b) => a.sortOrder - b.sortOrder);
+    .sort((a, b) => a.price - b.price);
 
   const handleClick = (event: React.MouseEvent) => {
     event.preventDefault();

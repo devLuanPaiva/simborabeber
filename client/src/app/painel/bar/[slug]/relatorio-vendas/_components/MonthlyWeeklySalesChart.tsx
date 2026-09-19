@@ -43,7 +43,7 @@ export function MonthlyWeeklySalesChart({ data }: Readonly<Props>) {
 
                         <YAxis
                             yAxisId="left"
-                            tickFormatter={(value) => `R$${value}`}
+                            tickFormatter={(value) => formatCurrency(Number(value))}
                         />
 
                         <YAxis
