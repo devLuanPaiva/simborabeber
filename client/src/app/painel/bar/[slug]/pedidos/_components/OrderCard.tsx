@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircle, MapPin, Store } from "lucide-react";
-import { formatCurrency, formatDate, getNextOrderStatuses, openWhatsApp } from "@/data/functions";
+import { formatCurrency, formatDate, formatPhoneNumber, getNextOrderStatuses, openWhatsApp } from "@/data/functions";
 import {
   IOrder,
   OrderStatus,
@@ -29,7 +29,7 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
 
   const handleWhatsApp = () => {
     openWhatsApp({
-      phoneNumber: order.customerPhone,
+      phoneNumber: `+55${order.customerPhone.replace(/\D/g, "")}`,
       message: `Olá ${order.customerName}, sobre o seu pedido #${order.id.slice(0, 8)}...`,
     });
   };
@@ -59,7 +59,7 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
           className="flex items-center gap-1 text-sm text-green-600 hover:underline"
         >
           <MessageCircle size={14} />
-          {order.customerPhone}
+          {formatPhoneNumber(order.customerPhone)}
         </button>
       </div>
 
@@ -68,14 +68,43 @@ export function OrderCard({ order, onChangeStatus }: Readonly<OrderCardProps>) {
         {order.type === OrderType.DELIVERY ? order.deliveryAddress : "Retirada no local"}
       </div>
 
-      <ul className="text-sm text-zinc-600 space-y-1">
+      <ul className="text-sm text-zinc-600 space-y-2">
         {order.items.map((item) => (
-          <li key={item.id}>
-            {item.quantity}x {item.name}
-            {item.notes ? ` (${item.notes})` : ""}
+          <li key={item.id} className="border-b border-dashed border-[#BFAE99]/30 pb-2 last:border-0 last:pb-0">
+            <p className="font-medium text-zinc-700">
+              {item.quantity}x {item.name}
+            </p>
+
+            {item.components && item.components.length > 0 && (
+              <ul className="mt-1 pl-4 text-xs text-zinc-500 list-disc space-y-0.5">
+                {item.components.map((component, index) => (
+                  <li key={index}>
+                    {component.productName}
+                    {component.variantLabel ? ` (${component.variantLabel})` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {item.addons && item.addons.length > 0 && (
+              <p className="mt-1 pl-4 text-xs text-[#F28B0C]">
+                + {item.addons.map((addon) => addon.name).join(", ")}
+              </p>
+            )}
+
+            {item.notes && (
+              <p className="mt-1 pl-4 text-xs italic text-zinc-400">Obs: {item.notes}</p>
+            )}
           </li>
         ))}
       </ul>
+
+      {order.notes && (
+        <div className="text-sm bg-[#F2BE5C]/15 border border-[#F2BE5C]/40 rounded-lg p-2">
+          <span className="font-semibold text-zinc-700">Observação geral: </span>
+          <span className="text-zinc-600">{order.notes}</span>
+        </div>
+      )}
 
       <div className="flex items-center justify-between text-sm text-zinc-500 pt-2 border-t border-[#BFAE99]/20">
         <span>{PaymentMethodLabels[order.paymentMethod]}</span>

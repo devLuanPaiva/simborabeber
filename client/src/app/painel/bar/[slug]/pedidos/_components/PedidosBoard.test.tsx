@@ -62,8 +62,9 @@ describe("PedidosBoard", () => {
     mockedUpdateStatus.mockResolvedValue({ success: true });
   });
 
-  it("groups the initial orders into the column matching their status", () => {
+  it("groups the initial orders into the tab matching their status", async () => {
     mockedConnect.mockReturnValue(createFakeSocket() as unknown as Socket);
+    const user = userEvent.setup();
 
     render(
       <PedidosBoard
@@ -72,8 +73,14 @@ describe("PedidosBoard", () => {
       />,
     );
 
-    expect(screen.getByRole("heading", { name: /recebido/i })).toHaveTextContent("1");
-    expect(screen.getByRole("heading", { name: /preparando/i })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /recebido/i })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /preparando/i })).toHaveTextContent("1");
+
+    expect(screen.getByText("João")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /preparando/i }));
+
+    expect(screen.getByText("João")).toBeInTheDocument();
   });
 
   it("prepends a new order to the board when order_created arrives", () => {
@@ -89,7 +96,7 @@ describe("PedidosBoard", () => {
     expect(screen.getByText("Maria")).toBeInTheDocument();
   });
 
-  it("moves an order to a different column when order_status_updated arrives", () => {
+  it("moves an order to a different tab when order_status_updated arrives", () => {
     const socket = createFakeSocket();
     mockedConnect.mockReturnValue(socket as unknown as Socket);
 
@@ -99,8 +106,8 @@ describe("PedidosBoard", () => {
       socket.trigger("order_status_updated", { order: buildOrder({ status: OrderStatus.READY }) });
     });
 
-    expect(screen.getByRole("heading", { name: /pronto/i })).toHaveTextContent("1");
-    expect(screen.getByRole("heading", { name: /recebido/i })).toHaveTextContent("0");
+    expect(screen.getByRole("button", { name: /pronto/i })).toHaveTextContent("1");
+    expect(screen.getByRole("button", { name: /recebido/i })).toHaveTextContent("0");
   });
 
   it("calls updateOrderStatus with the order id and target status when a transition button is clicked", async () => {
