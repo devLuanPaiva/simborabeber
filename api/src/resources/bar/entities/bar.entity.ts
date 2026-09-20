@@ -2,6 +2,7 @@ import { TabEntity } from "../../tab/entities/tab.entity";
 import { ProductEntity } from "../../product/entities/product.entity";
 import { UserEntity } from "../../user/entities/user.entity";
 import { OrderEntity } from "../../order/entities/order.entity";
+import { DeliveryCityEntity } from "./delivery-city.entity";
 import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 
 export enum AccessPlan {
@@ -104,6 +105,9 @@ export class BarEntity {
         name: 'opening_hours'
     })
     openingHours?: string;
+
+    @OneToMany(() => DeliveryCityEntity, city => city.bar, { cascade: true, eager: true, orphanedRowAction: 'delete' })
+    deliveryCities: DeliveryCityEntity[];
 
     @OneToMany(() => UserEntity, user => user.bar, { cascade: true })
     users: UserEntity[];
