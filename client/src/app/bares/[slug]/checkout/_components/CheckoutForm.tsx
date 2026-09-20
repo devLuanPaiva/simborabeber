@@ -9,6 +9,7 @@ import { createOrder } from "../actions";
 import { appToast } from "@/utils/toast-ui";
 import { formatCurrency, formatPhoneNumber } from "@/data/functions";
 import {
+  IDeliveryCity,
   OrderType,
   OrderTypeLabels,
   PaymentMethod,
@@ -30,20 +31,23 @@ interface CheckoutFormProps {
   slug: string;
   deliveryFee: number;
   minOrderValue: number;
+  deliveryCities: IDeliveryCity[];
 }
 
-export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<CheckoutFormProps>) {
+export function CheckoutForm({ slug, deliveryFee, minOrderValue, deliveryCities }: Readonly<CheckoutFormProps>) {
   const router = useRouter();
   const { items, subtotal, clear } = useCart();
   const [type, setType] = useState<OrderType>(OrderType.DELIVERY);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(PaymentMethod.PIX);
   const [customerPhone, setCustomerPhone] = useState("");
+  const [deliveryCityId, setDeliveryCityId] = useState("");
   const [isPending, startTransition] = useTransition();
 
+  const selectedCity = deliveryCities.find((city) => city.id === deliveryCityId);
   const hasPendingSize = items.some((item) => !!item.sizeOptions?.length);
   const missingForMinimum =
     type === OrderType.DELIVERY ? Math.max(0, minOrderValue - subtotal) : 0;
-  const fee = type === OrderType.DELIVERY ? deliveryFee : 0;
+  const fee = type === OrderType.DELIVERY ? (selectedCity ? Number(selectedCity.fee) : deliveryFee) : 0;
   const total = subtotal + fee;
   const canSubmit = items.length > 0 && missingForMinimum === 0 && !hasPendingSize && !isPending;
 
@@ -69,6 +73,7 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
     formData.set("type", type);
     formData.set("paymentMethod", paymentMethod);
     formData.set("items", JSON.stringify(items));
+    if (deliveryCityId) formData.set("deliveryCityId", deliveryCityId);
 
     startTransition(async () => {
       const result = await createOrder(formData, slug);
@@ -140,6 +145,35 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
           </div>
         )}
 
+        {type === OrderType.DELIVERY && deliveryCities.length > 0 && (
+          <div className="space-y-1">
+            <Label className="text-sm text-zinc-600">Seu endereço é em uma cidade vizinha?</Label>
+            <div className="space-y-1.5">
+              {deliveryCities.map((city) => (
+                <label
+                  key={city.id}
+                  className="flex items-center justify-between gap-3 bg-white border border-[#BFAE99]/40 rounded-lg px-3 py-2 cursor-pointer"
+                >
+                  <span className="flex items-center gap-2 text-sm text-zinc-700">
+                    <input
+                      type="checkbox"
+                      checked={deliveryCityId === city.id}
+                      onChange={() => setDeliveryCityId((prev) => (prev === city.id ? "" : city.id))}
+                      className="accent-[#F2A20C]"
+                    />
+                    {city.name}
+                  </span>
+                  {Number(city.fee) > 0 && (
+                    <span className="text-xs font-semibold text-[#F2A20C]">
+                      + {formatCurrency(Number(city.fee))} de acréscimo
+                    </span>
+                  )}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="space-y-1">
           <Label className="text-sm text-zinc-600">Forma de pagamento</Label>
           <Select
@@ -173,7 +207,7 @@ export function CheckoutForm({ slug, deliveryFee, minOrderValue }: Readonly<Chec
           </div>
           {fee > 0 && (
             <div className="flex justify-between text-zinc-500 text-sm">
-              <span>Taxa de entrega</span>
+              <span>Taxa de entrega{selectedCity ? ` (${selectedCity.name})` : ""}</span>
               <span>{formatCurrency(Number(fee))}</span>
             </div>
           )}

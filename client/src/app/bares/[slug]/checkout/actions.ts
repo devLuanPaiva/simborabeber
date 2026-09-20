@@ -9,6 +9,7 @@ export async function createOrder(formData: FormData, slug: string) {
         const customerName = getFormStringValue(formData, "customerName").trim();
         const customerPhone = getFormStringValue(formData, "customerPhone").replace(/\D/g, "");
         const deliveryAddress = getFormStringValue(formData, "deliveryAddress").trim();
+        const deliveryCityId = getFormStringValue(formData, "deliveryCityId").trim();
         const paymentMethod = getFormStringValue(formData, "paymentMethod");
         const notes = getFormStringValue(formData, "notes").trim();
         const itemsRaw = getFormStringValue(formData, "items");
@@ -33,6 +34,7 @@ export async function createOrder(formData: FormData, slug: string) {
             customerName,
             customerPhone,
             ...(type === OrderType.DELIVERY ? { deliveryAddress } : {}),
+            ...(type === OrderType.DELIVERY && deliveryCityId ? { deliveryCityId } : {}),
             paymentMethod,
             ...(notes ? { notes } : {}),
             items: items.map((item) => ({

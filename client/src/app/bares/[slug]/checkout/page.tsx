@@ -17,6 +17,7 @@ export default async function CheckoutPage(
       slug={slug}
       deliveryFee={Number(bar.deliveryFee)}
       minOrderValue={Number(bar.minOrderValue)}
+      deliveryCities={bar.deliveryCities ?? []}
     />
   );
 }
