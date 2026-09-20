@@ -9,6 +9,7 @@ export interface DeliverySettingsInput {
     minOrderValue: number;
     deliveryOriginAddress?: string;
     openingHours?: string;
+    deliveryCities: { name: string; fee: number }[];
 }
 
 export async function updateDeliverySettings(barId: string, slug: string, data: DeliverySettingsInput) {

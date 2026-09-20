@@ -24,6 +24,13 @@ export interface IBar {
     minOrderValue: number;
     deliveryOriginAddress?: string;
     openingHours?: string;
+    deliveryCities: IDeliveryCity[];
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface IDeliveryCity {
+    id: string;
+    name: string;
+    fee: number;
 }

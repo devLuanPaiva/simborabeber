@@ -8,6 +8,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Plus, Trash2 } from "lucide-react";
+
+interface DeliveryCityRow {
+  name: string;
+  fee: string;
+}
 
 interface DeliverySettingsFormProps {
   bar: IBar;
@@ -21,7 +27,16 @@ export function DeliverySettingsForm({ bar, slug }: Readonly<DeliverySettingsFor
   const [minOrderValue, setMinOrderValue] = useState(String(bar.minOrderValue ?? 0));
   const [deliveryOriginAddress, setDeliveryOriginAddress] = useState(bar.deliveryOriginAddress ?? "");
   const [openingHours, setOpeningHours] = useState(bar.openingHours ?? "");
+  const [deliveryCities, setDeliveryCities] = useState<DeliveryCityRow[]>(
+    (bar.deliveryCities ?? []).map((city) => ({ name: city.name, fee: String(city.fee) })),
+  );
   const [isPending, startTransition] = useTransition();
+
+  const addDeliveryCityRow = () => setDeliveryCities((prev) => [...prev, { name: "", fee: "0" }]);
+  const removeDeliveryCityRow = (index: number) =>
+    setDeliveryCities((prev) => prev.filter((_, i) => i !== index));
+  const updateDeliveryCityRow = (index: number, patch: Partial<DeliveryCityRow>) =>
+    setDeliveryCities((prev) => prev.map((row, i) => (i === index ? { ...row, ...patch } : row)));
 
   const handleSave = () => {
     startTransition(async () => {
@@ -32,6 +47,9 @@ export function DeliverySettingsForm({ bar, slug }: Readonly<DeliverySettingsFor
         minOrderValue: Number(minOrderValue) || 0,
         deliveryOriginAddress: deliveryOriginAddress || undefined,
         openingHours: openingHours || undefined,
+        deliveryCities: deliveryCities
+          .filter((city) => city.name.trim())
+          .map((city) => ({ name: city.name.trim(), fee: Number(city.fee) || 0 })),
       });
 
       if (!result.success) {
@@ -107,6 +125,52 @@ export function DeliverySettingsForm({ bar, slug }: Readonly<DeliverySettingsFor
               value={openingHours}
               onChange={(e) => setOpeningHours(e.target.value)}
             />
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <div>
+              <p className="font-semibold text-zinc-800">Cidades de entrega</p>
+              <p className="text-sm text-zinc-500">
+                Cidades vizinhas com uma taxa de entrega própria, diferente da taxa padrão acima
+              </p>
+            </div>
+
+            {deliveryCities.map((city, index) => (
+              <div key={index} className="flex items-center gap-2">
+                <Input
+                  placeholder="Nome da cidade"
+                  value={city.name}
+                  onChange={(e) => updateDeliveryCityRow(index, { name: e.target.value })}
+                  className="flex-1"
+                />
+                <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="Taxa (R$)"
+                  value={city.fee}
+                  onChange={(e) => updateDeliveryCityRow(index, { fee: e.target.value })}
+                  className="w-28"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeDeliveryCityRow(index)}
+                  aria-label={`Remover ${city.name || "cidade"}`}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addDeliveryCityRow}
+              className="flex items-center gap-1 text-sm font-semibold text-[#F2A20C] hover:text-[#F28B0C] cursor-pointer"
+            >
+              <Plus size={16} />
+              Adicionar cidade
+            </button>
           </div>
         </div>
       )}
