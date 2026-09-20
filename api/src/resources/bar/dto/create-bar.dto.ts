@@ -1,6 +1,8 @@
+import { Type } from "class-transformer"
 import { ApiProperty } from "@nestjs/swagger"
-import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator"
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Min, ValidateNested } from "class-validator"
 import { AccessPlan } from "../entities/bar.entity"
+import { DeliveryCityDto } from "./delivery-city.dto"
 
 export class CreateBarDto {
     @IsNotEmpty({ message: 'Nome é obrigatório' })
@@ -56,4 +58,10 @@ export class CreateBarDto {
     @IsString({ message: 'Horário de funcionamento deve ser uma string' })
     @ApiProperty({ example: 'Ter-Dom, 18h-23h30', description: 'Horário de funcionamento (texto livre)', required: false })
     openingHours?: string
+
+    @IsOptional()
+    @ValidateNested({ each: true })
+    @Type(() => DeliveryCityDto)
+    @ApiProperty({ type: [DeliveryCityDto], description: 'Cidades vizinhas com taxa de entrega própria', required: false })
+    deliveryCities?: DeliveryCityDto[]
 }
