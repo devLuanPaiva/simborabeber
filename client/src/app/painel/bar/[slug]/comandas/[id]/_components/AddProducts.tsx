@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { addTabItem, addTabItems, TabItemInput } from "../actions";
+import { addTabItem, TabItemInput } from "../actions";
 import { appToast } from "@/utils/toast-ui";
 import { IProduct, IProductAddon } from "@/data/models";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus } from "lucide-react";
 import { formatCurrency } from "@/data/functions";
 import { ProductImage } from "@/components/shared/ProductImage";
 
@@ -15,21 +15,13 @@ interface AddProductsProps {
   tabId: string;
 }
 
-interface DraftLine {
-  key: string;
-  name: string;
-  unitPrice: number;
-  quantity: number;
-  item: TabItemInput;
-}
-
 function sortedActiveVariants(product: IProduct) {
   return [...(product.variants ?? [])].filter((v) => v.isActive).sort((a, b) => a.price - b.price);
 }
 
 export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<AddProductsProps>) {
   const [search, setSearch] = useState("");
-  const [draftLines, setDraftLines] = useState<DraftLine[]>([]);
+  const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [configuringId, setConfiguringId] = useState<string | null>(null);
   const [variantId, setVariantId] = useState<string>("");
   const [extraProductId, setExtraProductId] = useState<string>("");
@@ -71,25 +63,22 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
   const toggleAddon = (id: string) =>
     setAddonIds((prev) => (prev.includes(id) ? prev.filter((a) => a !== id) : [...prev, id]));
 
-  const pushDraftLine = (line: DraftLine) => {
-    setDraftLines((prev) => [...prev, line]);
+  const submitItem = async (id: string, item: TabItemInput) => {
+    setSubmittingId(id);
+    try {
+      const res = await addTabItem({ slug, tabId, item });
+      if (res?.success) {
+        appToast.success(res.message || "Item adicionado com sucesso");
+      } else {
+        appToast.error(res?.error || "Erro ao adicionar item");
+      }
+    } finally {
+      setSubmittingId(null);
+    }
   };
 
   const handleAddSimpleProduct = (product: IProduct) => {
-    const key = product.id;
-    const existing = draftLines.find((l) => l.key === key);
-    if (existing) {
-      setDraftLines((prev) => prev.map((l) => (l.key === key ? { ...l, quantity: l.quantity + 1, item: { ...l.item, quantity: l.quantity + 1 } } : l)));
-      return;
-    }
-
-    pushDraftLine({
-      key,
-      name: product.name,
-      unitPrice: Number(product.price ?? 0),
-      quantity: 1,
-      item: { productId: product.id, quantity: 1 },
-    });
+    submitItem(product.id, { productId: product.id, quantity: 1 });
   };
 
   const handleStartConfiguring = (product: IProduct) => {
@@ -99,56 +88,20 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
     setAddonIds([]);
   };
 
-  const handleConfirmConfiguring = () => {
+  const handleConfirmConfiguring = async () => {
     if (!configuringProduct || !selectedVariant) return;
 
     const extraProduct = availableFlavors.find((p) => p.id === extraProductId);
-    const name = extraProduct
-      ? `${configuringProduct.name} / ${extraProduct.name} (${selectedVariant.label})`
-      : `${configuringProduct.name} (${selectedVariant.label})`;
 
-    pushDraftLine({
-      key: `${configuringProduct.id}-${Date.now()}`,
-      name,
-      unitPrice: configuringUnitPrice,
+    await submitItem(configuringProduct.id, {
+      productId: configuringProduct.id,
       quantity: 1,
-      item: {
-        productId: configuringProduct.id,
-        quantity: 1,
-        variantId: selectedVariant.id,
-        ...(extraProduct ? { extraProductId: extraProduct.id } : {}),
-        ...(addonIds.length ? { addonIds } : {}),
-      },
+      variantId: selectedVariant.id,
+      ...(extraProduct ? { extraProductId: extraProduct.id } : {}),
+      ...(addonIds.length ? { addonIds } : {}),
     });
 
     resetConfiguring();
-  };
-
-  const removeDraftLine = (key: string) => {
-    setDraftLines((prev) => prev.filter((l) => l.key !== key));
-  };
-
-  const handleSubmit = async () => {
-    if (draftLines.length === 0) return;
-
-    if (draftLines.length === 1) {
-      const res = await addTabItem({ slug, tabId, item: draftLines[0].item });
-      if (res?.success) {
-        appToast.success(res.message || "Item adicionado com sucesso");
-        setDraftLines([]);
-      } else {
-        appToast.error(res?.error || "Erro ao adicionar item");
-      }
-      return;
-    }
-
-    const res = await addTabItems({ slug, tabId, items: draftLines.map((l) => l.item) });
-    if (res?.success) {
-      appToast.success(res.message || "Itens adicionados com sucesso");
-      setDraftLines([]);
-    } else {
-      appToast.error(res?.error || "Erro ao adicionar itens");
-    }
   };
 
   return (
@@ -165,10 +118,16 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
         {filtered.map((product: IProduct) => {
           const hasVariants = sortedActiveVariants(product).length > 0;
           const isConfiguring = configuringId === product.id;
+          const isSubmitting = submittingId === product.id;
 
           return (
             <div key={product.id} className="py-2 space-y-3">
-              <div className="flex justify-between items-center">
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => (hasVariants ? handleStartConfiguring(product) : handleAddSimpleProduct(product))}
+                className="w-full flex justify-between items-center text-left cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 <div className="flex items-center gap-1.5">
                   <div className="relative w-16 h-16 rounded overflow-hidden bg-zinc-100">
                     <ProductImage src={product.image} alt={product.name} />
@@ -182,13 +141,13 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
                   </div>
                 </div>
 
-                <button
-                  onClick={() => (hasVariants ? handleStartConfiguring(product) : handleAddSimpleProduct(product))}
-                  className="p-2 bg-[#F2A20C] hover:bg-[#F28B0C] text-white rounded-md cursor-pointer"
+                <span
+                  aria-hidden
+                  className="p-2 bg-[#F2A20C] hover:bg-[#F28B0C] text-white rounded-md"
                 >
                   <Plus size={16} />
-                </button>
-              </div>
+                </span>
+              </button>
 
               {isConfiguring && (
                 <div className="bg-[#F2F2F2] rounded-lg p-3 space-y-3">
@@ -264,10 +223,10 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
                     <button
                       type="button"
                       onClick={handleConfirmConfiguring}
-                      disabled={!selectedVariant}
+                      disabled={!selectedVariant || isSubmitting}
                       className="flex-1 bg-[#F2A20C] hover:bg-[#F28B0C] disabled:opacity-50 disabled:cursor-not-allowed text-white py-2 rounded-lg text-sm font-semibold cursor-pointer"
                     >
-                      Adicionar {selectedVariant && `· ${formatCurrency(Number(configuringUnitPrice))}`}
+                      {isSubmitting ? "Adicionando..." : `Adicionar ${selectedVariant ? `· ${formatCurrency(Number(configuringUnitPrice))}` : ""}`}
                     </button>
                     <button
                       type="button"
@@ -283,40 +242,6 @@ export function AddProducts({ products, addonOptions, slug, tabId }: Readonly<Ad
           );
         })}
       </div>
-
-      {draftLines.length > 0 && (
-        <div className="space-y-2 border-t border-[#BFAE99]/20 pt-3">
-          <p className="text-sm font-semibold text-zinc-700">Itens selecionados</p>
-          {draftLines.map((line) => (
-            <div
-              key={line.key}
-              className="flex items-center justify-between gap-2 bg-[#F2F2F2] rounded-lg px-3 py-2"
-            >
-              <div>
-                <p className="text-sm font-medium text-zinc-800">
-                  {line.quantity}x {line.name}
-                </p>
-                <p className="text-xs text-zinc-500">{formatCurrency(Number(line.unitPrice))}</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => removeDraftLine(line.key)}
-                className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg cursor-pointer"
-                aria-label={`Remover ${line.name}`}
-              >
-                <Trash2 size={16} />
-              </button>
-            </div>
-          ))}
-
-          <button
-            onClick={handleSubmit}
-            className="w-full bg-[#F2A20C] hover:bg-[#F28B0C] cursor-pointer text-white py-2 rounded-lg"
-          >
-            Adicionar itens
-          </button>
-        </div>
-      )}
     </section>
   );
 }
