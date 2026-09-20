@@ -1,6 +1,6 @@
 import { Type } from "class-transformer";
 import { ApiProperty } from "@nestjs/swagger";
-import { ArrayMaxSize, ArrayMinSize, IsEnum, IsNotEmpty, IsOptional, IsString, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, ValidateIf, ValidateNested } from "class-validator";
 import { OrderType, PaymentMethod } from "../entities/order.entity";
 import { CreatePublicOrderItemDto } from "./create-public-order-item.dto";
 
@@ -27,6 +27,11 @@ export class CreatePublicOrderDto {
     @MaxLength(255, { message: 'Endereço deve ter no máximo 255 caracteres' })
     @ApiProperty({ example: 'Rua das Flores, 123', description: 'Endereço de entrega (obrigatório para delivery)', required: false })
     deliveryAddress?: string
+
+    @ValidateIf((dto: CreatePublicOrderDto) => dto.type === OrderType.DELIVERY && !!dto.deliveryCityId)
+    @IsUUID(undefined, { message: 'Cidade de entrega inválida' })
+    @ApiProperty({ example: 'a1b2c3d4-...', description: 'ID da cidade de entrega selecionada, quando aplicável', required: false })
+    deliveryCityId?: string
 
     @IsNotEmpty({ message: 'Forma de pagamento é obrigatória' })
     @IsEnum(PaymentMethod, { message: 'Forma de pagamento inválida' })

@@ -251,6 +251,40 @@ describe('OrderService', () => {
       );
     });
 
+    it('uses the selected delivery city fee (and snapshots its name) instead of the flat bar fee', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({
+        deliveryFee: 5,
+        minOrderValue: 0,
+        deliveryCities: [{ id: 'city-1', name: 'Cidade Vizinha', fee: 12 } as any],
+      }));
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));
+      orderRepository.createOrder.mockResolvedValue(buildOrder({ id: 'order-new' }));
+
+      await service.createPublicOrder(
+        'bar-do-joao',
+        baseDto({ items: [{ productId: 'product-1', quantity: 1 }], deliveryCityId: 'city-1' }) as any,
+      );
+
+      expect(orderRepository.createOrder).toHaveBeenCalledWith(
+        expect.objectContaining({ deliveryFee: 12, deliveryCityName: 'Cidade Vizinha', totalValue: 22 }),
+      );
+    });
+
+    it('rejects a deliveryCityId that is not one of the bar delivery cities', async () => {
+      barRepository.findBySlug.mockResolvedValue(buildBar({
+        deliveryCities: [{ id: 'city-1', name: 'Cidade Vizinha', fee: 12 } as any],
+      }));
+      productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));
+
+      await expect(
+        service.createPublicOrder(
+          'bar-do-joao',
+          baseDto({ items: [{ productId: 'product-1', quantity: 1 }], deliveryCityId: 'missing-city' }) as any,
+        ),
+      ).rejects.toBeInstanceOf(BadRequestException);
+      expect(orderRepository.createOrder).not.toHaveBeenCalled();
+    });
+
     it('charges no delivery fee and skips the minimum order check for PICKUP orders', async () => {
       barRepository.findBySlug.mockResolvedValue(buildBar({ minOrderValue: 100, deliveryFee: 7 }));
       productRepository.findByIdForBar.mockResolvedValue(buildProduct({ price: 10 }));

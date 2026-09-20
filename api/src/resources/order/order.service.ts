@@ -54,7 +54,21 @@ export class OrderService {
     }
 
     const subtotal = items.reduce((acc, item) => acc + Number(item.price) * Number(item.quantity), 0);
-    const deliveryFee = dto.type === OrderType.DELIVERY ? Number(bar.deliveryFee || 0) : 0;
+
+    let deliveryFee = 0;
+    let deliveryCityName: string | undefined;
+    if (dto.type === OrderType.DELIVERY) {
+      if (dto.deliveryCityId) {
+        const city = bar.deliveryCities?.find((c) => c.id === dto.deliveryCityId);
+        if (!city) {
+          throw new BadRequestException({ message: 'Cidade de entrega inválida', field: 'deliveryCityId', detail: 'A cidade selecionada não está disponível para entrega neste bar' });
+        }
+        deliveryFee = Number(city.fee);
+        deliveryCityName = city.name;
+      } else {
+        deliveryFee = Number(bar.deliveryFee || 0);
+      }
+    }
 
     if (dto.type === OrderType.DELIVERY && subtotal < Number(bar.minOrderValue || 0)) {
       throw new BadRequestException({
@@ -71,6 +85,7 @@ export class OrderService {
       customerPhone: dto.customerPhone,
       deliveryAddress: dto.type === OrderType.DELIVERY ? dto.deliveryAddress : undefined,
       deliveryFee,
+      deliveryCityName,
       paymentMethod: dto.paymentMethod,
       paymentStatus: PaymentStatus.PENDING,
       notes: dto.notes,
@@ -217,6 +232,7 @@ export class OrderService {
       customerName: order.customerName,
       deliveryAddress: order.deliveryAddress,
       deliveryFee: order.deliveryFee,
+      deliveryCityName: order.deliveryCityName,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       notes: order.notes,
@@ -292,6 +308,7 @@ export class OrderService {
       customerPhone: order.customerPhone,
       deliveryAddress: order.deliveryAddress,
       deliveryFee: order.deliveryFee,
+      deliveryCityName: order.deliveryCityName,
       paymentMethod: order.paymentMethod,
       paymentStatus: order.paymentStatus,
       notes: order.notes,

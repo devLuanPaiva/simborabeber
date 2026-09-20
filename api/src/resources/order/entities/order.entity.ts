@@ -51,6 +51,9 @@ export class OrderEntity {
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, name: 'delivery_fee' })
     deliveryFee: number;
 
+    @Column({ type: 'varchar', length: 120, nullable: true, name: 'delivery_city_name' })
+    deliveryCityName?: string;
+
     @Column({ type: 'enum', enum: PaymentMethod, name: 'payment_method' })
     paymentMethod: PaymentMethod;
 
