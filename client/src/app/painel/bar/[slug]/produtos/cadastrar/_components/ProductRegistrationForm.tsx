@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Upload, Link as LinkIcon } from "lucide-react";
+import { Upload, Link as LinkIcon, Plus, Trash2 } from "lucide-react";
 import { createProduct, uploadImage } from "../actions";
 import { ProductCategoryLabels } from "@/data/models/IProduct";
 import { appToast } from "@/utils/toast-ui";
@@ -17,6 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+type VariantDraft = {
+  label: string;
+  price: string;
+  numberOfSlices: string;
+};
+
 type ProductRegistrationFormProps = {
   slug: string;
 };
@@ -29,6 +35,34 @@ export function ProductRegistrationForm({
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [productName, setProductName] = useState<string>("");
   const [category, setCategory] = useState<string>("");
+  const [showVariants, setShowVariants] = useState(false);
+  const [variants, setVariants] = useState<VariantDraft[]>([]);
+
+  const addVariant = () => setVariants((v) => [...v, { label: "", price: "", numberOfSlices: "" }]);
+  const removeVariant = (index: number) => setVariants((v) => v.filter((_, i) => i !== index));
+  const updateVariant = (index: number, patch: Partial<VariantDraft>) =>
+    setVariants((v) => v.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+
+  function validateVariants(): string | null {
+    for (const variant of variants) {
+      if (!variant.label.trim()) return "Informe o tamanho de todas as variações";
+      if (!variant.price.trim() || Number.isNaN(Number(variant.price))) {
+        return `Informe o preço do tamanho "${variant.label.trim()}"`;
+      }
+      if (!variant.numberOfSlices.trim() || Number.isNaN(Number(variant.numberOfSlices))) {
+        return `Informe o número de fatias do tamanho "${variant.label.trim()}"`;
+      }
+    }
+    return null;
+  }
+
+  const variantsPayload = JSON.stringify(
+    variants.map((v) => ({
+      label: v.label.trim(),
+      price: Number(v.price),
+      numberOfSlices: Number(v.numberOfSlices),
+    })),
+  );
 
   async function handleUpload(file: File) {
     try {
@@ -52,12 +86,20 @@ export function ProductRegistrationForm({
   return (
     <form
       action={async (formData) => {
+        const variantsError = validateVariants();
+        if (variantsError) {
+          appToast.error(variantsError);
+          return;
+        }
+
         try {
           const res = await createProduct(formData, slug);
           if (res?.success) {
             appToast.success(res.message || "Produto criado com sucesso");
             setImageUrl("");
             setImageMode("upload");
+            setVariants([]);
+            setShowVariants(false);
           } else {
             appToast.error(res?.error || "Erro ao criar produto");
           }
@@ -85,14 +127,15 @@ export function ProductRegistrationForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="space-y-1">
           <Label htmlFor="price" className="text-sm text-zinc-600">
-            Preço <span className="text-red-500">*</span>
+            Preço {variants.length === 0 && <span className="text-red-500">*</span>}
+            {variants.length > 0 && <span className="text-zinc-400">(opcional)</span>}
           </Label>
           <Input
             id="price"
             name="price"
             type="number"
             step="0.01"
-            required
+            required={variants.length === 0}
             className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2 outline-none focus:border-[#F2A20C] focus:ring-2 focus:ring-[#F2BE5C]/40"
           />
         </div>
@@ -230,6 +273,79 @@ export function ProductRegistrationForm({
       )}
 
       <Input type="hidden" name="imageUrl" value={imageUrl} />
+
+      <div className="space-y-3 border-t border-[#BFAE99]/20 pt-4">
+        <button
+          type="button"
+          onClick={() => setShowVariants((v) => !v)}
+          className="text-sm font-medium text-[#F28B0C] hover:underline cursor-pointer"
+        >
+          {showVariants ? "Ocultar tamanhos/variações" : "+ Adicionar tamanhos/variações (opcional)"}
+        </button>
+
+        {showVariants && (
+          <div className="space-y-3">
+            <p className="text-xs text-zinc-400">
+              Use para produtos com tamanhos e preços diferentes, como pizzas (P, M, G, GG).
+              Se o produto não tiver variações, deixe em branco e o preço acima será usado.
+            </p>
+
+            {variants.map((variant, index) => (
+              <div key={index} className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Tamanho</Label>
+                  <Input
+                    value={variant.label}
+                    onChange={(e) => updateVariant(index, { label: e.target.value })}
+                    placeholder="G"
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Preço</Label>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={variant.price}
+                    onChange={(e) => updateVariant(index, { price: e.target.value })}
+                    placeholder="45.90"
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs text-zinc-500">Número de fatias</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    value={variant.numberOfSlices}
+                    onChange={(e) => updateVariant(index, { numberOfSlices: e.target.value })}
+                    placeholder="8"
+                    className="w-full border border-[#BFAE99]/50 rounded-lg px-3 py-2"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeVariant(index)}
+                  aria-label="Remover tamanho"
+                  className="p-2 text-zinc-400 hover:text-red-500 cursor-pointer"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addVariant}
+              className="flex items-center gap-1 text-sm font-medium text-zinc-700 border border-[#BFAE99]/40 rounded-lg px-3 py-1.5 hover:bg-[#F2F2F2] cursor-pointer"
+            >
+              <Plus size={16} /> Adicionar tamanho
+            </button>
+          </div>
+        )}
+      </div>
+
+      <Input type="hidden" name="variants" value={variantsPayload} />
 
       <button
         type="submit"

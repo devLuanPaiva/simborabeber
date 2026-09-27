@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import { apiError } from "./api-error";
 
 const allowedOrigins = new Set([
-    "https://simborabeber.com.br",
-    "https://www.simborabeber.com.br",
-    
+    "https://oseucardapio.com.br",
+    "https://www.oseucardapio.com.br",
+    "https://oseucardapio.vercel.app",
 ]);
 
 export function getCorsHeaders(origin: string | null) {

@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "@/lib/aws/s3";
+import { uploadToS3 } from "@/lib/aws/uploadToS3";
 import { apiError } from "@/lib/api/api-error";
 import { formatApiResponse } from "@/lib/api/api-response";
 import { corsErrorResponse, getCorsHeaders, isOriginAllowed, withCors } from "@/lib/api/api-cors";
@@ -76,19 +75,18 @@ async function handleUpload(formData: FormData, req: Request) {
 
         const key = path ? `${path}/${safeName}` : safeName;
 
-        const params = {
-            Bucket: process.env.BUCKET_NAME_AWS,
-            Key: key,
-            Body: buffer,
-            ContentType: file.type,
-        };
+        console.log("[upload/route] handling upload", JSON.stringify({
+            key,
+            fileName: file.name,
+            contentType: file.type,
+            sizeBytes: buffer.byteLength,
+        }, null, 2));
 
-        await s3.send(new PutObjectCommand(params));
+        const url = await uploadToS3({ buffer, key, contentType: file.type });
 
-        const url = `${process.env.NEXT_PUBLIC_CDN_URL}/${params.Key}`;
         return withCors(req, formatApiResponse({ url }, req));
     } catch (error) {
-        console.error("Upload error:", error);
+        console.error("[upload/route] upload error:", error instanceof Error ? error.message : JSON.stringify(error, null, 2));
         return apiError({
             statusCode: 500,
             message: "Internal server error",

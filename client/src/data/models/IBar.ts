@@ -18,6 +18,19 @@ export interface IBar {
     address: string;
     accessPlan: AccessPlan;
     isActive: boolean;
+    comandasEnabled: boolean;
+    deliveryEnabled: boolean;
+    deliveryFee: number;
+    minOrderValue: number;
+    deliveryOriginAddress?: string;
+    openingHours?: string;
+    deliveryCities: IDeliveryCity[];
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface IDeliveryCity {
+    id: string;
+    name: string;
+    fee: number;
 }

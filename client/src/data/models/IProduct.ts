@@ -6,6 +6,7 @@ export enum ProductCategory {
     OTHER = 'other',
     SKEWER = 'skewer',
     SOFT_DRINKS = 'soft_drinks',
+    PIZZA = 'pizza',
 }
 
 export const ProductCategoryLabels: Record<ProductCategory, string> = {
@@ -16,6 +17,16 @@ export const ProductCategoryLabels: Record<ProductCategory, string> = {
     [ProductCategory.OTHER]: 'Outros',
     [ProductCategory.SKEWER]: 'Espetinhos',
     [ProductCategory.SOFT_DRINKS]: 'Refrigerantes',
+    [ProductCategory.PIZZA]: 'Pizzas',
+}
+
+export interface IProductVariant {
+    id: string;
+    label: string;
+    price: number;
+    sortOrder: number;
+    numberOfSlices: number;
+    isActive: boolean;
 }
 
 export interface IProduct {
@@ -24,8 +35,9 @@ export interface IProduct {
     description: string
     image: string;
     isActive: boolean;
-    price: number;
+    price?: number;
     category: ProductCategory;
+    variants?: IProductVariant[];
     createdAt: Date;
     updatedAt: Date;
 }

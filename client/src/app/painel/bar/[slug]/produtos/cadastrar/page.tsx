@@ -15,15 +15,17 @@ export default async function ProductRegistrationPage(
         label="Voltar para produtos"
       />
 
-      <div className="w-11/12 mx-auto py-8 max-w-2xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-800">Novo Produto</h1>
-          <p className="text-zinc-500 text-sm">
-            Cadastre um novo item no cardápio
-          </p>
-        </div>
+      <div className="w-11/12 mx-auto py-8 max-w-7xl">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div>
+            <h1 className="text-2xl font-bold text-zinc-800">Novo Produto</h1>
+            <p className="text-zinc-500 text-sm">
+              Cadastre um novo item no cardápio
+            </p>
+          </div>
 
-        <ProductRegistrationForm slug={slug} />
+          <ProductRegistrationForm slug={slug} />
+        </div>
       </div>
     </main>
   );

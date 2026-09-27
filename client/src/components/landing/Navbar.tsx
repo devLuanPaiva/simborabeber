@@ -21,7 +21,7 @@ export function Navbar() {
       <div className="flex justify-between items-center">
         <Image
           src={"/logo-sem-fundo.png"}
-          alt="Logo Simbora Beber"
+          alt="Logo o seu cardápio"
           width={180}
           height={50}
           priority

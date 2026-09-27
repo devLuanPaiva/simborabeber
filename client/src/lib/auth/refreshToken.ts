@@ -9,7 +9,7 @@ export async function refreshToken() {
 
     if (!refreshToken) return null
 
-    const response = await fetch(`${process.env.API_URL}/auth/refresh`, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/refresh`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -30,14 +30,18 @@ export async function refreshToken() {
 
     cookieStore.set("accessToken", newAccessToken, {
         httpOnly: true,
-        secure: true,
-        path: "/"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 15,
     })
 
     cookieStore.set("refreshToken", newRefreshToken, {
         httpOnly: true,
-        secure: true,
-        path: "/"
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
     })
 
     return newAccessToken

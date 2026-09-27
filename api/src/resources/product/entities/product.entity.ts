@@ -1,15 +1,9 @@
 import { BarEntity } from "../../bar/entities/bar.entity";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { ProductCategory } from "./product-category.enum";
+import { ProductVariantEntity } from "../../product-variant/entities/product-variant.entity";
 
-export enum ProductCategory {
-    BEERS = 'beers',
-    DRINKS = 'drinks',
-    SNACKS = 'snacks',
-    NON_ALCOHOLIC = 'non_alcoholic',
-    OTHER = 'other',
-    SKEWER = 'skewer',
-    SOFT_DRINKS = 'soft_drinks',
-}
+export { ProductCategory };
 
 @Entity({ name: 'products', schema: 'public' })
 export class ProductEntity {
@@ -43,8 +37,8 @@ export class ProductEntity {
     })
     isActive: boolean;
 
-    @Column('decimal', { precision: 10, scale: 2 })
-    price: number;
+    @Column('decimal', { precision: 10, scale: 2, nullable: true })
+    price?: number;
 
     @Column({
         type: 'enum',
@@ -59,6 +53,9 @@ export class ProductEntity {
 
     @JoinColumn({ name: 'bar_id' })
     bar: BarEntity;
+
+    @OneToMany(() => ProductVariantEntity, variant => variant.product, { cascade: true })
+    variants: ProductVariantEntity[];
 
     @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
     createdAt: Date;

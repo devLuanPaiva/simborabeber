@@ -1,5 +1,6 @@
 import { IUser } from "./IUser";
 import { ProductCategory } from "./IProduct";
+import { IOrderItemAddon, IOrderItemComponent } from "./IOrder";
 
 export enum TabStatus {
     OPEN = 'open',
@@ -30,8 +31,11 @@ export interface ITabItem {
     name: string;
     price: number;
     quantity: number;
+    notes?: string;
     waiterAdded: Partial<IUser>;
     createdAt: Date;
     updatedAt: Date;
     category: ProductCategory;
+    components?: IOrderItemComponent[];
+    addons?: IOrderItemAddon[];
 }

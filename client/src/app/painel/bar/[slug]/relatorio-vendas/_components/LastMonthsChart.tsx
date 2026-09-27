@@ -47,7 +47,7 @@ export function LastMonthsChart({ data }: Readonly<Props>) {
 
                         <YAxis
                             yAxisId="left"
-                            tickFormatter={(v) => `R$${v}`}
+                            tickFormatter={(v) => formatCurrency(Number(v))}
                         />
 
                         <YAxis

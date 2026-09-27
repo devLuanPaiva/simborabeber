@@ -16,12 +16,18 @@ export class ProductRepository {
         result.name = product.name;
         result.description = product.description;
         result.image = product.image;
-        result.price = typeof product.price === 'string' ? Number.parseFloat(product.price) : product.price;
+        result.price = this.parsePrice(product.price);
         result.category = product.category;
         result.isActive = product.isActive;
         result.createdAt = product.createdAt;
         result.updatedAt = product.updatedAt;
+        result.variants = product.variants;
         return result;
+    }
+
+    private parsePrice(price: ProductEntity['price']): number | undefined {
+        if (price === null || price === undefined) return undefined;
+        return typeof price === 'string' ? Number.parseFloat(price) : price;
     }
 
     async createProduct(product: Partial<ProductEntity>): Promise<ProductEntity> {
@@ -37,36 +43,36 @@ export class ProductRepository {
     }
 
     async findAllByBarSlug(slug: string, category?: string): Promise<ProductEntity[]> {
-        const queryBuilder = this.repository.createQueryBuilder('product')
-            .innerJoin('product.bar', 'bar', 'bar.slug = :slug', { slug })
-            .select([
-                'product.id as id',
-                'product.name as name',
-                'product.description as description',
-                'product.image as image',
-                'product.price as price',
-                'product.is_active as "isActive"',
-                'product.category as category',
-                'product.created_at as "createdAt"',
-                'product.updated_at as "updatedAt"',
-            ])
-
+        const where: Record<string, unknown> = { bar: { slug } };
         if (category) {
-            queryBuilder.andWhere('product.category = :category', { category })
+            where.category = category;
         }
 
-        const rows: ProductEntity[] = await queryBuilder
-            .orderBy("LOWER(unaccent(product.name))", 'ASC')
-            .addOrderBy('product.created_at', 'DESC')
-            .getRawMany();
+        const products = await this.repository.find({
+            where,
+            relations: ['variants'],
+            order: { createdAt: 'DESC' },
+        });
 
-        return rows.map((r) => this.mapProductEntity(r))
+        const sorted = [...products].sort((a, b) =>
+            a.name.localeCompare(b.name, 'pt-BR', { sensitivity: 'base' }),
+        );
+
+        return sorted.map((p) => this.mapProductEntity(p))
     }
 
     async findById(id: string): Promise<ProductEntity | null> {
         return this.repository.findOne({
             where: { id },
+            relations: ['variants'],
         })
+    }
+
+    async findByIdForBar(id: string, barId: string): Promise<ProductEntity | null> {
+        const product = await this.repository.findOne({
+            where: { id, bar: { id: barId } },
+        })
+        return product ? this.mapProductEntity(product) : null
     }
 
     async updateProduct(id: string, product: Partial<ProductEntity>): Promise<ProductEntity> {

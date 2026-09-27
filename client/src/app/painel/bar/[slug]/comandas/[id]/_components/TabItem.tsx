@@ -37,8 +37,29 @@ export function TabItems({
                   {item.name}
                 </span>
                 <span className=" text-[#BFAE99] font-medium text-xs md:text-sm">
-                  {formatCurrency(item.price)}
+                  {formatCurrency(Number(item.price))}
                 </span>
+
+                {item.components && item.components.length > 0 && (
+                  <ul className="text-xs text-zinc-500 list-disc pl-4">
+                    {item.components.map((component, index) => (
+                      <li key={index}>
+                        {component.productName}
+                        {component.variantLabel ? ` (${component.variantLabel})` : ""}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {item.addons && item.addons.length > 0 && (
+                  <span className="text-xs text-[#F28B0C]">
+                    + {item.addons.map((addon) => addon.name).join(", ")}
+                  </span>
+                )}
+
+                {item.notes && (
+                  <span className="text-xs italic text-zinc-400">Obs: {item.notes}</span>
+                )}
               </div>
 
               <button
@@ -151,7 +172,7 @@ export function TabItems({
               </div>
 
               <span className="text-sm font-semibold text-zinc-700">
-                {formatCurrency(item.price * item.quantity)}
+                {formatCurrency(Number(item.price * item.quantity))}
               </span>
             </div>
           </div>

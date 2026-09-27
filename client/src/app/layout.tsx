@@ -27,15 +27,15 @@ const montSerrat = Montserrat({
 
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.simborabeber.com.br"),
+  metadataBase: new URL("https://www.oseucardapio.com.br"),
 
   title: {
-    default: "Simbora Beber | Gestão e Copo Cheio",
-    template: "%s | Simbora Beber",
+    default: "O seu cardápio | Gestão e Copo Cheio",
+    template: "%s | O seu cardápio",
   },
 
   description:
-    "Simbora Beber é um sistema simples e ágil para gerenciamento de bares. Substitua comandas e cardápios físicos por digitais, controle pedidos, produtos e vendas com rapidez e sem complicar a rotina dos garçons.",
+    "O seu cardápio é um sistema simples e ágil para gerenciamento de bares. Substitua comandas e cardápios físicos por digitais, controle pedidos, produtos e vendas com rapidez e sem complicar a rotina dos garçons.",
 
   keywords: [
     "sistema para bar",
@@ -63,9 +63,9 @@ export const metadata: Metadata = {
     "sistema rápido para atendimento",
   ],
 
-  authors: [{ name: "Simbora Beber" }],
-  creator: "Simbora Beber",
-  publisher: "Simbora Beber",
+  authors: [{ name: "O seu cardápio" }],
+  creator: "O seu cardápio",
+  publisher: "O seu cardápio",
 
   robots: {
     index: true,
@@ -108,33 +108,33 @@ export const metadata: Metadata = {
   },
 
   alternates: {
-    canonical: "https://www.simborabeber.com.br",
+    canonical: "https://www.oseucardapio.com.br",
   },
 
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    url: "https://www.simborabeber.com.br",
-    siteName: "Simbora Beber",
-    title: "Simbora Beber | Gestão e Copo Cheio",
+    url: "https://www.oseucardapio.com.br",
+    siteName: "O seu cardápio",
+    title: "O seu cardápio | Gestão e Copo Cheio",
     description:
       "Sistema ágil para bares: comandas digitais, cardápio online, controle de pedidos, produtos e relatórios de vendas. Simplifique o atendimento e ganhe velocidade.",
     images: [
       {
-        url: "https://www.simborabeber.com.br/logo-com-fundo.png",
+        url: "https://www.oseucardapio.com.br/logo-com-fundo.png",
         width: 1200,
         height: 630,
-        alt: "Simbora Beber - Sistema de Gestão para Bares",
+        alt: "O seu cardápio - Sistema de Gestão para Bares",
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Simbora Beber | Gestão de Bar Digital",
+    title: "O seu cardápio | Gestão de Bar Digital",
     description:
       "Comandas e cardápio digital para bares. Mais agilidade no atendimento e controle total das vendas.",
-    images: ["https://www.simborabeber.com.br/logo-com-fundo.png"],
+    images: ["https://www.oseucardapio.com.br/logo-com-fundo.png"],
   },
 
   category: "technology",

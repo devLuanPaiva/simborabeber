@@ -10,11 +10,15 @@ import { ProductModule } from './resources/product/product.module';
 import { TabModule } from './resources/tab/tab.module';
 import { TabItemModule } from './resources/tab-item/tab-item.module';
 import { ReportsModule } from './resources/reports/reports.module';
+import { OrderModule } from './resources/order/order.module';
+import { OrderItemModule } from './resources/order-item/order-item.module';
+import { ProductVariantModule } from './resources/product-variant/product-variant.module';
+import { ProductAddonModule } from './resources/product-addon/product-addon.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
     isGlobal: true,
-  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule, ReportsModule],
+  }), DatabaseModule, UserModule, AuthModule, BarModule, ProductModule, TabModule, TabItemModule, ReportsModule, OrderModule, OrderItemModule, ProductVariantModule, ProductAddonModule],
   controllers: [AppController],
   providers: [AppService],
 })

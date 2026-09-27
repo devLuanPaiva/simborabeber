@@ -4,6 +4,7 @@ import { UpdateBarDto } from './dto/update-bar.dto';
 import { BarRepository } from './repository/bar.repository';
 import { UserRepository } from '../user/repository/user.repository';
 import { BarEntity } from './entities/bar.entity';
+import { DeliveryCityEntity } from './entities/delivery-city.entity';
 
 @Injectable()
 export class BarService {
@@ -14,7 +15,8 @@ export class BarService {
   ) { }
 
   async create(createBarDto: CreateBarDto, managerId: string): Promise<BarEntity> {
-    const bar = await this.barRepository.createBar(createBarDto)
+    const { deliveryCities, ...rest } = createBarDto;
+    const bar = await this.barRepository.createBar({ ...rest, deliveryCities: this.mapDeliveryCities(deliveryCities) })
 
     const manager = await this.userRepository.findById(managerId)
     if (!manager) {
@@ -36,10 +38,20 @@ export class BarService {
   }
 
   update(id: string, updateBarDto: UpdateBarDto): Promise<BarEntity> {
-    return this.barRepository.updateBar({ ...updateBarDto, id });
+    const { deliveryCities, ...rest } = updateBarDto;
+    return this.barRepository.updateBar({
+      ...rest,
+      id,
+      ...(deliveryCities ? { deliveryCities: this.mapDeliveryCities(deliveryCities) } : {}),
+    });
   }
 
   remove(id: string) {
     return this.barRepository.deleteBar({ id } as BarEntity);
+  }
+
+  private mapDeliveryCities(deliveryCities?: { name: string; fee: number }[]): DeliveryCityEntity[] | undefined {
+    if (!deliveryCities) return undefined;
+    return deliveryCities.map((city) => ({ name: city.name, fee: city.fee } as DeliveryCityEntity));
   }
 }

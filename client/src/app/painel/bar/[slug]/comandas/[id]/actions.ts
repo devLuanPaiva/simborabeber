@@ -1,5 +1,5 @@
 "use server"
-import { ITab, ITabItem, ProductCategory } from "@/data/models";
+import { ITab, ITabItem } from "@/data/models";
 import { ApiResponse } from "@/data/types";
 import { serverFetch } from "@/lib/api/serverFetch";
 import { serverPatch } from "@/lib/api/serverPatch";
@@ -68,26 +68,18 @@ export async function getTabItemsByTabId(id: string) {
     }
 }
 
-interface ICreateTab {
-    slug: string;
-    formData: FormData;
-    tabId: string;
+export interface TabItemInput {
+    productId: string;
+    quantity: number;
+    notes?: string;
+    variantId?: string;
+    extraProductId?: string;
+    addonIds?: string[];
 }
 
-export async function addTabItem({ slug, tabId, formData }: Readonly<ICreateTab>) {
-    const name = String(formData.get("name"))
-    const price = Number(formData.get("price"))
-    const quantity = Number(formData.get("quantity"))
-    const category = String(formData.get("category"))
-
+export async function addTabItem({ slug, tabId, item }: Readonly<{ slug: string; tabId: string; item: TabItemInput }>) {
     try {
-        const response = await serverPost(`/tab-item/by-tab/${tabId}`, {
-            name,
-            price,
-            quantity,
-            category
-
-        });
+        const response = await serverPost(`/tab-item/by-tab/${tabId}`, item);
 
         const data = await response.json().catch(() => ({}));
 
@@ -103,49 +95,7 @@ export async function addTabItem({ slug, tabId, formData }: Readonly<ICreateTab>
     }
 }
 
-export async function addTabItems({ slug, tabId, formData }: Readonly<ICreateTab>) {
-    const entry = formData.get("items");
-    let items: ITabItem[] = [];
-
-    try {
-        let parsed: unknown = undefined;
-
-        if (entry === null) {
-            parsed = undefined;
-        } else if (typeof entry === "string") {
-            parsed = JSON.parse(entry);
-        } else if (entry && typeof (entry as { text?: () => Promise<string> }).text === "function") {
-            const text = await (entry as { text: () => Promise<string> }).text();
-            parsed = JSON.parse(text);
-        } else {
-            parsed = entry;
-        }
-
-        if (Array.isArray(parsed)) {
-            for (const el of parsed) {
-                if (!el || typeof el !== "object") continue;
-                const obj = el as Record<string, unknown>;
-
-                const name = typeof obj.name === "string" ? obj.name.trim() : undefined;
-
-                const rawPrice = obj.price;
-                const price = rawPrice
-
-                const rawQuantity = obj.quantity;
-                const quantity = rawQuantity
-                const category: ProductCategory = typeof obj.category === "string" && Object.values(ProductCategory).includes(obj.category as ProductCategory) ? obj.category as ProductCategory : ProductCategory.OTHER;
-
-                if (!name) continue;
-                if (!Number.isFinite(price)) continue;
-                if (!Number.isFinite(quantity)) continue;
-
-                items.push({ name, price, quantity, category } as ITabItem);
-            }
-        }
-    } catch {
-        items = [];
-    }
-
+export async function addTabItems({ slug, tabId, items }: Readonly<{ slug: string; tabId: string; items: TabItemInput[] }>) {
     try {
         const response = await serverPost(`/tab-item/bulk/by-tab/${tabId}`, { items });
         const data = await response.json().catch(() => ({}));
